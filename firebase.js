@@ -1,98 +1,85 @@
 // =============================================
-// FILE: firebase.js
-// Mô tả: Cấu hình Firebase và tham chiếu Database
+// FILE: firebase-config.js
+// MÔ TẢ: Cấu hình Firebase SDK v10 và khởi tạo các dịch vụ
 // =============================================
 
+// Import Firebase SDK từ CDN
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import { getFirestore, doc, setDoc, collection, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+import { getAuth, GoogleAuthProvider, FacebookAuthProvider, signInWithPopup, signOut, onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+import { getFirestore, collection, addDoc, doc, setDoc, getDoc, getDocs, updateDoc, deleteDoc, query, where, orderBy, limit, startAfter, onSnapshot, arrayUnion, arrayRemove, increment, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+import { getStorage, ref, uploadBytesResumable, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js";
 
-// 🔥 Cấu hình Firebase cho Dunukha
+// =============================================
+// CẤU HÌNH FIREBASE - ĐIỀN THÔNG TIN CỦA BẠN VÀO ĐÂY
+// =============================================
 const firebaseConfig = {
-  apiKey: "AIzaSyBJ3DAWyschGA6fM5VmBndLI0cGSaFF46U",
-  authDomain: "dunukhasite.firebaseapp.com",
-  projectId: "dunukhasite",
-  storageBucket: "dunukhasite.firebasestorage.app",
-  messagingSenderId: "841226738327",
-  appId: "1:841226738327:web:5e0192799adbe1179067d2"
+    apiKey: "AIzaSyDURjXMqgt_pVaCcpNUSoCM9KPIR7OmW10",
+    authDomain: "dunukhacall.firebaseapp.com",
+    databaseURL: "https://dunukhacall-default-rtdb.asia-southeast1.firebasedatabase.app",
+    projectId: "dunukhacall",
+    storageBucket: "dunukhacall.firebasestorage.app",
+    messagingSenderId: "907574693616",
+    appId: "1:907574693616:web:632e8ebc4937842765bc35"
 };
 
-// Khởi tạo Firebase App
+// =============================================
+// KHỞI TẠO FIREBASE APP
+// =============================================
 const app = initializeApp(firebaseConfig);
+
+// =============================================
+// KHỞI TẠO CÁC DỊCH VỤ
+// =============================================
+const auth = getAuth(app);
 const db = getFirestore(app);
+const storage = getStorage(app);
 
 // =============================================
-// THAM CHIẾU COLLECTIONS (Database References)
+// PROVIDERS CHO ĐĂNG NHẬP MẠNG XÃ HỘI
 // =============================================
-
-/**
- * Lấy tham chiếu đến document của user
- * @param {string} uid - ID của user
- */
-function userRef(uid) {
-  return doc(db, "users", uid);
-}
-
-/**
- * Lấy tham chiếu đến collection posts
- */
-function postsCollection() {
-  return collection(db, "posts");
-}
-
-/**
- * Lấy tham chiếu đến collection chats
- */
-function chatsCollection() {
-  return collection(db, "chats");
-}
-
-/**
- * Lấy tham chiếu đến sub-collection messages của một chat
- * @param {string} chatId - ID của chat
- */
-function messagesCollection(chatId) {
-  return collection(db, "chats", chatId, "messages");
-}
-
-/**
- * Lấy tham chiếu đến collection calls
- */
-function callsCollection() {
-  return collection(db, "calls");
-}
+const googleProvider = new GoogleAuthProvider();
+const facebookProvider = new FacebookAuthProvider();
 
 // =============================================
-// HÀM KHỞI TẠO USER MỚI (nếu chưa tồn tại)
+// CẤU HÌNH UPLOAD ẢNH (IMGBB API KEY)
 // =============================================
+const IMGBB_API_KEY = "d4802501f212046a8d74561bbdaf6dd3";
 
-/**
- * Tạo document user mới với cấu trúc chuẩn
- * @param {string} uid - Firebase Auth UID
- * @param {object} data - Dữ liệu ban đầu từ Google/Facebook
- */
-async function createUserIfNotExists(uid, data) {
-  const userDocRef = userRef(uid);
-  const snap = await getDoc(userDocRef);
-  
-  if (!snap.exists()) {
-    // Cấu trúc document users
-    await setDoc(userDocRef, {
-      uid: uid,                           // ID người dùng
-      username: data.email.split('@')[0], // Tên mặc định từ email
-      displayName: data.displayName || "Người dùng Dunukha",
-      avatarUrl: data.photoURL || "https://via.placeholder.com/150",
-      bio: "",                            // Tiểu sử
-      website: "",                        // Website cá nhân
-      followers: {},                      // Map { uid: true } để dễ kiểm tra
-      following: {},                      // Map { uid: true }
-      savedPosts: [],                     // Mảng lưu postId đã lưu
-      blockedUsers: {},                   // Map { uid: true }
-      isPrivate: false,                   // Tài khoản riêng tư?
-      isVerified: false,                  // Tích xanh?
-      createdAt: new Date().toISOString()
-    });
-    console.log(`✅ Đã tạo user: ${uid}`);
-  }
-}
-
-export { db, userRef, postsCollection, chatsCollection, messagesCollection, callsCollection, createUserIfNotExists };
+// =============================================
+// EXPORT TẤT CẢ CÁC BIẾN VÀ HÀM CẦN THIẾT
+// =============================================
+export {
+    app,
+    auth,
+    db,
+    storage,
+    googleProvider,
+    facebookProvider,
+    IMGBB_API_KEY,
+    signInWithPopup,
+    signOut,
+    onAuthStateChanged,
+    createUserWithEmailAndPassword,
+    signInWithEmailAndPassword,
+    collection,
+    addDoc,
+    doc,
+    setDoc,
+    getDoc,
+    getDocs,
+    updateDoc,
+    deleteDoc,
+    query,
+    where,
+    orderBy,
+    limit,
+    startAfter,
+    onSnapshot,
+    arrayUnion,
+    arrayRemove,
+    increment,
+    serverTimestamp,
+    ref,
+    uploadBytesResumable,
+    getDownloadURL
+};

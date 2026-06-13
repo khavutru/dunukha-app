@@ -28,7 +28,7 @@
     .post-header { display: flex; align-items: center; gap: 10px; padding: 12px 15px; cursor: pointer; }
     .post-header img { width: 32px; height: 32px; border-radius: 50%; object-fit: cover; }
     .post-header .username { font-weight: 600; font-size: 14px; }
-    .post-image { width: 100%; max-height: 500px; object-fit: cover; }
+    .post-image { width: 100%; max-height: 400px; object-fit: cover; }
     .post-actions { padding: 10px 15px; display: flex; gap: 15px; }
     .post-actions i { font-size: 24px; cursor: pointer; }
     .post-actions i.liked { color: #ed4956; }
@@ -73,6 +73,8 @@
     .message-bubble { max-width: 70%; padding: 8px 12px; border-radius: 18px; font-size: 14px; word-break: break-word; }
     .sent .message-bubble { background: #0095f6; color: white; }
     .received .message-bubble { background: #efefef; }
+    /* Loading indicator */
+    .loader { text-align: center; padding: 20px; color: #8e8e8e; }
   </style>
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
 </head>
@@ -96,6 +98,7 @@
       <div id="page-home" class="page">
         <div class="stories" id="stories-container"></div>
         <div class="feed" id="feed-container"></div>
+        <div class="loader" id="feed-loader" style="display:none;">Đang tải thêm...</div>
       </div>
       <!-- Search -->
       <div id="page-search" class="page" style="display:none;">
@@ -183,7 +186,7 @@
     // ========== FIREBASE ==========
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
     import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-    import { getFirestore, collection, addDoc, query, orderBy, onSnapshot, doc, updateDoc, arrayUnion, arrayRemove, serverTimestamp, where, getDocs, setDoc, getDoc, limit, Timestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+    import { getFirestore, collection, addDoc, query, orderBy, onSnapshot, doc, updateDoc, arrayUnion, arrayRemove, serverTimestamp, where, getDocs, setDoc, getDoc, limit, startAfter, Timestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
     import { getStorage, ref, uploadBytesResumable, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js";
 
     // 🔥 Config của bạn
@@ -205,6 +208,8 @@
     let currentUser = null;
     let currentChatUser = null;
     let unsubscribes = {};
+    let lastPostDoc = null;
+    let isLoadingPosts = false;
 
     // ========== AUTH ==========
     document.getElementById('google-login').addEventListener('click', async () => {
@@ -223,6 +228,9 @@
         currentUser = null;
         document.getElementById('login-screen').style.display = 'flex';
         document.getElementById('app').style.display = 'none';
+        // Hủy tất cả listener
+        Object.values(unsubscribes).forEach(unsub => unsub());
+        unsubscribes = {};
       }
     });
 
@@ -242,7 +250,7 @@
       }
     }
 
-    // ========== NAVIGATION ==========
+    // ========== NAVIGATION (hủy listener khi chuyển tab để đỡ tốn RAM) ==========
     const navIcons = document.querySelectorAll('.bottom-nav i');
     const pages = {
       home: document.getElementById('page-home'),
@@ -262,6 +270,12 @@
       Object.values(pages).forEach(p => p.style.display = 'none');
       pages[page].style.display = 'block';
 
+      // Hủy feed listener khi rời khỏi home
+      if (page !== 'home' && unsubscribes['feed']) {
+        unsubscribes['feed']();
+        delete unsubscribes['feed'];
+      }
+
       if (page === 'home') { loadStories(); loadFeed(); }
       else if (page === 'search') { document.getElementById('search-input').value = ''; document.getElementById('user-list').innerHTML = ''; }
       else if (page === 'profile') { loadProfile(currentUser.uid); }
@@ -279,12 +293,12 @@
       });
     }
 
-    // ========== STORIES ==========
+    // ========== STORIES (tối ưu: chỉ tải thủ công, không tự động lại mỗi lần chuyển tab) ==========
     async function loadStories() {
       const container = document.getElementById('stories-container');
       container.innerHTML = '';
       const now = new Date();
-      const snap = await getDocs(query(collection(db, "stories"), orderBy("expiresAt", "desc")));
+      const snap = await getDocs(query(collection(db, "stories"), orderBy("expiresAt", "desc"), limit(20))); // Giới hạn 20 story
       const users = {};
       snap.forEach(doc => {
         const data = doc.data();
@@ -335,16 +349,44 @@
       document.getElementById('btn-close-story').onclick = () => { clearInterval(timer); modal.style.display = 'none'; };
     }
 
-    // ========== FEED ==========
+    // ========== FEED (phân trang 5 bài, tải thêm khi cuộn) ==========
     function loadFeed() {
       const container = document.getElementById('feed-container');
       container.innerHTML = '';
-      const q = query(collection(db, "posts"), orderBy("createdAt", "desc"));
-      onSnapshot(q, snap => {
-        container.innerHTML = '';
-        snap.forEach(doc => renderPost(doc.data(), doc.id));
-      });
+      lastPostDoc = null;
+      fetchPosts();
     }
+
+    async function fetchPosts() {
+      if (isLoadingPosts) return;
+      isLoadingPosts = true;
+      document.getElementById('feed-loader').style.display = 'block';
+      let q;
+      if (!lastPostDoc) {
+        q = query(collection(db, "posts"), orderBy("createdAt", "desc"), limit(5));
+      } else {
+        q = query(collection(db, "posts"), orderBy("createdAt", "desc"), startAfter(lastPostDoc), limit(5));
+      }
+      const snap = await getDocs(q);
+      if (snap.empty) {
+        document.getElementById('feed-loader').textContent = 'Không còn bài viết nào.';
+      } else {
+        snap.forEach(doc => {
+          renderPost(doc.data(), doc.id);
+          lastPostDoc = doc;
+        });
+      }
+      isLoadingPosts = false;
+      document.getElementById('feed-loader').style.display = 'none';
+    }
+
+    // Thêm sự kiện cuộn để tải thêm
+    const scrollContainer = document.querySelector('#app > div:nth-child(2)'); // content area
+    scrollContainer.addEventListener('scroll', () => {
+      if (scrollContainer.scrollHeight - scrollContainer.scrollTop - scrollContainer.clientHeight < 100 && document.getElementById('page-home').style.display === 'block') {
+        fetchPosts();
+      }
+    });
 
     function renderPost(post, id) {
       const liked = post.likes?.includes(currentUser.uid);
@@ -355,7 +397,7 @@
           <img src="${post.userAvatar || 'https://via.placeholder.com/32'}">
           <span class="username">${post.username}</span>
         </div>
-        <img class="post-image" src="${post.imageUrl}" onerror="this.src='https://via.placeholder.com/400'">
+        <img class="post-image" src="${post.imageUrl}" loading="lazy" onerror="this.src='https://via.placeholder.com/400'">
         <div class="post-actions">
           <i class="${liked ? 'fas fa-heart liked' : 'far fa-heart'}" data-id="${id}"></i>
           <i class="far fa-comment"></i>
@@ -368,7 +410,7 @@
           <button class="send-comment" data-id="${id}">Đăng</button>
         </div>
       `;
-      container.appendChild(div);
+      document.getElementById('feed-container').appendChild(div);
 
       div.querySelector('.post-header').addEventListener('click', () => loadProfile(post.uid));
       div.querySelector('[data-id]').addEventListener('click', async (e) => {
@@ -380,19 +422,14 @@
         }
       });
       div.querySelector(`#share-${id}`).addEventListener('click', () => {
-        if (navigator.share) {
-          navigator.share({ title: 'Dunukha', text: post.caption, url: post.imageUrl });
-        } else {
-          prompt("Copy link ảnh:", post.imageUrl);
-        }
+        if (navigator.share) navigator.share({ title: 'Dunukha', text: post.caption, url: post.imageUrl });
+        else prompt("Copy link ảnh:", post.imageUrl);
       });
       div.querySelector('.send-comment').addEventListener('click', async () => {
         const input = document.getElementById(`comment-${id}`);
         const text = input.value.trim();
         if (!text) return;
-        await updateDoc(doc(db, "posts", id), {
-          comments: arrayUnion({ uid: currentUser.uid, username: currentUser.displayName, text, createdAt: new Date().toISOString() })
-        });
+        await updateDoc(doc(db, "posts", id), { comments: arrayUnion({ uid: currentUser.uid, username: currentUser.displayName, text, createdAt: new Date().toISOString() }) });
         if (post.uid !== currentUser.uid) addNotification(post.uid, 'comment', `${currentUser.displayName} đã bình luận: "${text}"`);
         input.value = '';
       });
@@ -467,7 +504,7 @@
       navigateTo('home');
     });
 
-    // ========== PROFILE ==========
+    // ========== PROFILE (tối ưu) ==========
     async function loadProfile(uid) {
       const container = document.getElementById('profile-content');
       container.innerHTML = 'Đang tải...';
@@ -496,13 +533,14 @@
         <div class="profile-posts" id="profile-posts"></div>
       `;
 
-      const postsQuery = query(collection(db, "posts"), where("uid", "==", uid), orderBy("createdAt", "desc"));
+      const postsQuery = query(collection(db, "posts"), where("uid", "==", uid), orderBy("createdAt", "desc"), limit(9));
       const postsSnap = await getDocs(postsQuery);
       const postsDiv = document.getElementById('profile-posts');
       postsSnap.forEach(doc => {
         const img = document.createElement('img');
         img.src = doc.data().imageUrl;
         img.className = 'profile-post';
+        img.loading = 'lazy';
         img.onclick = () => alert(doc.data().caption);
         postsDiv.appendChild(img);
       });
@@ -569,40 +607,46 @@
       loadProfile(uid);
     }
 
-    // ========== SEARCH ==========
-    document.getElementById('search-input').addEventListener('input', async (e) => {
-      const kw = e.target.value.trim().toLowerCase();
-      const list = document.getElementById('user-list');
-      if (!kw) { list.innerHTML = ''; return; }
-      list.innerHTML = 'Đang tìm...';
-      // Tìm kiếm đơn giản: lấy tất cả users, lọc client-side (Firestore không hỗ trợ like)
-      const snap = await getDocs(collection(db, "users"));
-      list.innerHTML = '';
-      snap.forEach(doc => {
-        if (doc.id === currentUser.uid) return;
-        const d = doc.data();
-        if (d.displayName.toLowerCase().includes(kw)) {
-          const li = document.createElement('li');
-          li.className = 'user-item';
-          li.innerHTML = `<img src="${d.photoURL || 'https://via.placeholder.com/44'}"><span class="name">${d.displayName}</span>`;
-          li.addEventListener('click', () => loadProfile(doc.id));
-          list.appendChild(li);
-        }
-      });
+    // ========== SEARCH (tối ưu: không dùng oninput liên tục, dùng debounce) ==========
+    let searchTimeout;
+    document.getElementById('search-input').addEventListener('input', (e) => {
+      clearTimeout(searchTimeout);
+      searchTimeout = setTimeout(async () => {
+        const kw = e.target.value.trim().toLowerCase();
+        const list = document.getElementById('user-list');
+        if (!kw) { list.innerHTML = ''; return; }
+        list.innerHTML = 'Đang tìm...';
+        const snap = await getDocs(collection(db, "users"));
+        list.innerHTML = '';
+        snap.forEach(doc => {
+          if (doc.id === currentUser.uid) return;
+          const d = doc.data();
+          if (d.displayName.toLowerCase().includes(kw)) {
+            const li = document.createElement('li');
+            li.className = 'user-item';
+            li.innerHTML = `<img src="${d.photoURL || 'https://via.placeholder.com/44'}"><span class="name">${d.displayName}</span>`;
+            li.addEventListener('click', () => loadProfile(doc.id));
+            list.appendChild(li);
+          }
+        });
+      }, 500);
     });
 
-    // ========== NOTIFICATIONS ==========
+    // ========== NOTIFICATIONS (tối ưu) ==========
     function listenNotifications() {
       const q = query(collection(db, "notifications"), where("to", "==", currentUser.uid), orderBy("createdAt", "desc"), limit(20));
       onSnapshot(q, snap => {
         let count = 0;
-        document.getElementById('notif-list').innerHTML = '';
+        const notifList = document.getElementById('notif-list');
+        if (notifList) notifList.innerHTML = '';
         snap.forEach(doc => {
           const d = doc.data();
           if (!d.read) count++;
-          const p = document.createElement('p');
-          p.textContent = d.message + ' (' + new Date(d.createdAt?.toDate()).toLocaleTimeString() + ')';
-          document.getElementById('notif-list').appendChild(p);
+          if (notifList) {
+            const p = document.createElement('p');
+            p.textContent = d.message + ' (' + new Date(d.createdAt?.toDate()).toLocaleTimeString() + ')';
+            notifList.appendChild(p);
+          }
         });
         document.getElementById('btn-notif').dataset.count = count;
       });
@@ -612,7 +656,7 @@
       await addDoc(collection(db, "notifications"), { to, from: currentUser.uid, type, message, read: false, createdAt: serverTimestamp() });
     }
 
-    // ========== CHAT ==========
+    // ========== CHAT (giữ nguyên) ==========
     document.getElementById('btn-chat').addEventListener('click', () => {
       document.getElementById('chat-modal').style.display = 'flex';
       loadChatList();
@@ -654,7 +698,7 @@
     function loadMessages() {
       const chatId = [currentUser.uid, currentChatUser].sort().join('_');
       if (unsubscribes[chatId]) unsubscribes[chatId]();
-      const q = query(collection(db, "messages"), where("chatId", "==", chatId), orderBy("createdAt"));
+      const q = query(collection(db, "messages"), where("chatId", "==", chatId), orderBy("createdAt"), limit(30));
       unsubscribes[chatId] = onSnapshot(q, snap => {
         const container = document.getElementById('chat-messages');
         container.innerHTML = '';

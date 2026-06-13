@@ -5,7 +5,7 @@
     script.onload = function() {
         if (typeof window.VConsole !== 'undefined') {
             new window.VConsole();
-            console.log('[Dunukha] vConsole đã sẵn sàng');
+            console.log('[Dunukha] vConsole đã sẵn sàng - Chạm nút xanh để debug');
         }
     };
     document.head.appendChild(script);
@@ -50,7 +50,7 @@ let isLoadingPosts = false;
 let selectedFiles = [];
 
 // =============================================
-// TOAST
+// TOAST THÔNG BÁO
 // =============================================
 function showToast(message) {
     var toast = document.getElementById('toast');
@@ -82,20 +82,49 @@ function createSafeImage(src, fallbackSrc, className, extraStyle) {
 }
 
 // =============================================
-// AUTH
+// HÀM SHARE AN TOÀN (BẮT LỖI Share canceled)
+// =============================================
+function safeShare(title, text, url) {
+    if (navigator.share) {
+        navigator.share({ title: title, text: text, url: url }).catch(function(err) {
+            console.log("Người dùng đã hủy chia sẻ hoặc trình duyệt không hỗ trợ: " + err.message);
+        });
+    } else {
+        prompt('Copy link ảnh:', url);
+    }
+}
+
+// =============================================
+// AUTHENTICATION
 // =============================================
 function setupAuth() {
-    document.getElementById('google-login').onclick = function() { signInWithPopup(auth, googleProvider).catch(function(e) { showToast('Lỗi: ' + e.message); }); };
-    document.getElementById('facebook-login').onclick = function() { signInWithPopup(auth, facebookProvider).catch(function(e) { showToast('Lỗi: ' + e.message); }); };
+    document.getElementById('google-login').onclick = function() {
+        signInWithPopup(auth, googleProvider).catch(function(e) {
+            showToast('Lỗi: ' + e.message);
+        });
+    };
+    document.getElementById('facebook-login').onclick = function() {
+        signInWithPopup(auth, facebookProvider).catch(function(e) {
+            showToast('Lỗi: ' + e.message);
+        });
+    };
     document.getElementById('email-login-btn').onclick = async function() {
         var email = document.getElementById('login-email').value;
         var pass = document.getElementById('login-password').value;
-        try { await signInWithEmailAndPassword(auth, email, pass); } catch (e) { showToast('Lỗi: ' + e.message); }
+        try {
+            await signInWithEmailAndPassword(auth, email, pass);
+        } catch (e) {
+            showToast('Lỗi: ' + e.message);
+        }
     };
     document.getElementById('email-register-btn').onclick = async function() {
         var email = document.getElementById('login-email').value;
         var pass = document.getElementById('login-password').value;
-        try { await createUserWithEmailAndPassword(auth, email, pass); } catch (e) { showToast('Lỗi: ' + e.message); }
+        try {
+            await createUserWithEmailAndPassword(auth, email, pass);
+        } catch (e) {
+            showToast('Lỗi: ' + e.message);
+        }
     };
 
     onAuthStateChanged(auth, async function(user) {
@@ -111,7 +140,7 @@ function setupAuth() {
                     displayName: user.displayName || user.email.split('@')[0],
                     email: user.email || '',
                     photoURL: user.photoURL || DEFAULT_AVATAR,
-                    username: user.email ? user.email.split('@')[0] : 'user' + user.uid.slice(0,6),
+                    username: user.email ? user.email.split('@')[0] : 'user' + user.uid.slice(0, 6),
                     bio: '',
                     location: '',
                     followers: {},
@@ -133,7 +162,7 @@ function setupAuth() {
 }
 
 // =============================================
-// UPLOAD IMGBB
+// UPLOAD ẢNH IMGBB
 // =============================================
 async function uploadImgBB(file) {
     var fd = new FormData();
@@ -199,7 +228,9 @@ async function loadStories() {
             div.onclick = function() { viewStory(map[uid].stories); };
             container.appendChild(div);
         }
-    } catch(e) {}
+    } catch (e) {
+        console.error('Lỗi stories:', e);
+    }
     var my = document.createElement('div');
     my.className = 'story-item';
     my.innerHTML = '<div class="story-ring" style="background:#ddd;display:flex;align-items:center;justify-content:center;"><i class="fas fa-plus" style="color:#0095f6;"></i></div><span>Bạn</span>';
@@ -213,27 +244,33 @@ function viewStory(stories) {
     modal.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:black;z-index:9999;';
     var img = document.createElement('img');
     img.style.cssText = 'width:100%;height:100%;object-fit:contain;';
-    img.onerror = function() { this.src = DEFAULT_POST_IMAGE; this.onerror = null; };
+    img.onerror = function() { this.src = DEFAULT_POST_IMAGE;
+        this.onerror = null; };
     var vid = document.createElement('video');
     vid.style.cssText = 'width:100%;height:100%;object-fit:contain;';
-    vid.controls = true; vid.autoplay = true;
+    vid.controls = true;
+    vid.autoplay = true;
     var close = document.createElement('button');
     close.textContent = 'X';
     close.style.cssText = 'position:absolute;top:10px;right:10px;background:white;border:none;border-radius:50%;width:30px;height:30px;';
-    close.onclick = function() { clearInterval(timer); modal.remove(); };
+    close.onclick = function() { clearInterval(timer);
+        modal.remove(); };
     modal.appendChild(close);
+
     function show() {
         var s = stories[i];
-        if (s.mediaType === 'video') { vid.src = s.mediaUrl; modal.appendChild(vid); if (img.parentNode) img.remove(); }
-        else { img.src = s.mediaUrl; modal.appendChild(img); if (vid.parentNode) vid.remove(); }
+        if (s.mediaType === 'video') { vid.src = s.mediaUrl;
+            modal.appendChild(vid); if (img.parentNode) img.remove(); } else { img.src = s.mediaUrl;
+            modal.appendChild(img); if (vid.parentNode) vid.remove(); }
     }
     show();
     document.body.appendChild(modal);
-    var timer = setInterval(function() { i++; if (i >= stories.length) { clearInterval(timer); modal.remove(); } else show(); }, 5000);
+    var timer = setInterval(function() { i++; if (i >= stories.length) { clearInterval(timer);
+            modal.remove(); } else show(); }, 5000);
 }
 
 // =============================================
-// FEED + TƯƠNG TÁC
+// FEED + TƯƠNG TÁC (LIKE, COMMENT, MENU 3 CHẤM)
 // =============================================
 function loadFeed() {
     document.getElementById('feed').innerHTML = '';
@@ -246,14 +283,18 @@ async function fetchPosts() {
     isLoadingPosts = true;
     document.getElementById('feed-loader').style.display = 'block';
     try {
-        var q = lastPostDoc ? query(collection(db, "posts"), orderBy("createdAt", "desc"), startAfter(lastPostDoc), limit(5)) : query(collection(db, "posts"), orderBy("createdAt", "desc"), limit(5));
+        var q = lastPostDoc ?
+            query(collection(db, "posts"), orderBy("createdAt", "desc"), startAfter(lastPostDoc), limit(5)) :
+            query(collection(db, "posts"), orderBy("createdAt", "desc"), limit(5));
         var snap = await getDocs(q);
         if (!snap.empty) {
-            snap.forEach(function(doc) { renderPost(doc.data(), doc.id); lastPostDoc = doc; });
+            snap.forEach(function(doc) { renderPost(doc.data(), doc.id);
+                lastPostDoc = doc; });
         } else if (!lastPostDoc) {
-            document.getElementById('feed').innerHTML = '<div style="text-align:center;padding:40px;color:#888;">Chưa có bài viết nào.</div>';
+            document.getElementById('feed').innerHTML =
+                '<div style="text-align:center;padding:40px;color:#888;">Chưa có bài viết nào.</div>';
         }
-    } catch(e) { showToast('Lỗi tải feed'); }
+    } catch (e) { showToast('Lỗi tải feed'); }
     isLoadingPosts = false;
     document.getElementById('feed-loader').style.display = 'none';
 }
@@ -269,11 +310,15 @@ function renderPost(post, id) {
     var media = '';
     if (post.mediaUrls && post.mediaUrls.length) {
         post.mediaUrls.forEach(function(url) {
-            if (url.match(/\.(mp4|webm|ogg|mov)$/i)) media += '<video class="post-media" src="' + url + '" controls></video>';
-            else media += '<img class="post-media" src="' + url + '" loading="lazy" onerror="this.src=\'' + DEFAULT_POST_IMAGE + '\'; this.onerror=null;">';
+            if (url.match(/\.(mp4|webm|ogg|mov)$/i))
+                media += '<video class="post-media" src="' + url + '" controls></video>';
+            else
+                media += '<img class="post-media" src="' + url +
+                '" loading="lazy" onerror="this.src=\'' + DEFAULT_POST_IMAGE + '\'; this.onerror=null;">';
         });
     } else {
-        media = '<img class="post-media" src="' + (post.mediaUrl || post.postUrl || DEFAULT_POST_IMAGE) + '" onerror="this.src=\'' + DEFAULT_POST_IMAGE + '\'; this.onerror=null;">';
+        media = '<img class="post-media" src="' + (post.mediaUrl || post.postUrl || DEFAULT_POST_IMAGE) +
+            '" onerror="this.src=\'' + DEFAULT_POST_IMAGE + '\'; this.onerror=null;">';
     }
     var timeStr = 'Vừa xong';
     if (post.createdAt) {
@@ -281,9 +326,9 @@ function renderPost(post, id) {
         var now = new Date();
         var diff = Math.floor((now - d) / 1000);
         if (diff < 60) timeStr = 'Vừa xong';
-        else if (diff < 3600) timeStr = Math.floor(diff/60) + ' phút trước';
-        else if (diff < 86400) timeStr = Math.floor(diff/3600) + ' giờ trước';
-        else timeStr = Math.floor(diff/86400) + ' ngày trước';
+        else if (diff < 3600) timeStr = Math.floor(diff / 60) + ' phút trước';
+        else if (diff < 86400) timeStr = Math.floor(diff / 3600) + ' giờ trước';
+        else timeStr = Math.floor(diff / 86400) + ' ngày trước';
     }
     div.innerHTML = `
         <div class="post-header" data-uid="${post.uid || post.ownerId}">
@@ -318,7 +363,8 @@ function renderPost(post, id) {
     div.querySelector('.post-header').onclick = function(e) {
         if (e.target.closest('.post-menu-trigger') || e.target.closest('.post-menu-dropdown')) return;
         var uid = div.querySelector('.post-header').getAttribute('data-uid');
-        if (uid) { renderProfile(uid); navigateTo('profile'); }
+        if (uid) { renderProfile(uid);
+            navigateTo('profile'); }
     };
 
     var trigger = div.querySelector('.post-menu-trigger');
@@ -335,19 +381,31 @@ function renderPost(post, id) {
             var action = this.dataset.action;
             var pid = this.dataset.id;
             if (action === 'delete') {
-                if (confirm('Xóa bài viết?')) { await deleteDoc(doc(db, "posts", pid)); div.remove(); showToast('Đã xóa'); }
+                if (confirm('Xóa bài viết?')) { await deleteDoc(doc(db, "posts", pid));
+                    div.remove();
+                    showToast('Đã xóa'); }
             } else if (action === 'report') {
                 var reason = prompt('Lý do báo cáo:');
-                if (reason) { await addDoc(collection(db, "reports"), { postId: pid, reporterId: currentUser.uid, reason: reason, createdAt: serverTimestamp() }); showToast('Đã gửi báo cáo'); }
+                if (reason) {
+                    await addDoc(collection(db, "reports"), {
+                        postId: pid,
+                        reporterId: currentUser.uid,
+                        reason: reason,
+                        createdAt: serverTimestamp()
+                    });
+                    showToast('Đã gửi báo cáo');
+                }
             } else if (action === 'copy') {
                 var url = post.mediaUrls ? post.mediaUrls[0] : (post.mediaUrl || '');
-                if (navigator.clipboard) { await navigator.clipboard.writeText(url); showToast('Đã copy link'); }
-                else prompt('Copy:', url);
+                if (navigator.clipboard) { await navigator.clipboard.writeText(url);
+                    showToast('Đã copy link'); } else prompt('Copy:', url);
             }
         };
     });
 
-    document.addEventListener('click', function() { document.querySelectorAll('.post-menu-dropdown').forEach(function(m) { m.style.display = 'none'; }); });
+    document.addEventListener('click', function() {
+        document.querySelectorAll('.post-menu-dropdown').forEach(function(m) { m.style.display = 'none'; });
+    });
 
     var heart = document.getElementById('like-icon-' + id);
     if (heart) {
@@ -375,7 +433,15 @@ function renderPost(post, id) {
             var input = document.getElementById('comment-' + id);
             var text = input.value.trim();
             if (!text) return;
-            await updateDoc(doc(db, "posts", id), { comments: arrayUnion({ uid: currentUser.uid, username: currentUser.displayName, avatar: currentUser.photoURL || DEFAULT_AVATAR, text: text, createdAt: new Date().toISOString() }) });
+            await updateDoc(doc(db, "posts", id), {
+                comments: arrayUnion({
+                    uid: currentUser.uid,
+                    username: currentUser.displayName,
+                    avatar: currentUser.photoURL || DEFAULT_AVATAR,
+                    text: text,
+                    createdAt: new Date().toISOString()
+                })
+            });
             input.value = '';
             loadComments(id);
             showToast('Đã bình luận');
@@ -388,8 +454,9 @@ function renderPost(post, id) {
             var ref = doc(db, "users", currentUser.uid);
             var snap = await getDoc(ref);
             var saved = snap.data().savedPosts || [];
-            if (saved.includes(id)) { await updateDoc(ref, { savedPosts: arrayRemove(id) }); showToast('Đã bỏ lưu'); }
-            else { await updateDoc(ref, { savedPosts: arrayUnion(id) }); showToast('Đã lưu'); }
+            if (saved.includes(id)) { await updateDoc(ref, { savedPosts: arrayRemove(id) });
+                showToast('Đã bỏ lưu'); } else { await updateDoc(ref, { savedPosts: arrayUnion(id) });
+                showToast('Đã lưu'); }
         };
     }
 
@@ -397,8 +464,7 @@ function renderPost(post, id) {
     if (shareBtn) {
         shareBtn.onclick = function() {
             var url = post.mediaUrls ? post.mediaUrls[0] : (post.mediaUrl || '');
-            if (navigator.share) navigator.share({ title: 'Dunukha', url: url });
-            else prompt('Copy:', url);
+            safeShare('Dunukha', post.caption || 'Chia sẻ bài viết từ Dunukha', url);
         };
     }
 
@@ -447,8 +513,11 @@ function setupPost() {
                 el.style.cssText = 'width:100%;height:100%;object-fit:cover;';
                 var rm = document.createElement('button');
                 rm.textContent = 'X';
-                rm.style.cssText = 'position:absolute;top:2px;right:2px;background:red;color:white;border:none;border-radius:50%;width:20px;height:20px;font-size:12px;cursor:pointer;';
-                rm.onclick = function(ev) { ev.stopPropagation(); wrap.remove(); selectedFiles.splice(idx,1); };
+                rm.style.cssText =
+                    'position:absolute;top:2px;right:2px;background:red;color:white;border:none;border-radius:50%;width:20px;height:20px;font-size:12px;cursor:pointer;';
+                rm.onclick = function(ev) { ev.stopPropagation();
+                    wrap.remove();
+                    selectedFiles.splice(idx, 1); };
                 wrap.appendChild(el);
                 wrap.appendChild(rm);
                 preview.appendChild(wrap);
@@ -467,11 +536,19 @@ function setupPost() {
             var snap = await getDoc(doc(db, "users", currentUser.uid));
             var u = snap.data();
             await addDoc(collection(db, "posts"), {
-                uid: currentUser.uid, ownerId: currentUser.uid,
-                username: u.displayName, userAvatar: u.photoURL || DEFAULT_AVATAR,
-                mediaUrls: urls, mediaUrl: urls[0], postUrl: urls[0],
+                uid: currentUser.uid,
+                ownerId: currentUser.uid,
+                username: u.displayName,
+                userAvatar: u.photoURL || DEFAULT_AVATAR,
+                mediaUrls: urls,
+                mediaUrl: urls[0],
+                postUrl: urls[0],
                 mediaType: selectedFiles[0].type.startsWith('video') ? 'video' : 'image',
-                caption: captionInput.value.trim(), likes: [], comments: [], status: 'pending', createdAt: serverTimestamp()
+                caption: captionInput.value.trim(),
+                likes: [],
+                comments: [],
+                status: 'pending',
+                createdAt: serverTimestamp()
             });
             fileInput.value = '';
             preview.innerHTML = '';
@@ -479,14 +556,14 @@ function setupPost() {
             selectedFiles = [];
             showToast('Đã gửi bài, chờ duyệt!');
             navigateTo('home');
-        } catch(e) { showToast('Lỗi: ' + e.message); }
+        } catch (e) { showToast('Lỗi: ' + e.message); }
         submitBtn.disabled = false;
         submitBtn.textContent = 'Đăng';
     };
 }
 
 // =============================================
-// PROFILE ĐỘNG
+// PROFILE ĐỘNG (CỐT LÕI)
 // =============================================
 async function renderProfile(targetUid) {
     var container = document.getElementById('profile-content');
@@ -499,8 +576,10 @@ async function renderProfile(targetUid) {
     var profile = snap.data();
     var isOwner = (targetUid === currentUser.uid);
     var following = profile.followers ? (profile.followers[currentUser.uid] === true) : false;
-    var followersCount = profile.followers ? Object.keys(profile.followers).filter(function(k) { return profile.followers[k] === true; }).length : 0;
-    var followingCount = profile.following ? Object.keys(profile.following).filter(function(k) { return profile.following[k] === true; }).length : 0;
+    var followersCount = profile.followers ? Object.keys(profile.followers).filter(function(k) { return profile
+            .followers[k] === true; }).length : 0;
+    var followingCount = profile.following ? Object.keys(profile.following).filter(function(k) { return profile
+            .following[k] === true; }).length : 0;
 
     container.innerHTML = `
         <div class="profile-header">
@@ -564,10 +643,14 @@ async function loadProfilePosts(uid) {
     var q = query(collection(db, "posts"), where("uid", "==", uid), orderBy("createdAt", "desc"), limit(12));
     var snap = await getDocs(q);
     grid.innerHTML = '';
-    if (snap.empty) { grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:40px;color:#888;">Chưa có bài viết</div>'; return; }
+    if (snap.empty) {
+        grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:40px;color:#888;">Chưa có bài viết</div>';
+        return;
+    }
     snap.forEach(function(doc) {
         var d = doc.data();
-        var img = createSafeImage(d.mediaUrls ? d.mediaUrls[0] : (d.mediaUrl || ''), DEFAULT_POST_IMAGE, '', 'width:100%;aspect-ratio:1;object-fit:cover;cursor:pointer;');
+        var img = createSafeImage(d.mediaUrls ? d.mediaUrls[0] : (d.mediaUrl || ''), DEFAULT_POST_IMAGE, '',
+            'width:100%;aspect-ratio:1;object-fit:cover;cursor:pointer;');
         img.onclick = function() { alert(d.caption || 'Không có caption'); };
         grid.appendChild(img);
     });
@@ -602,9 +685,11 @@ function setupSearch() {
         filtered.forEach(function(u) {
             var div = document.createElement('div');
             div.className = 'search-result';
-            var avatarImg = createSafeImage(u.data.photoURL, DEFAULT_AVATAR, '', 'width:44px;height:44px;border-radius:50%;');
+            var avatarImg = createSafeImage(u.data.photoURL, DEFAULT_AVATAR, '',
+                'width:44px;height:44px;border-radius:50%;');
             var infoDiv = document.createElement('div');
-            infoDiv.innerHTML = '<strong>' + u.data.displayName + '</strong><br><span style="color:#888;">@' + u.data.username + '</span>';
+            infoDiv.innerHTML = '<strong>' + u.data.displayName + '</strong><br><span style="color:#888;">@' + u
+                .data.username + '</span>';
             div.appendChild(avatarImg);
             div.appendChild(infoDiv);
             div.onclick = function() {
@@ -628,8 +713,10 @@ async function loadExplore() {
     var snap = await getDocs(query(collection(db, "posts"), orderBy("createdAt", "desc"), limit(12)));
     snap.forEach(function(doc) {
         var d = doc.data();
-        var img = createSafeImage(d.mediaUrls ? d.mediaUrls[0] : (d.mediaUrl || ''), DEFAULT_POST_IMAGE, '', 'width:100%;aspect-ratio:1;object-fit:cover;cursor:pointer;');
-        img.onclick = function() { renderProfile(d.uid); navigateTo('profile'); };
+        var img = createSafeImage(d.mediaUrls ? d.mediaUrls[0] : (d.mediaUrl || ''), DEFAULT_POST_IMAGE, '',
+            'width:100%;aspect-ratio:1;object-fit:cover;cursor:pointer;');
+        img.onclick = function() { renderProfile(d.uid);
+            navigateTo('profile'); };
         grid.appendChild(img);
     });
 }
@@ -638,11 +725,13 @@ async function loadReels() {
     var container = document.getElementById('reels-container');
     if (!container) return;
     container.innerHTML = '';
-    var snap = await getDocs(query(collection(db, "posts"), where("mediaType", "==", "video"), orderBy("createdAt", "desc"), limit(10)));
+    var snap = await getDocs(query(collection(db, "posts"), where("mediaType", "==", "video"), orderBy("createdAt",
+        "desc"), limit(10)));
     snap.forEach(function(doc) {
         var d = doc.data();
         var div = document.createElement('div');
-        div.innerHTML = '<video src="' + (d.mediaUrls ? d.mediaUrls[0] : d.mediaUrl) + '" controls style="width:100%;height:100%;object-fit:contain;"></video>';
+        div.innerHTML = '<video src="' + (d.mediaUrls ? d.mediaUrls[0] : d.mediaUrl) +
+            '" controls style="width:100%;height:100%;object-fit:contain;"></video>';
         container.appendChild(div);
     });
 }
@@ -655,7 +744,8 @@ function openChat(uid, name) {
     document.getElementById('chat-username').textContent = name;
     var chatId = [currentUser.uid, uid].sort().join('_');
     if (unsubscribes['chat']) unsubscribes['chat']();
-    unsubscribes['chat'] = onSnapshot(query(collection(db, "messages"), where("chatId", "==", chatId), orderBy("createdAt")), function(snap) {
+    unsubscribes['chat'] = onSnapshot(query(collection(db, "messages"), where("chatId", "==", chatId), orderBy(
+        "createdAt")), function(snap) {
         var msgContainer = document.getElementById('chat-messages');
         msgContainer.innerHTML = '';
         snap.forEach(function(doc) {
@@ -673,7 +763,8 @@ document.getElementById('chat-btn').onclick = function() {
     document.getElementById('chat-modal').style.display = 'flex';
     loadChatList();
 };
-document.getElementById('chat-close-btn').onclick = function() { document.getElementById('chat-modal').style.display = 'none'; };
+document.getElementById('chat-close-btn').onclick = function() { document.getElementById('chat-modal').style.display =
+        'none'; };
 
 async function loadChatList() {
     var list = document.getElementById('chat-list');
@@ -705,12 +796,14 @@ document.getElementById('chat-send-btn').onclick = async function() {
     var text = input.value.trim();
     if (!text || !currentChatUser) return;
     var chatId = [currentUser.uid, currentChatUser].sort().join('_');
-    await addDoc(collection(db, "messages"), { chatId: chatId, from: currentUser.uid, to: currentChatUser, text: text, type: 'text', createdAt: serverTimestamp() });
+    await addDoc(collection(db, "messages"), { chatId: chatId, from: currentUser.uid, to: currentChatUser, text: text,
+        type: 'text', createdAt: serverTimestamp() });
     input.value = '';
 };
 
 function listenNotifications() {
-    var q = query(collection(db, "notifications"), where("to", "==", currentUser.uid), orderBy("createdAt", "desc"), limit(20));
+    var q = query(collection(db, "notifications"), where("to", "==", currentUser.uid), orderBy("createdAt", "desc"),
+        limit(20));
     unsubscribes['notif'] = onSnapshot(q, function(snap) {
         var count = 0;
         snap.forEach(function(doc) { if (!doc.data().read) count++; });
@@ -719,7 +812,7 @@ function listenNotifications() {
 }
 
 // =============================================
-// SIDEBAR + EDIT
+// SIDEBAR + EDIT PROFILE
 // =============================================
 document.getElementById('menu-btn').onclick = function() {
     document.getElementById('side-menu').classList.add('open');
@@ -756,7 +849,8 @@ document.getElementById('save-edit').onclick = async function() {
         location: document.getElementById('edit-location').value.trim()
     };
     var file = document.getElementById('edit-avatar').files[0];
-    if (file) { try { updates.photoURL = await uploadImgBB(file); } catch(e) { return showToast('Lỗi upload'); } }
+    if (file) { try { updates.photoURL = await uploadImgBB(file); } catch (e) { return showToast(
+            'Lỗi upload'); } }
     await updateDoc(doc(db, "users", currentUser.uid), updates);
     document.getElementById('edit-modal').style.display = 'none';
     renderProfile(currentUser.uid);

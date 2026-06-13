@@ -9,7 +9,7 @@
     body { background: #fafafa; display: flex; justify-content: center; }
     #app { max-width: 500px; width: 100%; background: #fff; min-height: 100vh; display: none; flex-direction: column; position: relative; }
     .header { display: flex; align-items: center; justify-content: space-between; padding: 10px 15px; border-bottom: 1px solid #dbdbdb; background: #fff; position: sticky; top: 0; z-index: 10; }
-    .logo-text { font-size: 26px; font-weight: 700; color: #262626; letter-spacing: 1px; }
+    .logo-text { font-size: 26px; font-weight: 700; color: #262626; }
     .logo-text span { color: #0095f6; }
     .header-icons { display: flex; gap: 18px; }
     .header-icons i { font-size: 22px; cursor: pointer; }
@@ -28,7 +28,7 @@
     .post-header { display: flex; align-items: center; gap: 10px; padding: 12px 15px; cursor: pointer; }
     .post-header img { width: 32px; height: 32px; border-radius: 50%; object-fit: cover; }
     .post-header .username { font-weight: 600; font-size: 14px; }
-    .post-image { width: 100%; height: auto; max-height: 500px; object-fit: cover; }
+    .post-image { width: 100%; max-height: 500px; object-fit: cover; }
     .post-actions { padding: 10px 15px; display: flex; gap: 15px; }
     .post-actions i { font-size: 24px; cursor: pointer; }
     .post-actions i.liked { color: #ed4956; }
@@ -66,6 +66,13 @@
     .modal-content button { background: #0095f6; color: #fff; border: none; padding: 10px; border-radius: 8px; width: 100%; font-weight: 600; cursor: pointer; margin-top: 5px; }
     #login-screen { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; background: #fafafa; }
     #login-screen button { background: #0095f6; color: #fff; border: none; padding: 12px 24px; border-radius: 8px; font-size: 16px; cursor: pointer; }
+    .preview-img { max-width: 100%; max-height: 200px; object-fit: contain; margin: 10px 0; border-radius: 8px; }
+    /* Chat */
+    .message-row { display: flex; margin: 6px 0; }
+    .message-row.sent { justify-content: flex-end; }
+    .message-bubble { max-width: 70%; padding: 8px 12px; border-radius: 18px; font-size: 14px; word-break: break-word; }
+    .sent .message-bubble { background: #0095f6; color: white; }
+    .received .message-bubble { background: #efefef; }
   </style>
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
 </head>
@@ -84,35 +91,42 @@
       </div>
     </div>
 
-    <div id="content-area" style="flex:1; overflow-y:auto;">
+    <div style="flex:1; overflow-y:auto;">
+      <!-- Home -->
       <div id="page-home" class="page">
         <div class="stories" id="stories-container"></div>
         <div class="feed" id="feed-container"></div>
       </div>
+      <!-- Search -->
       <div id="page-search" class="page" style="display:none;">
         <div class="search-page">
           <input class="search-input" id="search-input" placeholder="Tìm kiếm người dùng...">
           <ul class="user-list" id="user-list"></ul>
         </div>
       </div>
+      <!-- Post (upload) -->
       <div id="page-post" class="page" style="display:none;">
         <div style="padding:20px;">
-          <h3>Tạo bài viết</h3>
-          <input type="text" id="post-image-url" placeholder="Link ảnh">
-          <textarea id="post-caption" placeholder="Caption"></textarea>
+          <h3>Tạo bài viết mới</h3>
+          <input type="file" id="post-file" accept="image/*" capture="environment">
+          <img id="post-preview" class="preview-img" style="display:none;">
+          <textarea id="post-caption" placeholder="Caption..."></textarea>
           <button id="btn-submit-post">Đăng</button>
           <hr style="margin:20px 0;">
-          <h3>Đăng Story</h3>
-          <input type="text" id="story-image-url" placeholder="Link ảnh story">
+          <h3>Thêm Story</h3>
+          <input type="file" id="story-file" accept="image/*" capture="environment">
+          <img id="story-preview" class="preview-img" style="display:none;">
           <button id="btn-submit-story">Đăng story</button>
         </div>
       </div>
+      <!-- Notifications -->
       <div id="page-notif" class="page" style="display:none;">
         <div style="padding:15px;">
           <h3>Thông báo</h3>
           <div id="notif-list"></div>
         </div>
       </div>
+      <!-- Profile -->
       <div id="page-profile" class="page" style="display:none;">
         <div id="profile-content"></div>
       </div>
@@ -157,19 +171,22 @@
     <div class="modal-content">
       <h3>Chỉnh sửa hồ sơ</h3>
       <input type="text" id="edit-name" placeholder="Tên">
-      <input type="text" id="edit-bio" placeholder="Tiểu sử">
-      <input type="text" id="edit-avatar" placeholder="Link avatar">
+      <textarea id="edit-bio" placeholder="Tiểu sử"></textarea>
+      <input type="file" id="edit-avatar-file" accept="image/*">
+      <img id="edit-avatar-preview" class="preview-img" style="display:none;">
       <button id="btn-save-profile">Lưu</button>
       <button style="background:#ed4956;" id="btn-close-edit">Hủy</button>
     </div>
   </div>
 
   <script type="module">
+    // ========== FIREBASE ==========
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
     import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
     import { getFirestore, collection, addDoc, query, orderBy, onSnapshot, doc, updateDoc, arrayUnion, arrayRemove, serverTimestamp, where, getDocs, setDoc, getDoc, limit, Timestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+    import { getStorage, ref, uploadBytesResumable, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js";
 
-    // 🔥 Config của bạn (dunukhasite)
+    // 🔥 Config của bạn
     const firebaseConfig = {
       apiKey: "AIzaSyBJ3DAWyschGA6fM5VmBndLI0cGSaFF46U",
       authDomain: "dunukhasite.firebaseapp.com",
@@ -182,12 +199,14 @@
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
     const db = getFirestore(app);
+    const storage = getStorage(app);
     const provider = new GoogleAuthProvider();
+
     let currentUser = null;
     let currentChatUser = null;
     let unsubscribes = {};
 
-    // ================= AUTH =================
+    // ========== AUTH ==========
     document.getElementById('google-login').addEventListener('click', async () => {
       try { await signInWithPopup(auth, provider); } catch (e) { alert("Lỗi đăng nhập: " + e.message); }
     });
@@ -223,7 +242,7 @@
       }
     }
 
-    // ================= NAVIGATION =================
+    // ========== NAVIGATION ==========
     const navIcons = document.querySelectorAll('.bottom-nav i');
     const pages = {
       home: document.getElementById('page-home'),
@@ -245,16 +264,26 @@
 
       if (page === 'home') { loadStories(); loadFeed(); }
       else if (page === 'search') { document.getElementById('search-input').value = ''; document.getElementById('user-list').innerHTML = ''; }
-      else if (page === 'notif') { /* đã listen realtime */ }
       else if (page === 'profile') { loadProfile(currentUser.uid); }
     }
 
-    // ================= STORIES =================
+    // ========== UPLOAD HELPER ==========
+    async function uploadFile(file, path) {
+      const storageRef = ref(storage, path);
+      const uploadTask = uploadBytesResumable(storageRef, file);
+      return new Promise((resolve, reject) => {
+        uploadTask.on('state_changed', null, reject, async () => {
+          const url = await getDownloadURL(uploadTask.snapshot.ref);
+          resolve(url);
+        });
+      });
+    }
+
+    // ========== STORIES ==========
     async function loadStories() {
       const container = document.getElementById('stories-container');
       container.innerHTML = '';
       const now = new Date();
-      // Lấy tất cả stories chưa hết hạn (client-side filter để tránh composite index)
       const snap = await getDocs(query(collection(db, "stories"), orderBy("expiresAt", "desc")));
       const users = {};
       snap.forEach(doc => {
@@ -278,7 +307,6 @@
         div.addEventListener('click', () => viewStory(u.stories));
         container.appendChild(div);
       }
-      // Story của mình
       const myDiv = document.createElement('div');
       myDiv.className = 'story-item story-self';
       myDiv.innerHTML = `<div class="story-ring"><i class="fas fa-plus"></i></div><span>Bạn</span>`;
@@ -290,9 +318,9 @@
       if (!stories.length) return;
       let index = 0;
       const modal = document.getElementById('story-modal');
+      modal.style.display = 'flex';
       const img = document.getElementById('story-img');
       const userP = document.getElementById('story-user');
-      modal.style.display = 'flex';
       const update = () => {
         const s = stories[index];
         img.src = s.imageUrl;
@@ -307,14 +335,14 @@
       document.getElementById('btn-close-story').onclick = () => { clearInterval(timer); modal.style.display = 'none'; };
     }
 
-    // ================= FEED =================
+    // ========== FEED ==========
     function loadFeed() {
       const container = document.getElementById('feed-container');
       container.innerHTML = '';
       const q = query(collection(db, "posts"), orderBy("createdAt", "desc"));
       onSnapshot(q, snap => {
         container.innerHTML = '';
-        snap.forEach(docSnap => renderPost(docSnap.data(), docSnap.id));
+        snap.forEach(doc => renderPost(doc.data(), doc.id));
       });
     }
 
@@ -331,6 +359,7 @@
         <div class="post-actions">
           <i class="${liked ? 'fas fa-heart liked' : 'far fa-heart'}" data-id="${id}"></i>
           <i class="far fa-comment"></i>
+          <i class="far fa-paper-plane" id="share-${id}"></i>
         </div>
         <div class="post-likes">${post.likes?.length || 0} lượt thích</div>
         <div class="post-caption"><span class="username">${post.username}</span> ${post.caption}</div>
@@ -350,60 +379,100 @@
           if (post.uid !== currentUser.uid) addNotification(post.uid, 'like', `${currentUser.displayName} đã thích bài viết của bạn`);
         }
       });
+      div.querySelector(`#share-${id}`).addEventListener('click', () => {
+        if (navigator.share) {
+          navigator.share({ title: 'Dunukha', text: post.caption, url: post.imageUrl });
+        } else {
+          prompt("Copy link ảnh:", post.imageUrl);
+        }
+      });
       div.querySelector('.send-comment').addEventListener('click', async () => {
         const input = document.getElementById(`comment-${id}`);
         const text = input.value.trim();
         if (!text) return;
-        await updateDoc(doc(db, "posts", id), { comments: arrayUnion({ uid: currentUser.uid, username: currentUser.displayName, text, createdAt: new Date().toISOString() }) });
+        await updateDoc(doc(db, "posts", id), {
+          comments: arrayUnion({ uid: currentUser.uid, username: currentUser.displayName, text, createdAt: new Date().toISOString() })
+        });
         if (post.uid !== currentUser.uid) addNotification(post.uid, 'comment', `${currentUser.displayName} đã bình luận: "${text}"`);
         input.value = '';
       });
     }
 
-    // ================= POST =================
+    // ========== POST UPLOAD ==========
+    document.getElementById('post-file').addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = (ev) => {
+          document.getElementById('post-preview').src = ev.target.result;
+          document.getElementById('post-preview').style.display = 'block';
+        };
+        reader.readAsDataURL(file);
+      }
+    });
+
     document.getElementById('btn-submit-post').addEventListener('click', async () => {
-      const img = document.getElementById('post-image-url').value.trim();
-      const cap = document.getElementById('post-caption').value.trim();
-      if (!img) return alert("Cần link ảnh");
+      const file = document.getElementById('post-file').files[0];
+      const caption = document.getElementById('post-caption').value.trim();
+      if (!file) return alert("Hãy chọn ảnh");
       const userData = (await getDoc(doc(db, "users", currentUser.uid))).data();
+      const path = `posts/${currentUser.uid}_${Date.now()}_${file.name}`;
+      const imageUrl = await uploadFile(file, path);
       await addDoc(collection(db, "posts"), {
         uid: currentUser.uid,
         username: userData.displayName,
         userAvatar: userData.photoURL || currentUser.photoURL,
-        imageUrl: img,
-        caption: cap,
+        imageUrl,
+        caption,
         likes: [],
         comments: [],
         createdAt: serverTimestamp()
       });
-      document.getElementById('post-image-url').value = '';
+      document.getElementById('post-file').value = '';
+      document.getElementById('post-preview').style.display = 'none';
       document.getElementById('post-caption').value = '';
       alert("Đã đăng bài!");
       navigateTo('home');
     });
 
+    // Story upload
+    document.getElementById('story-file').addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = (ev) => {
+          document.getElementById('story-preview').src = ev.target.result;
+          document.getElementById('story-preview').style.display = 'block';
+        };
+        reader.readAsDataURL(file);
+      }
+    });
+
     document.getElementById('btn-submit-story').addEventListener('click', async () => {
-      const url = document.getElementById('story-image-url').value.trim();
-      if (!url) return alert("Cần link ảnh");
+      const file = document.getElementById('story-file').files[0];
+      if (!file) return alert("Chọn ảnh cho story");
+      const path = `stories/${currentUser.uid}_${Date.now()}_${file.name}`;
+      const imageUrl = await uploadFile(file, path);
       const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000);
       await addDoc(collection(db, "stories"), {
         uid: currentUser.uid,
         username: currentUser.displayName || "Người dùng",
-        imageUrl: url,
+        imageUrl,
         createdAt: serverTimestamp(),
         expiresAt: Timestamp.fromDate(expiresAt)
       });
-      document.getElementById('story-image-url').value = '';
+      document.getElementById('story-file').value = '';
+      document.getElementById('story-preview').style.display = 'none';
       alert("Đã đăng story!");
       navigateTo('home');
     });
 
-    // ================= PROFILE =================
+    // ========== PROFILE ==========
     async function loadProfile(uid) {
       const container = document.getElementById('profile-content');
       container.innerHTML = 'Đang tải...';
-      const userRef = doc(db, "users", uid);
-      const snap = await getDoc(userRef);
+      const ref = doc(db, "users", uid);
+      const snap = await getDoc(ref);
       if (!snap.exists()) { container.innerHTML = 'Không tồn tại'; return; }
       const data = snap.data();
       const isMe = uid === currentUser.uid;
@@ -450,16 +519,35 @@
       const data = snap.data();
       document.getElementById('edit-name').value = data.displayName;
       document.getElementById('edit-bio').value = data.bio || '';
-      document.getElementById('edit-avatar').value = data.photoURL || '';
+      document.getElementById('edit-avatar-file').value = '';
+      document.getElementById('edit-avatar-preview').style.display = 'none';
       document.getElementById('edit-profile-modal').style.display = 'flex';
     }
+
+    document.getElementById('edit-avatar-file').addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = (ev) => {
+          document.getElementById('edit-avatar-preview').src = ev.target.result;
+          document.getElementById('edit-avatar-preview').style.display = 'block';
+        };
+        reader.readAsDataURL(file);
+      }
+    });
 
     document.getElementById('btn-save-profile').addEventListener('click', async () => {
       const name = document.getElementById('edit-name').value.trim();
       const bio = document.getElementById('edit-bio').value.trim();
-      const avatar = document.getElementById('edit-avatar').value.trim();
+      const avatarFile = document.getElementById('edit-avatar-file').files[0];
       if (!name) return alert("Tên không được để trống");
-      await updateDoc(doc(db, "users", currentUser.uid), { displayName: name, bio, photoURL: avatar || currentUser.photoURL });
+      const updates = { displayName: name, bio };
+      if (avatarFile) {
+        const path = `avatars/${currentUser.uid}_${Date.now()}_${avatarFile.name}`;
+        const photoURL = await uploadFile(avatarFile, path);
+        updates.photoURL = photoURL;
+      }
+      await updateDoc(doc(db, "users", currentUser.uid), updates);
       document.getElementById('edit-profile-modal').style.display = 'none';
       loadProfile(currentUser.uid);
     });
@@ -481,27 +569,29 @@
       loadProfile(uid);
     }
 
-    // ================= SEARCH =================
+    // ========== SEARCH ==========
     document.getElementById('search-input').addEventListener('input', async (e) => {
-      const kw = e.target.value.trim();
+      const kw = e.target.value.trim().toLowerCase();
       const list = document.getElementById('user-list');
       if (!kw) { list.innerHTML = ''; return; }
       list.innerHTML = 'Đang tìm...';
-      const q = query(collection(db, "users"), orderBy("displayName"), startAt(kw), endAt(kw+'\uf8ff'));
-      const snap = await getDocs(q);
+      // Tìm kiếm đơn giản: lấy tất cả users, lọc client-side (Firestore không hỗ trợ like)
+      const snap = await getDocs(collection(db, "users"));
       list.innerHTML = '';
       snap.forEach(doc => {
         if (doc.id === currentUser.uid) return;
         const d = doc.data();
-        const li = document.createElement('li');
-        li.className = 'user-item';
-        li.innerHTML = `<img src="${d.photoURL || 'https://via.placeholder.com/44'}"><span class="name">${d.displayName}</span>`;
-        li.addEventListener('click', () => loadProfile(doc.id));
-        list.appendChild(li);
+        if (d.displayName.toLowerCase().includes(kw)) {
+          const li = document.createElement('li');
+          li.className = 'user-item';
+          li.innerHTML = `<img src="${d.photoURL || 'https://via.placeholder.com/44'}"><span class="name">${d.displayName}</span>`;
+          li.addEventListener('click', () => loadProfile(doc.id));
+          list.appendChild(li);
+        }
       });
     });
 
-    // ================= NOTIFICATIONS =================
+    // ========== NOTIFICATIONS ==========
     function listenNotifications() {
       const q = query(collection(db, "notifications"), where("to", "==", currentUser.uid), orderBy("createdAt", "desc"), limit(20));
       onSnapshot(q, snap => {
@@ -522,34 +612,33 @@
       await addDoc(collection(db, "notifications"), { to, from: currentUser.uid, type, message, read: false, createdAt: serverTimestamp() });
     }
 
-    // ================= CHAT =================
+    // ========== CHAT ==========
     document.getElementById('btn-chat').addEventListener('click', () => {
       document.getElementById('chat-modal').style.display = 'flex';
       loadChatList();
     });
-
     document.getElementById('chat-modal').addEventListener('click', (e) => {
       if (e.target === e.currentTarget) document.getElementById('chat-modal').style.display = 'none';
     });
 
     async function loadChatList() {
-      const chatListDiv = document.getElementById('chat-list');
+      const chatList = document.getElementById('chat-list');
       const chatWindow = document.getElementById('chat-window');
-      chatListDiv.style.display = 'block';
+      chatList.style.display = 'block';
       chatWindow.style.display = 'none';
       const mySnap = await getDoc(doc(db, "users", currentUser.uid));
       const following = mySnap.data()?.following || {};
-      chatListDiv.innerHTML = '';
+      chatList.innerHTML = '';
       for (const uid in following) {
         if (!following[uid]) continue;
         const userSnap = await getDoc(doc(db, "users", uid));
         if (!userSnap.exists()) continue;
-        const userData = userSnap.data();
+        const data = userSnap.data();
         const div = document.createElement('div');
         div.className = 'user-item';
-        div.innerHTML = `<img src="${userData.photoURL || 'https://via.placeholder.com/44'}"><span class="name">${userData.displayName}</span>`;
-        div.addEventListener('click', () => openChat(uid, userData.displayName));
-        chatListDiv.appendChild(div);
+        div.innerHTML = `<img src="${data.photoURL || 'https://via.placeholder.com/44'}"><span class="name">${data.displayName}</span>`;
+        div.addEventListener('click', () => openChat(uid, data.displayName));
+        chatList.appendChild(div);
       }
     }
 
@@ -567,17 +656,16 @@
       if (unsubscribes[chatId]) unsubscribes[chatId]();
       const q = query(collection(db, "messages"), where("chatId", "==", chatId), orderBy("createdAt"));
       unsubscribes[chatId] = onSnapshot(q, snap => {
-        const chatMessages = document.getElementById('chat-messages');
-        chatMessages.innerHTML = '';
+        const container = document.getElementById('chat-messages');
+        container.innerHTML = '';
         snap.forEach(doc => {
           const d = doc.data();
-          const div = document.createElement('div');
-          div.style.display = 'flex';
-          div.style.justifyContent = d.from === currentUser.uid ? 'flex-end' : 'flex-start';
-          div.innerHTML = `<div style="max-width:70%; padding:8px 12px; border-radius:18px; font-size:14px; ${d.from === currentUser.uid ? 'background:#0095f6; color:white;' : 'background:#efefef;'}">${d.text}</div>`;
-          chatMessages.appendChild(div);
+          const row = document.createElement('div');
+          row.className = `message-row ${d.from === currentUser.uid ? 'sent' : 'received'}`;
+          row.innerHTML = `<div class="message-bubble">${d.text}</div>`;
+          container.appendChild(row);
         });
-        chatMessages.scrollTop = chatMessages.scrollHeight;
+        container.scrollTop = container.scrollHeight;
       });
     }
 
@@ -592,19 +680,16 @@
 
     document.getElementById('btn-back-chat').addEventListener('click', loadChatList);
 
-    // Đăng xuất (tạm thời để nút profile trong bottom nav là đăng xuất nếu muốn, nhưng để profile trang cá nhân, có thể thêm nút đăng xuất trong header)
-    // Thêm xử lý đăng xuất vào icon profile? Không, để profile là trang cá nhân.
-    // Có thể thêm nút đăng xuất trong profile hoặc header. Mình sẽ thêm vào header sau logo.
-    // Sửa nhanh: thêm nút đăng xuất cạnh logo
+    // ========== LOGOUT ==========
     const header = document.querySelector('.header');
     const logoutBtn = document.createElement('i');
     logoutBtn.className = 'fas fa-sign-out-alt';
-    logoutBtn.style.cssText = 'margin-left: auto; cursor: pointer; font-size: 22px; color: #262626;';
+    logoutBtn.style.cssText = 'margin-left: 10px; cursor: pointer; font-size: 22px; color: #262626;';
     logoutBtn.title = 'Đăng xuất';
     logoutBtn.addEventListener('click', () => {
       if (confirm("Đăng xuất?")) signOut(auth);
     });
-    header.insertBefore(logoutBtn, header.children[1]); // đặt trước header-icons
+    header.appendChild(logoutBtn);
   </script>
 </body>
 </html>

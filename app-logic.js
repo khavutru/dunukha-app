@@ -790,7 +790,7 @@ function setupChatSendButton() {
 }
 
 // =============================================
-// EXPLORE, SEARCH, REELS, NOTIFICATIONS
+// EXPLORE, SEARCH (ĐÃ SỬA LỖI @), REELS, NOTIFICATIONS
 // =============================================
 async function loadExplorePage() {
     const grid = document.getElementById('search-results');
@@ -811,33 +811,90 @@ async function loadExplorePage() {
 }
 
 function setupSearchFunctionality() {
-    const input = document.getElementById('search-input');
-    const results = document.getElementById('search-results');
-    if (!input || !results) return;
-    input.addEventListener('input', async function() {
-        const kw = input.value.trim().toLowerCase();
-        if (!kw) { results.style.display = 'grid'; results.style.gridTemplateColumns = 'repeat(3,1fr)'; loadExplorePage(); return; }
-        results.style.display = 'block';
-        results.innerHTML = '<div style="text-align:center;padding:10px;color:#888;">Đang tìm...</div>';
-        if (!allUsersCache) {
-            const snap = await getDocs(collection(db, "users"));
-            allUsersCache = [];
-            snap.forEach(function(doc) { if (doc.id !== currentUser.uid) allUsersCache.push({ id: doc.id, data: doc.data() }); });
+    const searchInput = document.getElementById('search-input');
+    const searchResults = document.getElementById('search-results');
+
+    if (!searchInput || !searchResults) {
+        console.warn("Không tìm thấy search-input hoặc search-results");
+        return;
+    }
+
+    searchInput.addEventListener('input', async function() {
+        let rawKeyword = searchInput.value.trim();
+
+        if (rawKeyword === '') {
+            searchResults.style.display = 'grid';
+            searchResults.style.gridTemplateColumns = 'repeat(3,1fr)';
+            searchResults.style.gap = '3px';
+            loadExplorePage();
+            return;
         }
-        const filtered = allUsersCache.filter(function(u) {
-            const dn = u.data.displayName ? u.data.displayName.toLowerCase() : '';
-            const un = u.data.username ? u.data.username.toLowerCase() : '';
-            return dn.includes(kw) || un.includes(kw);
-        });
-        results.innerHTML = '';
-        if (filtered.length === 0) { results.innerHTML = '<div style="text-align:center;padding:30px;color:#888;">Không tìm thấy</div>'; return; }
-        filtered.forEach(function(u) {
-            const div = document.createElement('div');
-            div.style.cssText = 'display:flex;align-items:center;gap:12px;padding:12px 15px;border-bottom:1px solid #f0f0f0;cursor:pointer;';
-            div.innerHTML = '<img src="' + (u.data.photoURL || 'https://via.placeholder.com/44') + '" style="width:44px;height:44px;border-radius:50%;object-fit:cover;"><div style="flex:1;"><div style="font-weight:600;">' + u.data.displayName + '</div><div style="color:#888;font-size:13px;">@' + u.data.username + '</div></div>';
-            div.addEventListener('click', function() { renderUserProfile(u.id); navigateTo('profile'); });
-            results.appendChild(div);
-        });
+
+        let cleanKeyword = rawKeyword;
+        if (cleanKeyword.startsWith('@')) {
+            cleanKeyword = cleanKeyword.substring(1);
+        }
+        cleanKeyword = cleanKeyword.toLowerCase();
+
+        searchResults.style.display = 'block';
+        searchResults.innerHTML = '<div style="text-align:center;padding:15px;color:#888;">Đang tìm kiếm...</div>';
+
+        try {
+            if (!allUsersCache) {
+                const usersSnap = await getDocs(collection(db, "users"));
+                allUsersCache = [];
+                usersSnap.forEach(function(docSnapshot) {
+                    if (docSnapshot.id !== currentUser.uid) {
+                        allUsersCache.push({
+                            id: docSnapshot.id,
+                            data: docSnapshot.data()
+                        });
+                    }
+                });
+            }
+
+            const filteredUsers = allUsersCache.filter(function(userEntry) {
+                const displayName = userEntry.data.displayName ? userEntry.data.displayName.toLowerCase() : '';
+                const username = userEntry.data.username ? userEntry.data.username.toLowerCase() : '';
+                return displayName.includes(cleanKeyword) || username.includes(cleanKeyword);
+            });
+
+            searchResults.innerHTML = '';
+
+            if (filteredUsers.length === 0) {
+                searchResults.innerHTML = '<div style="text-align:center;padding:30px;color:#888;">Không tìm thấy người dùng nào phù hợp</div>';
+                return;
+            }
+
+            filteredUsers.forEach(function(userEntry) {
+                const userDiv = document.createElement('div');
+                userDiv.style.cssText = 'display:flex;align-items:center;gap:12px;padding:12px 15px;border-bottom:1px solid #f0f0f0;cursor:pointer;transition:background 0.2s;';
+                userDiv.addEventListener('mouseenter', function() { this.style.background = '#f9f9f9'; });
+                userDiv.addEventListener('mouseleave', function() { this.style.background = 'transparent'; });
+
+                userDiv.innerHTML = `
+                    <img src="${userEntry.data.photoURL || 'https://via.placeholder.com/44'}" 
+                         style="width:44px;height:44px;border-radius:50%;object-fit:cover;" 
+                         alt="avatar">
+                    <div style="flex:1;">
+                        <div style="font-weight:600;font-size:15px;">${userEntry.data.displayName}</div>
+                        <div style="color:#888;font-size:13px;">@${userEntry.data.username}</div>
+                        <div style="font-size:12px;color:#aaa;">${userEntry.data.bio || ''}</div>
+                    </div>
+                `;
+
+                userDiv.addEventListener('click', function() {
+                    renderUserProfile(userEntry.id);
+                    navigateTo('profile');
+                });
+
+                searchResults.appendChild(userDiv);
+            });
+
+        } catch (error) {
+            console.error("Lỗi tìm kiếm người dùng:", error);
+            searchResults.innerHTML = '<div style="text-align:center;padding:20px;color:#888;">Lỗi tìm kiếm, vui lòng thử lại</div>';
+        }
     });
 }
 

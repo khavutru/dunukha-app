@@ -198,20 +198,19 @@
 
     <script type="module">
         // 🔴 BẮT BUỘC: DÁN CẤU HÌNH FIREBASE CỦA BẠN VÀO ĐÂY 🔴
-        // Sau khi tạo project Firebase, vào Project Settings -> Your apps -> Web
         const firebaseConfig = {
-            apiKey: "AIzaSyBJ3DAWyschGA6fM5VmBndLI0cGSaFF46U",
-            authDomain: "dunukhasite.firebaseapp.com",
-            projectId: "dunukhasite",
-            storageBucket: "dunukhasite.firebasestorage.app",
-            messagingSenderId: "841226738327",
-            appId: "1:841226738327:web:5e0192799adbe1179067d2"
+            apiKey: "AIzaSy...",
+            authDomain: "your-project.firebaseapp.com",
+            projectId: "your-project",
+            storageBucket: "your-project.appspot.com",
+            messagingSenderId: "...",
+            appId: "..."
         };
         // ----------------------------------------------------------------
 
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getAuth, signInWithPopup, GoogleAuthProvider, FacebookAuthProvider, onAuthStateChanged, signOut, createUserWithEmailAndPassword, signInWithEmailAndPassword, RecaptchaVerifier, signInWithPhoneNumber } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-        import { getFirestore, collection, addDoc, query, orderBy, onSnapshot, doc, updateDoc, arrayUnion, arrayRemove, serverTimestamp, where, getDocs, setDoc, getDoc, limit, startAfter, deleteDoc, increment } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, query, orderBy, onSnapshot, doc, updateDoc, arrayUnion, arrayRemove, serverTimestamp, where, getDocs, setDoc, getDoc, limit, startAfter, deleteDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
         const IMGBB_API_KEY = "d4802501f212046a8d74561bbdaf6dd3";
         const app = initializeApp(firebaseConfig);
@@ -322,19 +321,31 @@
         }
 
         // --- NAVIGATION ---
-        const pages = { home: document.getElementById('page-home'), explore: document.getElementById('page-explore'), reels: document.getElementById('page-reels'), post: document.getElementById('page-post'), profile: document.getElementById('page-profile') };
+        const pages = { 
+            home: document.getElementById('page-home'), 
+            explore: document.getElementById('page-explore'), 
+            reels: document.getElementById('page-reels'), 
+            post: document.getElementById('page-post'), 
+            profile: document.getElementById('page-profile') 
+        };
+        
         document.querySelectorAll('.bottom-nav i').forEach(icon => {
             icon.addEventListener('click', () => navigateTo(icon.dataset.page));
         });
-        function navigateTo(page) {
+
+        // HÀM ĐIỀU HƯỚNG ĐÃ SỬA: hỗ trợ tham số uid cho profile
+        function navigateTo(page, uid = null) {
             document.querySelectorAll('.bottom-nav i').forEach(i => i.classList.remove('active'));
-            document.querySelector(`[data-page="${page}"]`).classList.add('active');
+            const navIcon = document.querySelector(`[data-page="${page}"]`);
+            if (navIcon) navIcon.classList.add('active');
+            
             Object.values(pages).forEach(p => p.classList.remove('active'));
             pages[page].classList.add('active');
+            
             if (page === 'home') { loadStories(); loadFeed(); }
             else if (page === 'explore') loadExplore();
             else if (page === 'reels') loadReels();
-            else if (page === 'profile') loadProfile(currentUser.uid);
+            else if (page === 'profile') loadProfile(uid || currentUser.uid); // SỬA: ưu tiên uid
         }
 
         // --- STORIES ---
@@ -473,11 +484,11 @@
             `;
             document.getElementById('feed').appendChild(div);
 
-            // Click vào header -> mở profile
+            // Click vào header -> mở profile người đăng
             div.querySelector('.post-header').addEventListener('click', (e) => {
                 if (e.target.closest('.fa-ellipsis-v')) return;
                 const uid = div.querySelector('.post-header').dataset.uid;
-                if (uid) loadProfile(uid);
+                if (uid) navigateTo('profile', uid);
             });
 
             // 3 chấm menu
@@ -666,7 +677,7 @@
             } catch (e) { console.error('Lỗi reels:', e); }
         }
 
-        // --- EXPLORE & SEARCH ---
+        // --- EXPLORE & SEARCH (ĐÃ SỬA) ---
         async function loadExplore() {
             const grid = document.getElementById('search-results');
             grid.innerHTML = '';
@@ -677,7 +688,7 @@
                     const el = document.createElement('img');
                     el.src = p.mediaUrls?.[0] || p.mediaUrl;
                     el.style.width = '100%'; el.style.aspectRatio = '1/1'; el.style.objectFit = 'cover';
-                    el.onclick = () => loadProfile(p.uid);
+                    el.onclick = () => navigateTo('profile', p.uid);
                     grid.appendChild(el);
                 });
             } catch (e) { console.error('Lỗi explore:', e); }
@@ -698,7 +709,7 @@
                 filtered.forEach(u => {
                     const div = document.createElement('div');
                     div.className = 'search-result';
-                    div.dataset.uid = u.id;  // Lưu ID người dùng vào data attribute
+                    div.dataset.uid = u.id;
                     div.innerHTML = `
                         <img src="${u.photoURL || 'https://via.placeholder.com/44'}" style="width:44px;height:44px;border-radius:50%;">
                         <div>
@@ -709,13 +720,13 @@
                     grid.appendChild(div);
                 });
 
-                // THÊM EVENT DELEGATION: Gán sự kiện click cho phần tử cha
+                // 🔥 SỬA LỖI: Click vào kết quả -> chuyển tab profile
                 grid.addEventListener('click', function(e) {
                     const target = e.target.closest('.search-result');
                     if (target) {
                         const uid = target.dataset.uid;
                         if (uid) {
-                            loadProfile(uid);
+                            navigateTo('profile', uid); // QUAN TRỌNG
                         }
                     }
                 });
@@ -724,7 +735,7 @@
             }
         });
 
-        // --- PROFILE ---
+        // --- PROFILE (ĐÃ SỬA ĐỂ HỖ TRỢ MỞ NGƯỜI KHÁC) ---
         async function loadProfile(uid) {
             const container = document.getElementById('profile-content');
             container.innerHTML = 'Đang tải...';

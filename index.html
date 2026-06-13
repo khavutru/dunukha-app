@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Dunukha Social</title>
+    <title>Dunukha Pro</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
@@ -197,11 +197,8 @@
     </div>
 
     <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getAuth, signInWithPopup, GoogleAuthProvider, FacebookAuthProvider, onAuthStateChanged, signOut, createUserWithEmailAndPassword, signInWithEmailAndPassword, RecaptchaVerifier, signInWithPhoneNumber } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-        import { getFirestore, collection, addDoc, query, orderBy, onSnapshot, doc, updateDoc, arrayUnion, arrayRemove, serverTimestamp, where, getDocs, setDoc, getDoc, limit, startAfter, deleteDoc, increment } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-
-        // 🔴 THAY CẤU HÌNH FIREBASE CỦA BẠN VÀO ĐÂY 🔴
+        // 🔴 BẮT BUỘC: DÁN CẤU HÌNH FIREBASE CỦA BẠN VÀO ĐÂY 🔴
+        // Sau khi tạo project Firebase, vào Project Settings -> Your apps -> Web
         const firebaseConfig = {
             apiKey: "AIzaSyBJ3DAWyschGA6fM5VmBndLI0cGSaFF46U",
             authDomain: "dunukhasite.firebaseapp.com",
@@ -210,6 +207,11 @@
             messagingSenderId: "841226738327",
             appId: "1:841226738327:web:5e0192799adbe1179067d2"
         };
+        // ----------------------------------------------------------------
+
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getAuth, signInWithPopup, GoogleAuthProvider, FacebookAuthProvider, onAuthStateChanged, signOut, createUserWithEmailAndPassword, signInWithEmailAndPassword, RecaptchaVerifier, signInWithPhoneNumber } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { getFirestore, collection, addDoc, query, orderBy, onSnapshot, doc, updateDoc, arrayUnion, arrayRemove, serverTimestamp, where, getDocs, setDoc, getDoc, limit, startAfter, deleteDoc, increment } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
         const IMGBB_API_KEY = "d4802501f212046a8d74561bbdaf6dd3";
         const app = initializeApp(firebaseConfig);
@@ -696,6 +698,7 @@
                 filtered.forEach(u => {
                     const div = document.createElement('div');
                     div.className = 'search-result';
+                    div.dataset.uid = u.id;  // Lưu ID người dùng vào data attribute
                     div.innerHTML = `
                         <img src="${u.photoURL || 'https://via.placeholder.com/44'}" style="width:44px;height:44px;border-radius:50%;">
                         <div>
@@ -703,9 +706,18 @@
                             <div style="color:#888; font-size:12px;">@${u.username}</div>
                         </div>
                     `;
-                    // QUAN TRỌNG: Click vào sẽ mở profile
-                    div.onclick = () => loadProfile(u.id);
                     grid.appendChild(div);
+                });
+
+                // THÊM EVENT DELEGATION: Gán sự kiện click cho phần tử cha
+                grid.addEventListener('click', function(e) {
+                    const target = e.target.closest('.search-result');
+                    if (target) {
+                        const uid = target.dataset.uid;
+                        if (uid) {
+                            loadProfile(uid);
+                        }
+                    }
                 });
             } else {
                 loadExplore();

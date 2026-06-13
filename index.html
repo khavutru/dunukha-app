@@ -5,39 +5,33 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Dunukha</title>
   <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; }
     body { background: #000; display: flex; justify-content: center; }
-    #app { max-width: 480px; width: 100%; background: #fff; min-height: 100vh; display: none; flex-direction: column; position: relative; }
-    .header { display: flex; align-items: center; justify-content: space-between; padding: 12px 15px; border-bottom: 1px solid #dbdbdb; background: #fff; position: sticky; top: 0; z-index: 20; }
-    .logo { font-size: 22px; font-weight: 700; }
-    .logo span { color: #0095f6; }
-    .header-icons { display: flex; gap: 18px; font-size: 22px; color: #262626; }
+    #app { max-width: 500px; width: 100%; background: #fff; min-height: 100vh; display: none; flex-direction: column; position: relative; }
+    .header { display: flex; align-items: center; justify-content: space-between; padding: 10px 15px; border-bottom: 1px solid #dbdbdb; background: #fff; position: sticky; top: 0; z-index: 20; }
+    .logo { font-size: 22px; font-weight: 700; } .logo span { color: #0095f6; }
+    .header-icons { display: flex; gap: 18px; }
+    .header-icons i { font-size: 22px; cursor: pointer; }
     .badge { position: relative; }
-    .badge::after { content: attr(data-count); position: absolute; top: -4px; right: -8px; background: #ed4956; color: #fff; border-radius: 50%; padding: 2px 5px; font-size: 11px; display: none; }
+    .badge::after { content: attr(data-count); position: absolute; top: -5px; right: -8px; background: #ed4956; color: white; border-radius: 10px; padding: 2px 6px; font-size: 10px; display: none; }
     .badge[data-count]:not([data-count="0"])::after { display: block; }
-    
-    .bottom-nav { display: flex; justify-content: space-around; padding: 10px 0; border-top: 1px solid #dbdbdb; background: #fff; position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 480px; z-index: 10; }
-    .bottom-nav i { font-size: 24px; color: #262626; cursor: pointer; padding: 5px; transition: 0.2s; }
+    .bottom-nav { display: flex; justify-content: space-around; padding: 10px 0; border-top: 1px solid #dbdbdb; background: #fff; position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 500px; z-index: 10; }
+    .bottom-nav i { font-size: 24px; color: #262626; cursor: pointer; }
     .bottom-nav i.active { color: #0095f6; }
-    .bottom-nav i:active { transform: scale(0.9); }
-
-    .page { display: none; flex: 1; overflow-y: auto; padding-bottom: 80px; background: #fafafa; }
+    .page { display: none; flex: 1; overflow-y: auto; padding-bottom: 60px; }
     .page.active { display: block; }
-
     .stories { display: flex; gap: 12px; padding: 12px 15px; border-bottom: 1px solid #dbdbdb; overflow-x: auto; background: #fff; }
-    .story-item { display: flex; flex-direction: column; align-items: center; gap: 4px; cursor: pointer; flex-shrink: 0; }
-    .story-ring { width: 64px; height: 64px; border-radius: 50%; background: linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888); padding: 2px; }
-    .story-ring img { width: 100%; height: 100%; border-radius: 50%; border: 2px solid #fff; object-fit: cover; }
-    .story-item span { font-size: 11px; color: #262626; max-width: 70px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-
-    .post { background: #fff; border: 1px solid #dbdbdb; border-radius: 12px; margin-bottom: 20px; overflow: hidden; }
+    .story-item { display: flex; flex-direction: column; align-items: center; gap: 4px; cursor: pointer; }
+    .story-ring { width: 66px; height: 66px; border-radius: 50%; background: linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888); padding: 2px; }
+    .story-ring img, .story-ring video { width: 100%; height: 100%; border-radius: 50%; border: 2px solid white; object-fit: cover; }
+    .story-item span { font-size: 12px; color: #262626; max-width: 70px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .post { background: #fff; border: 1px solid #dbdbdb; border-radius: 8px; margin-bottom: 20px; }
     .post-header { display: flex; align-items: center; gap: 10px; padding: 12px 15px; cursor: pointer; }
     .post-header img { width: 32px; height: 32px; border-radius: 50%; object-fit: cover; }
     .post-header .username { font-weight: 600; font-size: 14px; }
-    .post-media { width: 100%; max-height: 500px; object-fit: cover; background: #000; }
-    .post-actions { padding: 10px 15px 5px; display: flex; gap: 15px; }
-    .post-actions i { font-size: 26px; cursor: pointer; transition: 0.15s; }
-    .post-actions i:active { transform: scale(1.2); }
+    .post-media { width: 100%; max-height: 500px; object-fit: contain; background: black; cursor: pointer; }
+    .post-actions { padding: 10px 15px; display: flex; gap: 15px; }
+    .post-actions i { font-size: 24px; cursor: pointer; }
     .post-actions i.liked { color: #ed4956; }
     .post-likes { padding: 0 15px 5px; font-weight: 600; font-size: 14px; }
     .post-caption { padding: 0 15px 10px; font-size: 14px; }
@@ -45,106 +39,83 @@
     .post-comment-input { display: flex; border-top: 1px solid #efefef; padding: 10px 15px; }
     .post-comment-input input { flex: 1; border: none; outline: none; font-size: 14px; }
     .post-comment-input button { background: none; border: none; color: #0095f6; font-weight: 600; cursor: pointer; }
-
-    .reel-item { position: relative; width: 100%; height: 80vh; scroll-snap-align: start; background: #000; display: flex; align-items: center; justify-content: center; }
+    .reel-item { position: relative; width: 100%; height: 100vh; scroll-snap-align: start; background: black; display: flex; align-items: center; justify-content: center; }
     .reel-item video { width: 100%; height: 100%; object-fit: contain; }
-    .reel-info { position: absolute; bottom: 20px; left: 20px; color: #fff; text-shadow: 0 1px 4px rgba(0,0,0,0.7); }
-
+    .reel-info { position: absolute; bottom: 20px; left: 20px; color: white; }
     .profile-header { display: flex; align-items: center; gap: 20px; padding: 20px; border-bottom: 1px solid #dbdbdb; }
     .profile-avatar { width: 80px; height: 80px; border-radius: 50%; object-fit: cover; border: 2px solid #0095f6; }
     .profile-info { flex: 1; }
-    .profile-stats { display: flex; gap: 15px; margin: 10px 0; }
-    .profile-stats div { text-align: center; font-size: 14px; }
-    .profile-stats span { font-weight: 600; display: block; }
-    .profile-bio { margin: 5px 0; font-size: 14px; }
+    .profile-stats { display: flex; gap: 20px; margin: 10px 0; }
+    .profile-stats div { text-align: center; }
+    .profile-stats span { font-weight: 600; }
+    .profile-bio { margin: 5px 0; }
     .profile-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 3px; }
     .profile-grid img, .profile-grid video { aspect-ratio: 1/1; object-fit: cover; width: 100%; cursor: pointer; }
-
-    .btn { padding: 6px 16px; border-radius: 8px; border: 1px solid #dbdbdb; background: #fafafa; font-weight: 600; cursor: pointer; transition: 0.2s; }
-    .btn-primary { background: #0095f6; color: white; border: none; }
-    .btn-primary:active { opacity: 0.7; }
-
-    .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); justify-content: center; align-items: center; z-index: 30; }
+    .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); justify-content: center; align-items: center; z-index: 30; }
     .modal-content { background: #fff; padding: 25px; border-radius: 16px; width: 90%; max-width: 400px; max-height: 80%; overflow-y: auto; }
     .modal-content input, .modal-content textarea { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #dbdbdb; border-radius: 8px; }
     .modal-content button { background: #0095f6; color: #fff; border: none; padding: 12px; border-radius: 10px; width: 100%; font-weight: 600; margin-top: 10px; cursor: pointer; }
-
-    .side-menu { position: fixed; top: 0; left: 0; width: 75%; max-width: 300px; height: 100%; background: #fff; z-index: 40; box-shadow: 2px 0 15px rgba(0,0,0,0.2); transform: translateX(-100%); transition: 0.3s; padding: 20px; display: flex; flex-direction: column; }
+    .side-menu { position: fixed; top: 0; left: 0; width: 80%; max-width: 300px; height: 100%; background: #fff; z-index: 40; box-shadow: 2px 0 10px rgba(0,0,0,0.2); transform: translateX(-100%); transition: 0.3s; padding: 20px; display: flex; flex-direction: column; }
     .side-menu.open { transform: translateX(0); }
     .overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); z-index: 35; }
     .overlay.show { display: block; }
-
     .message-row { display: flex; margin: 6px 0; }
     .message-row.sent { justify-content: flex-end; }
-    .message-bubble { max-width: 70%; padding: 10px 14px; border-radius: 20px; font-size: 15px; word-break: break-word; }
+    .message-bubble { max-width: 70%; padding: 10px 14px; border-radius: 20px; font-size: 15px; word-break: break-word; position: relative; }
     .sent .message-bubble { background: #0095f6; color: white; }
     .received .message-bubble { background: #efefef; }
-
-    #login-screen { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; gap: 12px; padding: 20px; background: #000; color: #fff; }
-    #login-screen h1 { font-size: 3rem; margin-bottom: 30px; }
-    #login-screen h1 span { color: #0095f6; }
-    #login-screen button { padding: 12px 30px; border: none; border-radius: 30px; font-weight: 600; color: #fff; cursor: pointer; background: #0095f6; width: 80%; max-width: 300px; font-size: 16px; }
-    #login-screen button:active { opacity: 0.8; }
-    #login-screen .demo-hint { font-size: 13px; color: #888; margin-top: 15px; }
-
-    ::-webkit-scrollbar { width: 0; height: 0; }
+    .message-actions { display: none; position: absolute; top: -15px; right: 0; background: white; border-radius: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.2); padding: 5px; }
+    .message-bubble:hover .message-actions { display: flex; gap: 5px; }
+    .loader { text-align: center; padding: 20px; color: #8e8e8e; }
+    .toast { position: fixed; top: 60px; left: 50%; transform: translateX(-50%); z-index: 999; background: #333; color: #fff; padding: 10px 20px; border-radius: 20px; font-size: 14px; box-shadow: 0 4px 10px rgba(0,0,0,0.3); opacity: 0; transition: opacity 0.3s; pointer-events: none; }
+    .toast.show { opacity: 1; }
   </style>
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
 </head>
 <body>
-  <!-- Màn hình đăng nhập DUNUKHA -->
+  <div id="toast" class="toast"></div>
   <div id="login-screen">
-    <h1><span>D</span>unukha</h1>
-    <button onclick="fakeLogin()"><i class="fab fa-google" style="margin-right:10px;"></i> Đăng nhập Demo</button>
-    <button onclick="fakeLogin()" style="background:#1877f2; margin-top:5px;"><i class="fab fa-facebook"></i> Facebook Demo</button>
-    <p class="demo-hint">(Click để dùng ngay với dữ liệu giả)</p>
+    <h1 style="font-size:3rem; margin-bottom:20px;"><span style="color:#0095f6;">D</span>unukha</h1>
+    <button id="google-login"><i class="fab fa-google"></i> Đăng nhập Google</button>
+    <button id="facebook-login" style="background:#1877f2; margin-top:10px;"><i class="fab fa-facebook"></i> Facebook</button>
+    <p style="color: #888; font-size: 12px; margin-top: 15px;">Chúng tôi sử dụng Firebase Authentication để bảo mật tài khoản của bạn.</p>
   </div>
 
-  <!-- Ứng dụng chính DUNUKHA -->
   <div id="app">
     <div class="header">
-      <i class="fas fa-bars" id="menu-btn" style="font-size:22px;cursor:pointer;"></i>
+      <i class="fas fa-bars" id="menu-btn" style="font-size:22px; cursor:pointer;"></i>
       <div class="logo"><span>D</span>unukha</div>
       <div class="header-icons">
-        <i class="far fa-heart badge" id="btn-notif" data-count="2"></i>
+        <i class="far fa-heart badge" id="btn-notif" data-count="0"></i>
         <i class="far fa-paper-plane" id="btn-chat"></i>
       </div>
     </div>
 
-    <!-- Trang chủ -->
     <div class="page active" id="page-home">
       <div class="stories" id="stories-container"></div>
       <div id="feed-container"></div>
+      <div class="loader" id="feed-loader" style="display:none;">Đang tải thêm...</div>
     </div>
-
-    <!-- Khám phá -->
     <div class="page" id="page-explore">
-      <div style="padding:15px;"><input type="text" id="search-input" placeholder="Tìm kiếm người dùng..." style="width:100%;padding:10px;border-radius:10px;border:1px solid #dbdbdb;"></div>
-      <div id="explore-grid" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:3px;padding:0 5px;"></div>
+      <div style="padding:15px;"><input type="text" id="search-input" placeholder="Tìm kiếm người dùng..." style="width:100%; padding:10px; border-radius:10px; border:1px solid #dbdbdb; margin-bottom:10px;"></div>
+      <div id="explore-grid" style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:3px; padding:0 5px;"></div>
     </div>
-
-    <!-- Reels -->
     <div class="page" id="page-reels">
-      <div id="reels-container" style="height:100vh;overflow-y:scroll;scroll-snap-type:y mandatory;"></div>
+      <div id="reels-container" style="height:100vh; overflow-y:scroll; scroll-snap-type: y mandatory;"></div>
     </div>
-
-    <!-- Đăng bài -->
     <div class="page" id="page-post">
       <div style="padding:20px;">
-        <label style="display:block;margin-bottom:5px;">Chọn ảnh/video</label>
         <input type="file" id="post-files" accept="image/*,video/*" multiple>
-        <div id="preview-container" style="display:flex;flex-wrap:wrap;gap:5px;margin:10px 0;"></div>
-        <textarea id="post-caption" placeholder="Caption..." style="width:100%;padding:10px;border:1px solid #dbdbdb;border-radius:8px;"></textarea>
-        <button id="btn-submit-post" class="btn btn-primary" style="width:100%;margin-top:10px;">Đăng</button>
+        <div id="preview-container" style="display:flex; flex-wrap:wrap; gap:5px; margin:10px 0;"></div>
+        <textarea id="post-caption" placeholder="Caption..."></textarea>
+        <input type="text" id="post-hashtags" placeholder="#hashtags cách nhau dấu cách">
+        <button id="btn-submit-post" style="width:100%; background:#0095f6; color:white; border:none; padding:12px; border-radius:8px; font-weight:600;">Đăng</button>
       </div>
     </div>
-
-    <!-- Trang cá nhân -->
     <div class="page" id="page-profile">
       <div id="profile-content"></div>
     </div>
 
-    <!-- Thanh điều hướng dưới -->
     <div class="bottom-nav">
       <i class="fas fa-home active" data-page="home"></i>
       <i class="fas fa-search" data-page="explore"></i>
@@ -154,412 +125,706 @@
     </div>
   </div>
 
-  <!-- Sidebar -->
   <div class="overlay" id="menu-overlay"></div>
   <div class="side-menu" id="side-menu">
-    <i class="fas fa-times" id="close-menu" style="align-self:flex-end;font-size:24px;cursor:pointer;"></i>
-    <div class="menu-item" data-action="profile" style="padding:12px 0;cursor:pointer;">Trang cá nhân</div>
-    <div class="menu-item" data-action="edit-profile" style="padding:12px 0;cursor:pointer;">Chỉnh sửa hồ sơ</div>
-    <div class="menu-item" data-action="saved" style="padding:12px 0;cursor:pointer;">Đã lưu</div>
-    <div class="menu-item" data-action="logout" style="padding:12px 0;cursor:pointer;">Đăng xuất</div>
+    <i class="fas fa-times" id="close-menu" style="align-self:flex-end; font-size:24px;"></i>
+    <div class="menu-item" data-action="profile" style="padding:12px 0; cursor:pointer;">Trang cá nhân</div>
+    <div class="menu-item" data-action="edit-profile" style="padding:12px 0; cursor:pointer;">Chỉnh sửa hồ sơ</div>
+    <div class="menu-item" data-action="saved" style="padding:12px 0; cursor:pointer;">Đã lưu</div>
+    <div class="menu-item" data-action="report" style="padding:12px 0; cursor:pointer;">Báo cáo</div>
+    <div class="menu-item" data-action="logout" style="padding:12px 0; cursor:pointer;">Đăng xuất</div>
   </div>
 
-  <!-- Modal Story -->
   <div class="modal" id="story-modal">
-    <div class="modal-content" style="background:#000;color:#fff;text-align:center;width:100%;max-width:500px;height:80%;">
-      <img id="story-img" style="width:100%;height:100%;object-fit:contain;display:none;">
-      <video id="story-video" style="width:100%;height:100%;object-fit:contain;display:none;" controls autoplay></video>
-      <button id="btn-close-story" style="position:absolute;top:10px;right:10px;background:#fff;border:none;border-radius:50%;width:35px;height:35px;">✕</button>
+    <div class="modal-content" style="background:black; color:white; text-align:center; width:100%; max-width:500px; height:80%;">
+      <img id="story-img" style="width:100%; height:100%; object-fit:contain; display:none;">
+      <video id="story-video" style="width:100%; height:100%; object-fit:contain; display:none;" controls autoplay></video>
+      <button id="btn-close-story" style="position:absolute; top:10px; right:10px; background:white; color:black;">X</button>
     </div>
   </div>
 
-  <!-- Modal Chat -->
   <div class="modal" id="chat-modal">
-    <div class="modal-content" style="height:90%;display:flex;flex-direction:column;max-width:500px;">
-      <div style="display:flex;justify-content:space-between;align-items:center;">
+    <div class="modal-content" style="height:90%; display:flex; flex-direction:column; max-width:500px;">
+      <div style="display:flex; justify-content:space-between; align-items:center;">
         <h3 id="chat-username">Chat</h3>
-        <button id="btn-back-chat" style="background:none;border:none;color:#0095f6;font-size:16px;">Quay lại</button>
+        <button id="btn-back-chat" style="background:none; border:none; color:#0095f6; font-size:16px;"><i class="fas fa-arrow-left"></i> Quay lại</button>
       </div>
-      <div id="chat-list" style="flex:1;overflow-y:auto;"></div>
-      <div id="chat-window" style="display:none;flex:1;flex-direction:column;">
-        <div id="chat-messages" style="flex:1;overflow-y:auto;padding:10px;"></div>
-        <div style="display:flex;padding:10px;border-top:1px solid #dbdbdb;gap:5px;">
-          <input type="text" id="chat-input" placeholder="Nhắn tin..." style="flex:1;border:1px solid #dbdbdb;border-radius:20px;padding:8px 15px;">
-          <button id="btn-send-msg" style="background:#0095f6;color:#fff;border:none;border-radius:50%;width:36px;height:36px;"><i class="fas fa-paper-plane"></i></button>
+      <div id="chat-list" style="flex:1; overflow-y:auto;"></div>
+      <div id="chat-window" style="display:none; flex:1; flex-direction:column;">
+        <div id="chat-messages" style="flex:1; overflow-y:auto; padding:10px;"></div>
+        <div style="display:flex; padding:10px; border-top:1px solid #dbdbdb; gap:5px;">
+          <input type="text" id="chat-input" placeholder="Nhắn tin..." style="flex:1; border:1px solid #dbdbdb; border-radius:20px; padding:8px 15px;">
+          <input type="file" id="chat-file" accept="image/*,video/*" style="display:none;">
+          <button id="btn-attach" style="background:#f0f0f0; border:none; border-radius:50%; width:36px; height:36px;"><i class="fas fa-paperclip"></i></button>
+          <button id="btn-send-msg" style="background:#0095f6; color:white; border:none; border-radius:50%; width:36px; height:36px;"><i class="fas fa-paper-plane"></i></button>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- Modal Edit Profile -->
   <div class="modal" id="edit-modal">
     <div class="modal-content">
       <h3>Chỉnh sửa hồ sơ</h3>
       <input type="text" id="edit-username" placeholder="Username">
       <input type="text" id="edit-displayname" placeholder="Tên hiển thị">
       <textarea id="edit-bio" placeholder="Bio"></textarea>
+      <input type="url" id="edit-website" placeholder="Website">
+      <label>Avatar:</label>
+      <input type="file" id="edit-avatar-file" accept="image/*">
       <button id="btn-save-edit">Lưu</button>
     </div>
   </div>
 
-  <script>
-    // ======== DỮ LIỆU GIẢ (SẴN SÀNG DÙNG NGAY) ========
-    const DEMO_USERS = {
-      'user1': { displayName: 'Nguyễn Văn A', username: 'nguyenvana', photoURL: 'https://i.pravatar.cc/150?img=1', bio: 'Yêu đời, sống ảo', followers: { 'me': true }, following: {} },
-      'user2': { displayName: 'Trần Thị B', username: 'tranthib', photoURL: 'https://i.pravatar.cc/150?img=2', bio: 'Chụp ảnh xuyên đêm', followers: {}, following: {} },
-      'user3': { displayName: 'Lê Văn C', username: 'levanc', photoURL: 'https://i.pravatar.cc/150?img=3', bio: 'Game thủ chân chính', followers: {}, following: {} }
-    };
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { getAuth, signInWithPopup, GoogleAuthProvider, FacebookAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+    import { getFirestore, collection, addDoc, query, orderBy, onSnapshot, doc, updateDoc, arrayUnion, arrayRemove, serverTimestamp, where, getDocs, setDoc, getDoc, limit, startAfter, deleteDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-    let DEMO_POSTS = [
-      { id: 'p1', uid: 'user1', username: 'Nguyễn Văn A', userAvatar: 'https://i.pravatar.cc/150?img=1', caption: 'Chào buổi sáng mọi người ☀️', mediaUrls: ['https://picsum.photos/400/400?random=1'], likes: ['user2'], comments: ['Đẹp quá!', 'Chúc một ngày tốt lành'] },
-      { id: 'p2', uid: 'user2', username: 'Trần Thị B', userAvatar: 'https://i.pravatar.cc/150?img=2', caption: 'Mới đi du lịch về, đăng ảnh lưu niệm 😍', mediaUrls: ['https://picsum.photos/400/400?random=2'], likes: ['user1', 'me'], comments: ['Chụp đẹp quá!'] },
-      { id: 'p3', uid: 'user3', username: 'Lê Văn C', userAvatar: 'https://i.pravatar.cc/150?img=3', caption: 'Chiến thắng game thôi nào! 🎮', mediaUrls: ['https://picsum.photos/400/400?random=3'], likes: [], comments: ['Add friend nhé'] }
-    ];
+    const firebaseConfig = {
+      apiKey: "AIzaSyBJ3DAWyschGA6fM5VmBndLI0cGSaFF46U",
+      authDomain: "dunukhasite.firebaseapp.com",
+      projectId: "dunukhasite",
+      storageBucket: "dunukhasite.firebasestorage.app",
+      messagingSenderId: "841226738327",
+      appId: "1:841226738327:web:5e0192799adbe1179067d2"
+    };
+    const IMGBB_API_KEY = "d4802501f212046a8d74561bbdaf6dd3";
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+    const googleProvider = new GoogleAuthProvider();
+    const facebookProvider = new FacebookAuthProvider();
 
     let currentUser = null;
-    let currentChatUserId = null;
-    let allUsers = [];
+    let currentChatUser = null;
+    let unsubscribes = {};
+    let allUsersCache = null;
+    let lastPostDoc = null;
+    let isLoadingPosts = false;
 
-    // ======== HÀM ĐĂNG NHẬP GIẢ ========
-    window.fakeLogin = function() {
-      document.getElementById('login-screen').style.display = 'none';
-      document.getElementById('app').style.display = 'flex';
-      currentUser = { uid: 'me', displayName: 'Bạn', username: 'me_user', photoURL: 'https://i.pravatar.cc/150?img=4', email: 'me@demo.com' };
-      allUsers = Object.entries(DEMO_USERS).map(([id, data]) => ({ id, ...data }));
-      initApp();
-    };
-
-    // ======== KHỞI TẠO ỨNG DỤNG ========
-    function initApp() {
-      loadStories();
-      loadFeed();
-      loadExplore();
-      loadReels();
-      loadProfile('me');
-      setupNavigation();
+    // ---------- TOAST NOTIFICATION ----------
+    function showToast(msg, duration = 2000) {
+      const toast = document.getElementById('toast');
+      toast.textContent = msg;
+      toast.classList.add('show');
+      clearTimeout(toast._hideTimer);
+      toast._hideTimer = setTimeout(() => toast.classList.remove('show'), duration);
     }
 
-    // ======== CHUYỂN TRANG ========
-    function setupNavigation() {
-      document.querySelectorAll('.bottom-nav i').forEach(el => {
-        el.addEventListener('click', function() {
-          document.querySelectorAll('.bottom-nav i').forEach(i => i.classList.remove('active'));
-          this.classList.add('active');
-          const page = this.dataset.page;
-          document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-          document.getElementById('page-' + page).classList.add('active');
-          if (page === 'home') { loadStories(); loadFeed(); }
-          else if (page === 'explore') loadExplore();
-          else if (page === 'reels') loadReels();
-          else if (page === 'profile') loadProfile('me');
+    // ---------- AUTH ----------
+    document.getElementById('google-login').onclick = () => signInWithPopup(auth, googleProvider).catch(e => showToast('Lỗi đăng nhập: ' + e.message));
+    document.getElementById('facebook-login').onclick = () => signInWithPopup(auth, facebookProvider).catch(e => showToast('Lỗi đăng nhập: ' + e.message));
+
+    onAuthStateChanged(auth, async user => {
+      if (user) {
+        currentUser = user;
+        document.getElementById('login-screen').style.display = 'none';
+        document.getElementById('app').style.display = 'flex';
+        await ensureUserDoc(user);
+        navigateTo('home');
+        listenNotifications();
+        showToast('Đăng nhập thành công!');
+      } else {
+        currentUser = null;
+        document.getElementById('login-screen').style.display = 'flex';
+        document.getElementById('app').style.display = 'none';
+        Object.values(unsubscribes).forEach(u => u());
+        unsubscribes = {};
+      }
+    });
+
+    async function ensureUserDoc(user) {
+      const ref = doc(db, "users", user.uid);
+      if (!(await getDoc(ref)).exists()) {
+        await setDoc(ref, {
+          displayName: user.displayName || "Người dùng",
+          email: user.email,
+          photoURL: user.photoURL || "https://via.placeholder.com/150",
+          username: user.email.split('@')[0],
+          bio: "",
+          website: "",
+          followers: {},
+          following: {},
+          saved: [],
+          blocked: {},
+          createdAt: serverTimestamp()
         });
-      });
+      }
     }
 
-    // ======== STORIES ========
-    function loadStories() {
+    // ---------- IMGBB UPLOAD ----------
+    async function uploadImgBB(file) {
+      const fd = new FormData();
+      fd.append('image', file);
+      try {
+        const res = await fetch(`https://api.imgbb.com/1/upload?key=${IMGBB_API_KEY}`, { method: 'POST', body: fd });
+        const data = await res.json();
+        if (!data.success) throw new Error(data.error?.message || 'Upload lỗi');
+        return data.data.url;
+      } catch (e) {
+        console.error('ImgBB upload error:', e);
+        throw new Error('Không thể tải lên ảnh. Vui lòng kiểm tra kết nối hoặc thử lại.');
+      }
+    }
+
+    // ---------- NAVIGATION ----------
+    const pages = {
+      home: document.getElementById('page-home'),
+      explore: document.getElementById('page-explore'),
+      reels: document.getElementById('page-reels'),
+      post: document.getElementById('page-post'),
+      profile: document.getElementById('page-profile')
+    };
+    document.querySelectorAll('.bottom-nav i').forEach(icon => {
+      icon.addEventListener('click', () => navigateTo(icon.dataset.page));
+    });
+
+    function navigateTo(page) {
+      document.querySelectorAll('.bottom-nav i').forEach(i => i.classList.remove('active'));
+      document.querySelector(`[data-page="${page}"]`).classList.add('active');
+      Object.values(pages).forEach(p => p.classList.remove('active'));
+      pages[page].classList.add('active');
+
+      if (page === 'home') { loadStories(); loadFeed(); }
+      else if (page === 'explore') loadExplore();
+      else if (page === 'reels') loadReels();
+      else if (page === 'profile') loadProfile(currentUser.uid);
+    }
+
+    // ---------- STORIES ----------
+    async function loadStories() {
       const container = document.getElementById('stories-container');
       container.innerHTML = '';
-      const users = ['user1', 'user2', 'user3'];
-      users.forEach(uid => {
-        const u = DEMO_USERS[uid];
-        const div = document.createElement('div');
-        div.className = 'story-item';
-        div.innerHTML = `<div class="story-ring"><img src="${u.photoURL}"></div><span>${u.displayName}</span>`;
-        div.onclick = () => viewStory([{ mediaUrl: 'https://picsum.photos/400/600?random='+Math.random(), type: 'image' }]);
-        container.appendChild(div);
-      });
-      // Story của bạn
-      const me = document.createElement('div');
-      me.className = 'story-item';
-      me.innerHTML = `<div class="story-ring" style="background:#ddd;display:flex;align-items:center;justify-content:center;"><i class="fas fa-plus" style="color:#0095f6;"></i></div><span>Bạn</span>`;
-      me.onclick = () => navigateTo('post');
-      container.appendChild(me);
+      const now = new Date();
+      try {
+        const snap = await getDocs(query(collection(db, "stories"), orderBy("expiresAt", "desc")));
+        const users = {};
+        snap.forEach(doc => {
+          const d = doc.data();
+          if (d.expiresAt.toDate() > now) {
+            if (!users[d.uid]) users[d.uid] = { ...d, stories: [] };
+            users[d.uid].stories.push(d);
+          }
+        });
+        for (const uid in users) {
+          const u = users[uid];
+          const userDoc = await getDoc(doc(db, "users", uid));
+          if (!userDoc.exists()) continue;
+          const userData = userDoc.data();
+          const div = document.createElement('div');
+          div.className = 'story-item';
+          const thumb = u.stories[0].mediaType === 'video' ?
+            `<video src="${u.stories[0].mediaUrl}" muted autoplay loop></video>` :
+            `<img src="${u.stories[0].mediaUrl}">`;
+          div.innerHTML = `<div class="story-ring">${thumb}</div><span>${userData.displayName}</span>`;
+          div.onclick = () => viewStory(u.stories);
+          container.appendChild(div);
+        }
+      } catch (e) {
+        console.error('Lỗi tải stories:', e);
+      }
+      const myDiv = document.createElement('div');
+      myDiv.className = 'story-item';
+      myDiv.innerHTML = `<div class="story-ring" style="background:#ddd; display:flex; align-items:center; justify-content:center;"><i class="fas fa-plus" style="color:#0095f6;"></i></div><span>Bạn</span>`;
+      myDiv.onclick = () => navigateTo('post');
+      container.appendChild(myDiv);
     }
 
     function viewStory(stories) {
+      let index = 0;
       const modal = document.getElementById('story-modal');
       modal.style.display = 'flex';
       const img = document.getElementById('story-img');
       const video = document.getElementById('story-video');
-      const s = stories[0];
-      if (s.type === 'video') {
-        video.src = s.mediaUrl; video.style.display = 'block'; video.play();
-        img.style.display = 'none';
-      } else {
-        img.src = s.mediaUrl; img.style.display = 'block';
-        video.style.display = 'none';
-      }
-      document.getElementById('btn-close-story').onclick = () => modal.style.display = 'none';
+      const show = () => {
+        const s = stories[index];
+        if (s.mediaType === 'video') {
+          video.src = s.mediaUrl; video.style.display = 'block'; video.play();
+          img.style.display = 'none';
+        } else {
+          img.src = s.mediaUrl; img.style.display = 'block';
+          video.style.display = 'none';
+        }
+      };
+      show();
+      const timer = setInterval(() => {
+        index++;
+        if (index >= stories.length) { clearInterval(timer); modal.style.display = 'none'; }
+        else show();
+      }, 5000);
+      document.getElementById('btn-close-story').onclick = () => { clearInterval(timer); modal.style.display = 'none'; };
     }
 
-    // ======== FEED ========
+    // ---------- FEED ----------
     function loadFeed() {
-      const container = document.getElementById('feed-container');
-      container.innerHTML = '';
-      DEMO_POSTS.forEach(post => renderPost(post, container));
+      document.getElementById('feed-container').innerHTML = '';
+      lastPostDoc = null;
+      fetchPosts();
     }
 
-    function renderPost(post, container) {
+    async function fetchPosts() {
+      if (isLoadingPosts) return;
+      isLoadingPosts = true;
+      document.getElementById('feed-loader').style.display = 'block';
+      try {
+        const q = lastPostDoc ?
+          query(collection(db, "posts"), orderBy("createdAt", "desc"), startAfter(lastPostDoc), limit(5)) :
+          query(collection(db, "posts"), orderBy("createdAt", "desc"), limit(5));
+        const snap = await getDocs(q);
+        if (!snap.empty) {
+          snap.forEach(doc => { renderPost(doc.data(), doc.id); lastPostDoc = doc; });
+        } else {
+          if (!lastPostDoc) document.getElementById('feed-container').innerHTML = '<div style="text-align:center;padding:20px;color:#8e8e8e;">Chưa có bài viết nào. Hãy là người đầu tiên!</div>';
+          else document.getElementById('feed-loader').textContent = 'Đã hết bài viết';
+        }
+      } catch (e) {
+        console.error('Lỗi tải feed:', e);
+        showToast('Lỗi tải bài viết');
+      }
+      isLoadingPosts = false;
+      document.getElementById('feed-loader').style.display = 'none';
+    }
+
+    document.getElementById('page-home').addEventListener('scroll', function() {
+      if (this.scrollHeight - this.scrollTop - this.clientHeight < 100 && !isLoadingPosts) fetchPosts();
+    });
+
+    function renderPost(post, id) {
+      const liked = post.likes?.includes(currentUser.uid);
       const div = document.createElement('div');
       div.className = 'post';
-      const liked = post.likes.includes('me');
+      const media = post.mediaUrls?.map(url =>
+        url.match(/\.(mp4|webm|ogg)$/i) ? `<video class="post-media" src="${url}" controls preload="metadata"></video>` : `<img class="post-media" src="${url}" loading="lazy">`
+      ).join('') || `<img class="post-media" src="${post.mediaUrl || 'https://via.placeholder.com/400'}">`;
+      
+      // Xử lý xóa bài viết
+      const isOwner = post.uid === currentUser.uid;
+      const deleteBtn = isOwner ? `<i class="fas fa-trash" style="float:right; color:#ed4956; cursor:pointer;" data-id="${id}"></i>` : '';
+      
       div.innerHTML = `
-        <div class="post-header" onclick="loadProfile('${post.uid}')">
-          <img src="${post.userAvatar}">
+        <div class="post-header" data-uid="${post.uid}">
+          <img src="${post.userAvatar || 'https://via.placeholder.com/32'}">
           <span class="username">${post.username}</span>
+          ${deleteBtn}
         </div>
-        <img class="post-media" src="${post.mediaUrls[0]}" loading="lazy">
+        <div>${media}</div>
         <div class="post-actions">
-          <i class="${liked ? 'fas fa-heart liked' : 'far fa-heart'}" data-id="${post.id}"></i>
+          <i class="${liked ? 'fas fa-heart liked' : 'far fa-heart'}" data-id="${id}"></i>
           <i class="far fa-comment"></i>
-          <i class="far fa-paper-plane share-btn"></i>
-          <i class="far fa-bookmark save-btn"></i>
+          <i class="far fa-paper-plane share-btn" data-id="${id}"></i>
+          <i class="far fa-bookmark save-btn" data-id="${id}"></i>
         </div>
-        <div class="post-likes">${post.likes.length} thích</div>
-        <div class="post-caption"><span class="username">${post.username}</span> ${post.caption}</div>
+        <div class="post-likes">${post.likes?.length || 0} thích</div>
+        <div class="post-caption"><span class="username">${post.username}</span> ${post.caption || ''} ${post.hashtags?.map(t=>'#'+t).join(' ')||''}</div>
         <div class="post-comment-input">
-          <input placeholder="Bình luận..." id="comment-${post.id}">
-          <button class="send-comment" data-id="${post.id}">Đăng</button>
+          <input placeholder="Bình luận..." id="comment-${id}">
+          <button class="send-comment" data-id="${id}">Đăng</button>
         </div>
       `;
-      container.appendChild(div);
+      document.getElementById('feed-container').appendChild(div);
 
-      // Like
-      div.querySelector('[data-id]').onclick = function() {
-        const id = this.dataset.id;
-        const idx = DEMO_POSTS.findIndex(p => p.id === id);
-        if (idx === -1) return;
-        if (DEMO_POSTS[idx].likes.includes('me')) {
-          DEMO_POSTS[idx].likes = DEMO_POSTS[idx].likes.filter(u => u !== 'me');
-          this.classList.remove('liked');
-          this.classList.add('far');
-          this.classList.remove('fas');
-        } else {
-          DEMO_POSTS[idx].likes.push('me');
-          this.classList.add('liked');
-          this.classList.remove('far');
-          this.classList.add('fas');
-        }
-        div.querySelector('.post-likes').textContent = DEMO_POSTS[idx].likes.length + ' thích';
-        showToast('Đã like!');
-      };
-
-      // Comment
-      div.querySelector('.send-comment').onclick = function() {
-        const input = document.getElementById('comment-' + this.dataset.id);
-        const text = input.value.trim();
-        if (!text) return;
-        showToast('Bình luận: "' + text + '"');
-        input.value = '';
-      };
-
-      // Share
-      div.querySelector('.share-btn').onclick = function() {
-        if (navigator.share) navigator.share({ title: 'Dunukha', text: post.caption, url: post.mediaUrls[0] });
-        else alert('Chia sẻ link: ' + post.mediaUrls[0]);
-      };
-
-      // Save
-      div.querySelector('.save-btn').onclick = function() {
-        this.classList.toggle('fas');
-        this.classList.toggle('far');
-        showToast('Đã lưu!');
-      };
-    }
-
-    // ======== KHÁM PHÁ ========
-    function loadExplore() {
-      const grid = document.getElementById('explore-grid');
-      grid.innerHTML = '';
-      DEMO_POSTS.slice(0,6).forEach(p => {
-        const img = document.createElement('img');
-        img.src = p.mediaUrls[0];
-        img.style.width = '100%'; img.style.aspectRatio = '1/1'; img.style.objectFit = 'cover';
-        img.onclick = () => showToast('Bài viết: ' + p.caption);
-        grid.appendChild(img);
-      });
-    }
-
-    // ======== REELS ========
-    function loadReels() {
-      const container = document.getElementById('reels-container');
-      container.innerHTML = '';
-      // Video demo từ W3Schools
-      const videoUrls = [
-        'https://www.w3schools.com/html/mov_bbb.mp4',
-        'https://www.w3schools.com/html/movie.mp4'
-      ];
-      videoUrls.forEach((url, i) => {
-        const div = document.createElement('div');
-        div.className = 'reel-item';
-        div.innerHTML = `<video src="${url}" controls loop autoplay muted></video><div class="reel-info">Reel ${i+1} - <b>Dunukha</b></div>`;
-        container.appendChild(div);
-      });
-    }
-
-    // ======== PROFILE ========
-    function loadProfile(uid) {
-      const container = document.getElementById('profile-content');
-      const user = uid === 'me' ? 
-        { ...currentUser, displayName: 'Bạn', username: 'me_user', photoURL: 'https://i.pravatar.cc/150?img=4', followers: { 'user1': true }, following: { 'user2': true, 'user3': true }, bio: 'Chia sẻ cuộc sống' } : 
-        DEMO_USERS[uid];
-      
-      if (!user) { container.innerHTML = 'Không tìm thấy'; return; }
-      const isMe = uid === 'me';
-      const isFollowing = user.followers && user.followers['me'];
-      
-      container.innerHTML = `
-        <div class="profile-header">
-          <img class="profile-avatar" src="${user.photoURL}">
-          <div class="profile-info">
-            <h2>${user.displayName}</h2>
-            <p>@${user.username}</p>
-            <div class="profile-stats">
-              <div><span>${Object.keys(user.followers || {}).length}</span> followers</div>
-              <div><span>${Object.keys(user.following || {}).length}</span> following</div>
-            </div>
-            <p class="profile-bio">${user.bio || 'Chưa có bio'}</p>
-            <div style="margin-top:10px;display:flex;gap:8px;">
-              ${isMe ? '<button class="btn" id="edit-profile-btn">Chỉnh sửa</button>' :
-                `<button class="btn btn-primary" id="follow-btn">${isFollowing ? 'Bỏ theo dõi' : 'Theo dõi'}</button>
-                 <button class="btn" id="block-btn" style="background:#ed4956;color:#fff;">Chặn</button>`}
-            </div>
-          </div>
-        </div>
-        <div class="profile-grid">
-          ${DEMO_POSTS.filter(p => p.uid === uid).map(p => `<img src="${p.mediaUrls[0]}" onclick="showToast('${p.caption}')">`).join('')}
-        </div>
-      `;
-      
-      if (isMe) {
-        document.getElementById('edit-profile-btn').onclick = () => {
-          document.getElementById('edit-modal').style.display = 'flex';
-          document.getElementById('edit-username').value = user.username;
-          document.getElementById('edit-displayname').value = user.displayName;
-          document.getElementById('edit-bio').value = user.bio || '';
-        };
-      } else {
-        document.getElementById('follow-btn').onclick = function() {
-          const isFollowing = this.textContent === 'Bỏ theo dõi';
-          this.textContent = isFollowing ? 'Theo dõi' : 'Bỏ theo dõi';
-          this.classList.toggle('btn-primary');
-          showToast(isFollowing ? 'Đã bỏ theo dõi' : 'Đã theo dõi');
-        };
-        document.getElementById('block-btn').onclick = () => {
-          if (confirm('Chặn người này?')) showToast('Đã chặn');
+      // Delete post
+      if (isOwner) {
+        div.querySelector('.fa-trash').onclick = async () => {
+          if (confirm('Bạn có chắc muốn xóa bài viết này?')) {
+            try {
+              await deleteDoc(doc(db, "posts", id));
+              div.remove();
+              showToast('Đã xóa bài viết');
+            } catch (e) {
+              showToast('Lỗi khi xóa bài viết');
+            }
+          }
         };
       }
+
+      // Click vào media để xem toàn màn hình
+      div.querySelector('.post-media').onclick = function() {
+        const src = this.src || this.querySelector('source')?.src;
+        if (src) {
+          const w = window.open('', '_blank');
+          if (w) {
+            w.document.write(`<img src="${src}" style="max-width:100%;max-height:100%;">`);
+          }
+        }
+      };
+
+      // Các sự kiện khác (like, comment, share, save)
+      div.querySelector('.post-header').onclick = () => loadProfile(post.uid);
+      div.querySelector('[data-id]').onclick = async (e) => {
+        // Nếu là nút like thì dùng logic dưới, nếu là nút share thì xử lý share
+        if (e.target.classList.contains('fa-heart') || e.target.classList.contains('fa-heart')) {
+           const ref = doc(db, "posts", id);
+           if (liked) await updateDoc(ref, { likes: arrayRemove(currentUser.uid) });
+           else {
+             await updateDoc(ref, { likes: arrayUnion(currentUser.uid) });
+             if (post.uid !== currentUser.uid) addNotification(post.uid, 'like', `${currentUser.displayName} đã thích bài của bạn`);
+           }
+        }
+      };
+      div.querySelector('.send-comment').onclick = async () => {
+        const input = document.getElementById(`comment-${id}`);
+        const text = input.value.trim();
+        if (!text) return;
+        await updateDoc(doc(db, "posts", id), { comments: arrayUnion({ uid: currentUser.uid, username: currentUser.displayName, text, createdAt: new Date().toISOString() }) });
+        if (post.uid !== currentUser.uid) addNotification(post.uid, 'comment', `${currentUser.displayName}: ${text}`);
+        input.value = '';
+        showToast('Đã bình luận');
+      };
+      div.querySelector('.save-btn').onclick = async () => {
+        const userRef = doc(db, "users", currentUser.uid);
+        const snap = await getDoc(userRef);
+        const saved = snap.data().saved || [];
+        if (saved.includes(id)) {
+          await updateDoc(userRef, { saved: arrayRemove(id) });
+          showToast('Đã bỏ lưu');
+        } else {
+          await updateDoc(userRef, { saved: arrayUnion(id) });
+          showToast('Đã lưu bài viết');
+        }
+      };
+      div.querySelector('.share-btn').onclick = () => {
+        const url = post.mediaUrls?.[0] || post.mediaUrl;
+        if (navigator.share) navigator.share({ title: 'Dunukha', text: post.caption, url });
+        else prompt("Copy link:", url);
+      };
     }
 
-    // ======== ĐĂNG BÀI ========
+    // ---------- POST UPLOAD ----------
     document.getElementById('post-files').onchange = function() {
       const preview = document.getElementById('preview-container');
       preview.innerHTML = '';
       for (const file of this.files) {
         const reader = new FileReader();
-        reader.onload = e => {
+        reader.onload = (e) => {
           const el = file.type.startsWith('video') ? document.createElement('video') : document.createElement('img');
           el.src = e.target.result;
-          el.style.width = '80px'; el.style.height = '80px'; el.style.objectFit = 'cover';
+          el.style.width = '100px'; el.style.height = '100px'; el.style.objectFit = 'cover';
+          el.style.borderRadius = '8px';
           preview.appendChild(el);
         };
         reader.readAsDataURL(file);
       }
     };
 
-    document.getElementById('btn-submit-post').onclick = function() {
+    document.getElementById('btn-submit-post').onclick = async () => {
       const files = document.getElementById('post-files').files;
       const caption = document.getElementById('post-caption').value.trim();
-      if (files.length === 0) { alert('Chọn ảnh/video'); return; }
-      // Thêm bài viết mới vào đầu feed
-      const newPost = {
-        id: 'newpost_' + Date.now(),
-        uid: 'me',
-        username: 'Bạn',
-        userAvatar: 'https://i.pravatar.cc/150?img=4',
-        caption: caption || 'Bài viết mới',
-        mediaUrls: [URL.createObjectURL(files[0])],
-        likes: [],
-        comments: []
-      };
-      DEMO_POSTS.unshift(newPost);
-      document.getElementById('post-files').value = '';
-      document.getElementById('preview-container').innerHTML = '';
-      document.getElementById('post-caption').value = '';
-      loadFeed();
-      showToast('Đã đăng bài!');
+      const hashtags = document.getElementById('post-hashtags').value.split(' ').filter(t => t.startsWith('#')).map(t => t.slice(1));
+      if (!files.length) return showToast("Vui lòng chọn ảnh/video");
+      
+      document.getElementById('btn-submit-post').disabled = true;
+      document.getElementById('btn-submit-post').textContent = 'Đang đăng...';
+      
+      try {
+        const urls = [];
+        for (const file of files) {
+          const url = await uploadImgBB(file);
+          urls.push(url);
+        }
+        const userData = (await getDoc(doc(db, "users", currentUser.uid))).data();
+        await addDoc(collection(db, "posts"), {
+          uid: currentUser.uid,
+          username: userData.displayName,
+          userAvatar: userData.photoURL,
+          mediaUrls: urls,
+          mediaType: files[0].type.startsWith('video') ? 'video' : 'image',
+          caption, hashtags,
+          likes: [], comments: [],
+          createdAt: serverTimestamp()
+        });
+        document.getElementById('post-files').value = '';
+        document.getElementById('preview-container').innerHTML = '';
+        document.getElementById('post-caption').value = '';
+        document.getElementById('post-hashtags').value = '';
+        showToast("Đã đăng bài!");
+        navigateTo('home');
+      } catch (e) {
+        showToast('Lỗi đăng bài: ' + e.message);
+      } finally {
+        document.getElementById('btn-submit-post').disabled = false;
+        document.getElementById('btn-submit-post').textContent = 'Đăng';
+      }
     };
 
-    // ======== CHAT ========
-    document.getElementById('btn-chat').onclick = () => {
-      document.getElementById('chat-modal').style.display = 'flex';
-      loadChatList();
-    };
+    // ---------- REELS ----------
+    async function loadReels() {
+      const container = document.getElementById('reels-container');
+      container.innerHTML = '';
+      try {
+        const snap = await getDocs(query(collection(db, "posts"), where("mediaType", "==", "video"), orderBy("createdAt", "desc"), limit(10)));
+        snap.forEach(doc => {
+          const d = doc.data();
+          const div = document.createElement('div');
+          div.className = 'reel-item';
+          div.innerHTML = `<video src="${d.mediaUrls[0]}" controls preload="metadata"></video><div class="reel-info">${d.username}: ${d.caption}</div>`;
+          container.appendChild(div);
+        });
+      } catch (e) {
+        console.error('Lỗi tải reels:', e);
+      }
+    }
 
-    function loadChatList() {
-      const list = document.getElementById('chat-list');
-      list.style.display = 'block';
-      document.getElementById('chat-window').style.display = 'none';
-      list.innerHTML = '';
-      Object.entries(DEMO_USERS).forEach(([uid, data]) => {
-        const div = document.createElement('div');
-        div.style.cssText = 'display:flex;align-items:center;gap:10px;padding:10px;cursor:pointer;border-bottom:1px solid #efefef;';
-        div.innerHTML = `<img src="${data.photoURL}" style="width:40px;height:40px;border-radius:50%;"><span>${data.displayName}</span>`;
-        div.onclick = () => openChat(uid, data.displayName);
-        list.appendChild(div);
+    // ---------- EXPLORE ----------
+    async function loadExplore() {
+      const grid = document.getElementById('explore-grid');
+      grid.innerHTML = '';
+      try {
+        const snap = await getDocs(query(collection(db, "posts"), orderBy("createdAt", "desc"), limit(12)));
+        snap.forEach(doc => {
+          const p = doc.data();
+          const el = document.createElement('img');
+          el.src = p.mediaUrls?.[0] || p.mediaUrl;
+          el.style.width = '100%'; el.style.aspectRatio = '1/1'; el.style.objectFit = 'cover';
+          el.onclick = () => loadProfile(p.uid);
+          grid.appendChild(el);
+        });
+      } catch (e) {
+        console.error('Lỗi tải explore:', e);
+      }
+      document.getElementById('search-input').value = '';
+    }
+
+    // ---------- PROFILE ----------
+    async function loadProfile(uid) {
+      const container = document.getElementById('profile-content');
+      container.innerHTML = 'Đang tải...';
+      const ref = doc(db, "users", uid);
+      const snap = await getDoc(ref);
+      if (!snap.exists()) { container.innerHTML = 'Người dùng không tồn tại'; return; }
+      const data = snap.data();
+      const isMe = uid === currentUser.uid;
+      const isFollowing = data.followers?.[currentUser.uid];
+      container.innerHTML = `
+        <div class="profile-header">
+          <img class="profile-avatar" src="${data.photoURL || 'https://via.placeholder.com/150'}">
+          <div class="profile-info">
+            <h2>${data.displayName}</h2>
+            <p>@${data.username}</p>
+            <div class="profile-stats">
+              <div><span>${Object.keys(data.followers||{}).length}</span> followers</div>
+              <div><span>${Object.keys(data.following||{}).length}</span> following</div>
+              <div><span>${(data.saved||[]).length}</span> đã lưu</div>
+            </div>
+            <p>${data.bio || ''}</p>
+            <a href="${data.website || '#'}" target="_blank">${data.website || ''}</a>
+            <div style="margin-top:10px;">
+              ${isMe ? '<button class="btn" id="edit-profile-btn">Chỉnh sửa</button>' :
+                `<button class="btn btn-primary" id="follow-btn">${isFollowing ? 'Bỏ theo dõi' : 'Theo dõi'}</button>
+                <button class="btn" id="block-btn" style="background:#ed4956; color:white;">Chặn</button>
+                <button class="btn" id="report-btn">Báo cáo</button>`}
+            </div>
+          </div>
+        </div>
+        <div class="profile-grid" id="profile-grid"></div>
+      `;
+      try {
+        const postsQ = query(collection(db, "posts"), where("uid", "==", uid), orderBy("createdAt", "desc"), limit(12));
+        const postsSnap = await getDocs(postsQ);
+        const grid = document.getElementById('profile-grid');
+        grid.innerHTML = '';
+        postsSnap.forEach(doc => {
+          const d = doc.data();
+          const el = d.mediaType === 'video' ? document.createElement('video') : document.createElement('img');
+          el.src = d.mediaUrls?.[0] || d.mediaUrl;
+          el.className = 'profile-post';
+          el.onclick = () => alert(d.caption);
+          grid.appendChild(el);
+        });
+        if (grid.innerHTML === '') {
+          grid.innerHTML = '<div style="grid-column:1/-1; text-align:center; color:#8e8e8e; padding:20px;">Chưa có bài viết nào</div>';
+        }
+      } catch (e) {
+        console.error('Lỗi tải profile posts:', e);
+      }
+      if (isMe) document.getElementById('edit-profile-btn').onclick = openEditProfile;
+      else {
+        document.getElementById('follow-btn').onclick = () => toggleFollow(uid);
+        document.getElementById('block-btn').onclick = () => blockUser(uid);
+        document.getElementById('report-btn').onclick = () => reportUser(uid);
+      }
+    }
+
+    function openEditProfile() {
+      document.getElementById('edit-modal').style.display = 'flex';
+      getDoc(doc(db, "users", currentUser.uid)).then(snap => {
+        const d = snap.data();
+        document.getElementById('edit-username').value = d.username || '';
+        document.getElementById('edit-displayname').value = d.displayName || '';
+        document.getElementById('edit-bio').value = d.bio || '';
+        document.getElementById('edit-website').value = d.website || '';
       });
+    }
+
+    document.getElementById('btn-save-edit').onclick = async () => {
+      const updates = {
+        username: document.getElementById('edit-username').value.trim(),
+        displayName: document.getElementById('edit-displayname').value.trim(),
+        bio: document.getElementById('edit-bio').value.trim(),
+        website: document.getElementById('edit-website').value.trim()
+      };
+      const file = document.getElementById('edit-avatar-file').files[0];
+      if (file) {
+        try {
+          updates.photoURL = await uploadImgBB(file);
+        } catch (e) {
+          return showToast('Lỗi upload avatar: ' + e.message);
+        }
+      }
+      await updateDoc(doc(db, "users", currentUser.uid), updates);
+      document.getElementById('edit-modal').style.display = 'none';
+      loadProfile(currentUser.uid);
+      showToast('Đã cập nhật hồ sơ');
+    };
+
+    async function toggleFollow(uid) {
+      const me = doc(db, "users", currentUser.uid);
+      const target = doc(db, "users", uid);
+      const snap = await getDoc(target);
+      const isFollow = snap.data().followers?.[currentUser.uid];
+      if (isFollow) {
+        await updateDoc(target, { [`followers.${currentUser.uid}`]: false });
+        await updateDoc(me, { [`following.${uid}`]: false });
+        showToast('Đã bỏ theo dõi');
+      } else {
+        await updateDoc(target, { [`followers.${currentUser.uid}`]: true });
+        await updateDoc(me, { [`following.${uid}`]: true });
+        addNotification(uid, 'follow', `${currentUser.displayName} theo dõi bạn`);
+        showToast('Đã theo dõi');
+      }
+      loadProfile(uid);
+    }
+
+    async function blockUser(uid) {
+      if (!confirm("Chặn người này?")) return;
+      await updateDoc(doc(db, "users", currentUser.uid), { [`blocked.${uid}`]: true });
+      showToast("Đã chặn");
+    }
+
+    async function reportUser(uid) {
+      const reason = prompt("Lý do báo cáo:");
+      if (!reason) return;
+      await addDoc(collection(db, "reports"), { reporter: currentUser.uid, target: uid, reason, createdAt: serverTimestamp() });
+      showToast("Đã gửi báo cáo");
+    }
+
+    // ---------- SEARCH ----------
+    document.getElementById('search-input').addEventListener('input', async (e) => {
+      const kw = e.target.value.trim().toLowerCase();
+      const grid = document.getElementById('explore-grid');
+      if (kw) {
+        if (!allUsersCache) {
+          const snap = await getDocs(collection(db, "users"));
+          allUsersCache = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+        }
+        const filtered = allUsersCache.filter(u => u.displayName?.toLowerCase().includes(kw) || u.username?.toLowerCase().includes(kw));
+        grid.innerHTML = '';
+        filtered.forEach(u => {
+          const div = document.createElement('div');
+          div.style.display = 'flex'; div.style.alignItems = 'center'; div.style.padding = '10px';
+          div.innerHTML = `<img src="${u.photoURL || 'https://via.placeholder.com/44'}" style="width:44px;height:44px;border-radius:50%; margin-right:10px;"><span>${u.displayName}</span>`;
+          div.onclick = () => loadProfile(u.id);
+          grid.appendChild(div);
+        });
+      } else {
+        loadExplore();
+      }
+    });
+
+    // ---------- CHAT ----------
+    document.getElementById('btn-chat').onclick = () => { document.getElementById('chat-modal').style.display = 'flex'; loadChatList(); };
+
+    async function loadChatList() {
+      document.getElementById('chat-list').style.display = 'block';
+      document.getElementById('chat-window').style.display = 'none';
+      const snap = await getDoc(doc(db, "users", currentUser.uid));
+      const following = snap.data()?.following || {};
+      const list = document.getElementById('chat-list');
+      list.innerHTML = '';
+      for (const uid in following) {
+        if (!following[uid]) continue;
+        const u = await getDoc(doc(db, "users", uid));
+        if (!u.exists()) continue;
+        const d = u.data();
+        const div = document.createElement('div');
+        div.className = 'user-item';
+        div.style.cssText = 'display:flex; align-items:center; gap:10px; padding:10px; border-bottom:1px solid #efefef;';
+        div.innerHTML = `<img src="${d.photoURL || 'https://via.placeholder.com/44'}" style="width:44px;height:44px;border-radius:50%;"><span>${d.displayName}</span>`;
+        div.onclick = () => openChat(uid, d.displayName);
+        list.appendChild(div);
+      }
     }
 
     function openChat(uid, name) {
-      currentChatUserId = uid;
+      currentChatUser = uid;
       document.getElementById('chat-list').style.display = 'none';
       document.getElementById('chat-window').style.display = 'flex';
       document.getElementById('chat-username').textContent = name;
-      document.getElementById('chat-messages').innerHTML = '';
-      // Tin nhắn giả lập
-      const msgs = [
-        { from: uid, text: 'Chào bạn! Hôm nay thế nào?' },
-        { from: 'me', text: 'Mình khỏe, cảm ơn bạn!' },
-        { from: uid, text: 'Có gì mới không?' }
-      ];
-      msgs.forEach(m => {
-        const row = document.createElement('div');
-        row.className = `message-row ${m.from === 'me' ? 'sent' : 'received'}`;
-        row.innerHTML = `<div class="message-bubble">${m.text}</div>`;
-        document.getElementById('chat-messages').appendChild(row);
+      loadMessages();
+    }
+
+    function loadMessages() {
+      const chatId = [currentUser.uid, currentChatUser].sort().join('_');
+      if (unsubscribes[chatId]) unsubscribes[chatId]();
+      const q = query(collection(db, "messages"), where("chatId", "==", chatId), orderBy("createdAt"));
+      unsubscribes[chatId] = onSnapshot(q, snap => {
+        const container = document.getElementById('chat-messages');
+        container.innerHTML = '';
+        snap.forEach(doc => {
+          const d = doc.data();
+          const row = document.createElement('div');
+          row.className = `message-row ${d.from === currentUser.uid ? 'sent' : 'received'}`;
+          row.innerHTML = `
+            <div class="message-bubble">
+              ${d.type === 'image' ? `<img src="${d.text}" style="max-width:200px; border-radius:8px;">` :
+                d.type === 'video' ? `<video src="${d.text}" controls style="max-width:200px;"></video>` : d.text}
+            </div>`;
+          container.appendChild(row);
+        });
+        container.scrollTop = container.scrollHeight;
       });
     }
 
-    document.getElementById('btn-send-msg').onclick = function() {
+    document.getElementById('btn-send-msg').onclick = async () => {
       const input = document.getElementById('chat-input');
       const text = input.value.trim();
-      if (!text || !currentChatUserId) return;
-      const row = document.createElement('div');
-      row.className = 'message-row sent';
-      row.innerHTML = `<div class="message-bubble">${text}</div>`;
-      document.getElementById('chat-messages').appendChild(row);
+      if (!text || !currentChatUser) return;
+      const chatId = [currentUser.uid, currentChatUser].sort().join('_');
+      await addDoc(collection(db, "messages"), { chatId, from: currentUser.uid, to: currentChatUser, text, type: 'text', createdAt: serverTimestamp() });
       input.value = '';
-      // Giả lập người kia trả lời sau 1 giây
-      setTimeout(() => {
-        const reply = document.createElement('div');
-        reply.className = 'message-row received';
-        reply.innerHTML = `<div class="message-bubble">OK! Cảm ơn bạn đã nhắn.</div>`;
-        document.getElementById('chat-messages').appendChild(reply);
-      }, 1000);
     };
 
-    document.getElementById('btn-back-chat').onclick = () => {
-      document.getElementById('chat-modal').style.display = 'none';
+    document.getElementById('btn-attach').onclick = () => document.getElementById('chat-file').click();
+    document.getElementById('chat-file').onchange = async function() {
+      const file = this.files[0];
+      if (!file || !currentChatUser) return;
+      try {
+        const url = await uploadImgBB(file);
+        const type = file.type.startsWith('video') ? 'video' : 'image';
+        const chatId = [currentUser.uid, currentChatUser].sort().join('_');
+        await addDoc(collection(db, "messages"), { chatId, from: currentUser.uid, to: currentChatUser, text: url, type, createdAt: serverTimestamp() });
+        showToast('Đã gửi ảnh/video');
+      } catch (e) {
+        showToast('Lỗi gửi file: ' + e.message);
+      }
     };
 
-    // ======== THÔNG BÁO ========
-    document.getElementById('btn-notif').onclick = () => {
-      document.getElementById('btn-notif').dataset.count = '0';
-      showToast('Bạn có 2 thông báo mới (demo)');
-    };
+    // ---------- NOTIFICATIONS ----------
+    function listenNotifications() {
+      const q = query(collection(db, "notifications"), where("to", "==", currentUser.uid), orderBy("createdAt", "desc"), limit(20));
+      unsubscribes['notifications'] = onSnapshot(q, snap => {
+        let count = 0;
+        snap.forEach(doc => { if (!doc.data().read) count++; });
+        document.getElementById('btn-notif').dataset.count = count;
+      });
+    }
 
-    // ======== SIDEBAR ========
+    async function addNotification(to, type, message) {
+      await addDoc(collection(db, "notifications"), { to, from: currentUser.uid, type, message, read: false, createdAt: serverTimestamp() });
+    }
+
+    // ---------- SIDE MENU ----------
     document.getElementById('menu-btn').onclick = () => {
       document.getElementById('side-menu').classList.add('open');
       document.getElementById('menu-overlay').classList.add('show');
@@ -572,40 +837,55 @@
       item.onclick = () => {
         const act = item.dataset.action;
         if (act === 'profile') navigateTo('profile');
-        else if (act === 'edit-profile') document.getElementById('edit-modal').style.display = 'flex';
-        else if (act === 'logout') { document.getElementById('app').style.display = 'none'; document.getElementById('login-screen').style.display = 'flex'; }
-        else if (act === 'saved') showToast('Tính năng đang phát triển');
+        else if (act === 'edit-profile') openEditProfile();
+        else if (act === 'logout') { 
+          if (confirm('Bạn có chắc muốn đăng xuất?')) {
+            signOut(auth);
+            showToast('Đã đăng xuất');
+          }
+        }
+        else if (act === 'saved') {
+          // Tính năng xem bài đã lưu
+          loadSavedPosts();
+          navigateTo('profile'); // Chuyển đến profile và hiển thị bài đã lưu
+        }
         document.getElementById('side-menu').classList.remove('open');
         document.getElementById('menu-overlay').classList.remove('show');
       };
     });
 
-    // ======== CHỈNH SỬA PROFILE ========
-    document.getElementById('btn-save-edit').onclick = () => {
-      document.getElementById('edit-modal').style.display = 'none';
-      showToast('Đã lưu thông tin');
-      loadProfile('me');
+    async function loadSavedPosts() {
+      // Hiển thị các bài đã lưu trong profile
+      const container = document.getElementById('profile-content');
+      container.innerHTML = 'Đang tải bài đã lưu...';
+      const userRef = doc(db, "users", currentUser.uid);
+      const snap = await getDoc(userRef);
+      const savedIds = snap.data()?.saved || [];
+      if (savedIds.length === 0) {
+        container.innerHTML = '<div style="text-align:center;padding:20px;color:#8e8e8e;">Bạn chưa lưu bài viết nào</div>';
+        return;
+      }
+      const grid = document.createElement('div');
+      grid.style.cssText = 'display:grid; grid-template-columns: 1fr 1fr 1fr; gap:3px;';
+      for (const id of savedIds) {
+        const postSnap = await getDoc(doc(db, "posts", id));
+        if (postSnap.exists()) {
+          const d = postSnap.data();
+          const el = document.createElement('img');
+          el.src = d.mediaUrls?.[0] || d.mediaUrl;
+          el.style.width = '100%'; el.style.aspectRatio = '1/1'; el.style.objectFit = 'cover';
+          el.onclick = () => alert(d.caption);
+          grid.appendChild(el);
+        }
+      }
+      container.innerHTML = '';
+      container.appendChild(grid);
+    }
+
+    // Close modals on overlay click
+    window.onclick = (e) => {
+      if (e.target.classList.contains('modal')) e.target.style.display = 'none';
     };
-
-    // ======== TIỆN ÍCH ========
-    function showToast(msg) {
-      const div = document.createElement('div');
-      div.textContent = msg;
-      div.style.cssText = 'position:fixed;top:20px;left:50%;transform:translateX(-50%);background:#333;color:#fff;padding:10px 25px;border-radius:30px;z-index:100;font-size:14px;box-shadow:0 4px 10px rgba(0,0,0,0.3);';
-      document.body.appendChild(div);
-      setTimeout(() => div.remove(), 2000);
-    }
-
-    function navigateTo(page) {
-      document.querySelectorAll('.bottom-nav i').forEach(i => i.classList.remove('active'));
-      document.querySelector(`[data-page="${page}"]`).classList.add('active');
-      document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-      document.getElementById('page-' + page).classList.add('active');
-      if (page === 'home') { loadStories(); loadFeed(); }
-      else if (page === 'explore') loadExplore();
-      else if (page === 'reels') loadReels();
-      else if (page === 'profile') loadProfile('me');
-    }
   </script>
 </body>
 </html>

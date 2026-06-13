@@ -1,3 +1,9 @@
+// =============================================
+// FILE: app-logic.js - DUNUKHA.STORE
+// VIẾT LẠI HOÀN CHỈNH KHỚP VỚI index.html
+// FULL CODE 100% - KHÔNG VIẾT TẮT
+// =============================================
+
 import {
     auth, db, googleProvider, facebookProvider, IMGBB_API_KEY,
     signInWithPopup, signOut, onAuthStateChanged,
@@ -18,7 +24,7 @@ let isLoadingPosts = false;
 let selectedFiles = [];
 
 // =============================================
-// TOAST
+// TOAST THÔNG BÁO
 // =============================================
 function showToast(message) {
     let toastElement = document.getElementById('dunukha-toast');
@@ -39,7 +45,7 @@ function showToast(message) {
 }
 
 // =============================================
-// AUTH
+// AUTHENTICATION
 // =============================================
 function setupAuthListeners() {
     const googleLoginBtn = document.getElementById('google-login');
@@ -48,6 +54,7 @@ function setupAuthListeners() {
     const emailRegisterBtn = document.getElementById('email-register-btn');
     const loginEmailInput = document.getElementById('login-email');
     const loginPasswordInput = document.getElementById('login-password');
+
     if (googleLoginBtn) {
         googleLoginBtn.addEventListener('click', async function() {
             try { await signInWithPopup(auth, googleProvider); } catch (error) { showToast("Lỗi Google: " + error.message); }
@@ -116,7 +123,7 @@ function setupAuthStateObserver() {
 }
 
 // =============================================
-// UPLOAD IMGBB
+// UPLOAD ẢNH LÊN IMGBB
 // =============================================
 async function uploadImageToImgBB(file) {
     const formData = new FormData();

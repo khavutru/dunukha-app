@@ -3,19 +3,29 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Dunukha Pro</title>
+  <title>Dunukha</title>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; }
     body { background: #fafafa; display: flex; justify-content: center; }
     #app { max-width: 500px; width: 100%; background: #fff; min-height: 100vh; display: none; flex-direction: column; position: relative; }
-    .header { display: flex; align-items: center; justify-content: space-between; padding: 10px 15px; border-bottom: 1px solid #dbdbdb; background: #fff; position: sticky; top: 0; z-index: 10; }
-    .logo-text { font-size: 26px; font-weight: 700; color: #262626; }
+    /* Header */
+    .header { display: flex; align-items: center; padding: 10px 15px; border-bottom: 1px solid #dbdbdb; background: #fff; position: sticky; top: 0; z-index: 20; }
+    .menu-btn { font-size: 24px; cursor: pointer; margin-right: 15px; color: #262626; }
+    .logo-text { font-size: 26px; font-weight: 700; color: #262626; flex: 1; }
     .logo-text span { color: #0095f6; }
     .header-icons { display: flex; gap: 18px; }
     .header-icons i { font-size: 22px; cursor: pointer; }
     .badge { position: relative; }
     .badge::after { content: attr(data-count); position: absolute; top: -8px; right: -10px; background: #ed4956; color: white; border-radius: 10px; padding: 2px 6px; font-size: 11px; display: none; }
     .badge[data-count]:not([data-count="0"])::after { display: block; }
+    /* Side menu */
+    .side-menu { position: fixed; top: 0; left: 0; width: 80%; max-width: 300px; height: 100%; background: #fff; z-index: 30; box-shadow: 2px 0 10px rgba(0,0,0,0.2); transform: translateX(-100%); transition: 0.3s; padding: 20px; display: flex; flex-direction: column; }
+    .side-menu.open { transform: translateX(0); }
+    .side-menu .close-btn { align-self: flex-end; font-size: 24px; cursor: pointer; }
+    .menu-item { padding: 12px 0; border-bottom: 1px solid #f0f0f0; cursor: pointer; display: flex; align-items: center; gap: 10px; font-size: 16px; }
+    .overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); z-index: 25; }
+    .overlay.show { display: block; }
+    /* Stories */
     .stories { display: flex; gap: 12px; padding: 12px 15px; border-bottom: 1px solid #dbdbdb; overflow-x: auto; background: #fff; }
     .story-item { display: flex; flex-direction: column; align-items: center; gap: 4px; cursor: pointer; }
     .story-ring { width: 66px; height: 66px; border-radius: 50%; background: linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888); padding: 2px; }
@@ -23,8 +33,9 @@
     .story-item span { font-size: 12px; color: #262626; max-width: 70px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     .story-self .story-ring { background: #ddd; display: flex; align-items: center; justify-content: center; }
     .story-self .story-ring i { color: #0095f6; font-size: 24px; }
+    /* Feed */
     .feed { flex: 1; display: flex; flex-direction: column; gap: 20px; padding-bottom: 60px; }
-    .post { background: #fff; border: 1px solid #dbdbdb; border-radius: 4px; }
+    .post { background: #fff; border: 1px solid #dbdbdb; border-radius: 8px; }
     .post-header { display: flex; align-items: center; gap: 10px; padding: 12px 15px; cursor: pointer; }
     .post-header img { width: 32px; height: 32px; border-radius: 50%; object-fit: cover; }
     .post-header .username { font-weight: 600; font-size: 14px; }
@@ -38,40 +49,44 @@
     .post-comment-input { display: flex; border-top: 1px solid #efefef; padding: 10px 15px; }
     .post-comment-input input { flex: 1; border: none; outline: none; font-size: 14px; }
     .post-comment-input button { background: none; border: none; color: #0095f6; font-weight: 600; cursor: pointer; }
-    .profile-header { display: flex; align-items: center; gap: 20px; padding: 20px; border-bottom: 1px solid #dbdbdb; }
-    .profile-avatar { width: 80px; height: 80px; border-radius: 50%; object-fit: cover; }
+    /* Profile */
+    .profile-header { display: flex; align-items: center; gap: 20px; padding: 20px; border-bottom: 1px solid #dbdbdb; background: #fff; }
+    .profile-avatar { width: 80px; height: 80px; border-radius: 50%; object-fit: cover; border: 2px solid #0095f6; }
     .profile-info { flex: 1; }
-    .profile-info h2 { font-size: 20px; margin-bottom: 5px; }
+    .profile-info h2 { font-size: 20px; }
     .profile-stats { display: flex; gap: 20px; margin: 10px 0; }
     .profile-stats div { text-align: center; }
     .profile-stats span { font-weight: 600; }
-    .profile-bio { margin: 5px 0; }
+    .profile-bio { margin: 5px 0; color: #262626; }
     .profile-buttons { display: flex; gap: 8px; margin-top: 8px; }
     .btn { padding: 6px 16px; border: 1px solid #dbdbdb; background: transparent; border-radius: 4px; font-weight: 600; cursor: pointer; }
     .btn-primary { background: #0095f6; color: white; border: none; }
     .profile-posts { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 3px; margin-top: 20px; }
     .profile-post { aspect-ratio: 1/1; object-fit: cover; width: 100%; cursor: pointer; }
+    /* Search */
     .search-page { padding: 10px 15px; }
-    .search-input { width: 100%; padding: 8px 12px; background: #efefef; border: none; border-radius: 6px; margin-bottom: 10px; }
+    .search-input { width: 100%; padding: 10px 15px; background: #efefef; border: none; border-radius: 10px; font-size: 16px; margin-bottom: 10px; }
     .user-list { list-style: none; }
-    .user-item { display: flex; align-items: center; gap: 12px; padding: 10px 0; border-bottom: 1px solid #f0f0f0; }
+    .user-item { display: flex; align-items: center; gap: 12px; padding: 12px 0; border-bottom: 1px solid #f0f0f0; }
     .user-item img { width: 44px; height: 44px; border-radius: 50%; object-fit: cover; }
     .user-item .name { font-weight: 600; flex: 1; }
+    /* Bottom nav */
     .bottom-nav { display: flex; justify-content: space-around; padding: 10px 0; border-top: 1px solid #dbdbdb; background: #fff; position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 500px; z-index: 10; }
     .bottom-nav i { font-size: 24px; color: #262626; cursor: pointer; }
     .bottom-nav i.active { color: #0095f6; }
-    .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); justify-content: center; align-items: center; z-index: 20; }
-    .modal-content { background: #fff; padding: 20px; border-radius: 12px; width: 90%; max-width: 400px; max-height: 80%; overflow-y: auto; }
-    .modal-content input, .modal-content textarea { width: 100%; padding: 10px; margin: 8px 0; border: 1px solid #dbdbdb; border-radius: 4px; }
-    .modal-content button { background: #0095f6; color: #fff; border: none; padding: 10px; border-radius: 8px; width: 100%; font-weight: 600; cursor: pointer; margin-top: 5px; }
+    /* Modal */
+    .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); justify-content: center; align-items: center; z-index: 30; }
+    .modal-content { background: #fff; padding: 25px; border-radius: 16px; width: 90%; max-width: 400px; max-height: 80%; overflow-y: auto; }
+    .modal-content input, .modal-content textarea { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #dbdbdb; border-radius: 8px; }
+    .modal-content button { background: #0095f6; color: #fff; border: none; padding: 12px; border-radius: 10px; width: 100%; font-weight: 600; margin-top: 10px; cursor: pointer; }
     #login-screen { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; background: #fafafa; }
-    #login-screen button { background: #0095f6; color: #fff; border: none; padding: 12px 24px; border-radius: 8px; font-size: 16px; cursor: pointer; }
+    #login-screen button { background: #0095f6; color: #fff; border: none; padding: 14px 28px; border-radius: 12px; font-size: 18px; cursor: pointer; }
     .preview-media { max-width: 100%; max-height: 200px; object-fit: contain; margin: 10px 0; border-radius: 8px; display: none; }
     .loader { text-align: center; padding: 20px; color: #8e8e8e; }
     /* Chat */
     .message-row { display: flex; margin: 6px 0; }
     .message-row.sent { justify-content: flex-end; }
-    .message-bubble { max-width: 70%; padding: 8px 12px; border-radius: 18px; font-size: 14px; word-break: break-word; }
+    .message-bubble { max-width: 70%; padding: 10px 14px; border-radius: 20px; font-size: 15px; word-break: break-word; }
     .sent .message-bubble { background: #0095f6; color: white; }
     .received .message-bubble { background: #efefef; }
   </style>
@@ -79,17 +94,28 @@
 </head>
 <body>
   <div id="login-screen">
-    <div style="font-size:42px;font-weight:700;margin-bottom:20px;"><span style="color:#0095f6;">D</span>unukha</div>
+    <div style="font-size:48px;font-weight:800;margin-bottom:30px;"><span style="color:#0095f6;">D</span>unukha</div>
     <button id="google-login"><i class="fab fa-google"></i> Đăng nhập với Google</button>
   </div>
 
   <div id="app">
     <div class="header">
+      <i class="fas fa-bars menu-btn" id="menu-btn"></i>
       <div class="logo-text"><span>D</span>unukha</div>
       <div class="header-icons">
         <i class="far fa-paper-plane" id="btn-chat"></i>
         <i class="far fa-bell badge" id="btn-notif" data-count="0"></i>
       </div>
+    </div>
+
+    <!-- Side menu -->
+    <div class="overlay" id="menu-overlay"></div>
+    <div class="side-menu" id="side-menu">
+      <i class="fas fa-times close-btn" id="close-menu"></i>
+      <div class="menu-item" data-action="profile"><i class="far fa-user-circle"></i> Trang cá nhân</div>
+      <div class="menu-item" data-action="edit-profile"><i class="fas fa-pencil-alt"></i> Chỉnh sửa hồ sơ</div>
+      <div class="menu-item" data-action="report"><i class="fas fa-flag"></i> Báo cáo vấn đề</div>
+      <div class="menu-item" data-action="logout"><i class="fas fa-sign-out-alt"></i> Đăng xuất</div>
     </div>
 
     <div style="flex:1; overflow-y:auto;">
@@ -121,10 +147,7 @@
         </div>
       </div>
       <div id="page-notif" class="page" style="display:none;">
-        <div style="padding:15px;">
-          <h3>Thông báo</h3>
-          <div id="notif-list"></div>
-        </div>
+        <div style="padding:15px;"><h3>Thông báo</h3><div id="notif-list"></div></div>
       </div>
       <div id="page-profile" class="page" style="display:none;">
         <div id="profile-content"></div>
@@ -140,9 +163,9 @@
     </div>
   </div>
 
-  <!-- Story viewer modal -->
+  <!-- Modals -->
   <div class="modal" id="story-modal">
-    <div class="modal-content" style="text-align:center; background:black; color:white;">
+    <div class="modal-content" style="background:black; color:white; text-align:center;">
       <img id="story-img" style="width:100%; max-height:70vh; object-fit:contain; display:none;">
       <video id="story-video" style="width:100%; max-height:70vh; object-fit:contain; display:none;" controls autoplay loop></video>
       <p id="story-user" style="margin:10px 0;"></p>
@@ -150,7 +173,6 @@
     </div>
   </div>
 
-  <!-- Chat modal -->
   <div class="modal" id="chat-modal">
     <div class="modal-content" style="height:90%; display:flex; flex-direction:column;">
       <div style="display:flex; justify-content:space-between; align-items:center;">
@@ -161,23 +183,32 @@
       <div id="chat-window" style="display:none; flex:1; flex-direction:column;">
         <div id="chat-messages" style="flex:1; overflow-y:auto; padding:10px;"></div>
         <div style="display:flex; padding:10px; border-top:1px solid #dbdbdb;">
-          <input type="text" id="chat-input" placeholder="Nhập tin nhắn..." style="flex:1; border:1px solid #dbdbdb; border-radius:20px; padding:8px 15px;">
-          <button id="btn-send-msg" style="background:#0095f6; color:white; border:none; border-radius:50%; width:36px; height:36px; margin-left:8px;"><i class="fas fa-paper-plane"></i></button>
+          <input type="text" id="chat-input" placeholder="Nhắn tin..." style="flex:1; border:1px solid #dbdbdb; border-radius:20px; padding:8px 15px;">
+          <button id="btn-send-msg" style="background:#0095f6; color:white; border:none; border-radius:50%; width:40px; height:40px; margin-left:8px;"><i class="fas fa-paper-plane"></i></button>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- Edit profile modal -->
   <div class="modal" id="edit-profile-modal">
     <div class="modal-content">
       <h3>Chỉnh sửa hồ sơ</h3>
       <input type="text" id="edit-name" placeholder="Tên">
       <textarea id="edit-bio" placeholder="Tiểu sử"></textarea>
-      <input type="file" id="edit-avatar-file" accept="image/*,video/*">
+      <label>Ảnh đại diện mới:</label>
+      <input type="file" id="edit-avatar-file" accept="image/*">
       <img id="edit-avatar-preview" class="preview-media" style="display:none;">
       <button id="btn-save-profile">Lưu</button>
       <button style="background:#ed4956;" id="btn-close-edit">Hủy</button>
+    </div>
+  </div>
+
+  <div class="modal" id="report-modal">
+    <div class="modal-content">
+      <h3>Báo cáo vấn đề</h3>
+      <textarea id="report-text" placeholder="Mô tả..."></textarea>
+      <button id="btn-submit-report">Gửi</button>
+      <button style="background:#ed4956;" id="btn-close-report">Hủy</button>
     </div>
   </div>
 
@@ -187,7 +218,7 @@
     import { getFirestore, collection, addDoc, query, orderBy, onSnapshot, doc, updateDoc, arrayUnion, arrayRemove, serverTimestamp, where, getDocs, setDoc, getDoc, limit, startAfter, Timestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
     import { getStorage, ref, uploadBytesResumable, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js";
 
-    // 🔥 Config của bạn
+    // 🔥 Config
     const firebaseConfig = {
       apiKey: "AIzaSyBJ3DAWyschGA6fM5VmBndLI0cGSaFF46U",
       authDomain: "dunukhasite.firebaseapp.com",
@@ -226,15 +257,14 @@
         currentUser = null;
         document.getElementById('login-screen').style.display = 'flex';
         document.getElementById('app').style.display = 'none';
-        Object.values(unsubscribes).forEach(unsub => unsub());
+        Object.values(unsubscribes).forEach(u => u());
         unsubscribes = {};
       }
     });
 
     async function ensureUserDoc(user) {
       const ref = doc(db, "users", user.uid);
-      const snap = await getDoc(ref);
-      if (!snap.exists()) {
+      if (!(await getDoc(ref)).exists()) {
         await setDoc(ref, {
           displayName: user.displayName || "Người dùng",
           email: user.email,
@@ -247,7 +277,25 @@
       }
     }
 
-    // ========== NAVIGATION ==========
+    // ========== MENU & NAV ==========
+    const menuBtn = document.getElementById('menu-btn');
+    const closeMenu = document.getElementById('close-menu');
+    const sideMenu = document.getElementById('side-menu');
+    const overlay = document.getElementById('menu-overlay');
+    menuBtn.addEventListener('click', () => { sideMenu.classList.add('open'); overlay.classList.add('show'); });
+    closeMenu.addEventListener('click', () => { sideMenu.classList.remove('open'); overlay.classList.remove('show'); });
+    overlay.addEventListener('click', () => { sideMenu.classList.remove('open'); overlay.classList.remove('show'); });
+    document.querySelectorAll('.menu-item').forEach(item => {
+      item.addEventListener('click', () => {
+        const action = item.dataset.action;
+        sideMenu.classList.remove('open'); overlay.classList.remove('show');
+        if (action === 'profile') navigateTo('profile');
+        else if (action === 'edit-profile') openEditProfile();
+        else if (action === 'report') document.getElementById('report-modal').style.display = 'flex';
+        else if (action === 'logout') { if (confirm("Đăng xuất?")) signOut(auth); }
+      });
+    });
+
     const navIcons = document.querySelectorAll('.bottom-nav i');
     const pages = {
       home: document.getElementById('page-home'),
@@ -256,7 +304,6 @@
       notif: document.getElementById('page-notif'),
       profile: document.getElementById('page-profile')
     };
-
     navIcons.forEach(icon => icon.addEventListener('click', () => navigateTo(icon.dataset.page)));
 
     function navigateTo(page) {
@@ -264,44 +311,28 @@
       document.querySelector(`.bottom-nav i[data-page="${page}"]`).classList.add('active');
       Object.values(pages).forEach(p => p.style.display = 'none');
       pages[page].style.display = 'block';
-
-      if (page !== 'home' && unsubscribes['feed']) {
-        unsubscribes['feed']();
-        delete unsubscribes['feed'];
-      }
-
+      if (page !== 'home' && unsubscribes['feed']) { unsubscribes['feed'](); delete unsubscribes['feed']; }
       if (page === 'home') { loadStories(); loadFeed(); }
       else if (page === 'search') { document.getElementById('search-input').value = ''; document.getElementById('user-list').innerHTML = ''; }
-      else if (page === 'profile') { loadProfile(currentUser.uid); }
+      else if (page === 'profile') loadProfile(currentUser.uid);
     }
 
-    // ========== UPLOAD HELPER (hỗ trợ video) ==========
+    // ========== UPLOAD ==========
     async function uploadFile(file, path) {
       const storageRef = ref(storage, path);
-      const uploadTask = uploadBytesResumable(storageRef, file);
+      const task = uploadBytesResumable(storageRef, file);
       return new Promise((resolve, reject) => {
-        uploadTask.on('state_changed', null, reject, async () => {
-          const url = await getDownloadURL(uploadTask.snapshot.ref);
-          resolve(url);
-        });
+        task.on('state_changed', null, reject, async () => resolve(await getDownloadURL(task.snapshot.ref)));
       });
     }
-
-    function isVideo(file) {
-      return file.type.startsWith('video/');
-    }
-
+    function isVideo(file) { return file.type.startsWith('video/'); }
     function setPreview(inputFile, imgEl, videoEl) {
       const file = inputFile.files[0];
       if (!file) return;
       if (isVideo(file)) {
-        videoEl.src = URL.createObjectURL(file);
-        videoEl.style.display = 'block';
-        imgEl.style.display = 'none';
+        videoEl.src = URL.createObjectURL(file); videoEl.style.display = 'block'; imgEl.style.display = 'none';
       } else {
-        imgEl.src = URL.createObjectURL(file);
-        imgEl.style.display = 'block';
-        videoEl.style.display = 'none';
+        imgEl.src = URL.createObjectURL(file); imgEl.style.display = 'block'; videoEl.style.display = 'none';
       }
     }
 
@@ -310,13 +341,13 @@
       const container = document.getElementById('stories-container');
       container.innerHTML = '';
       const now = new Date();
-      const snap = await getDocs(query(collection(db, "stories"), orderBy("expiresAt", "desc"), limit(20)));
+      const snap = await getDocs(query(collection(db, "stories"), orderBy("expiresAt", "desc")));
       const users = {};
       snap.forEach(doc => {
-        const data = doc.data();
-        if (data.expiresAt.toDate() > now) {
-          if (!users[data.uid]) users[data.uid] = { ...data, stories: [] };
-          users[data.uid].stories.push(data);
+        const d = doc.data();
+        if (d.expiresAt.toDate() > now) {
+          if (!users[d.uid]) users[d.uid] = { ...d, stories: [] };
+          users[d.uid].stories.push(d);
         }
       });
       for (const uid in users) {
@@ -326,10 +357,10 @@
         const userData = userDoc.data();
         const div = document.createElement('div');
         div.className = 'story-item';
-        const thumbnail = u.stories[0].mediaType === 'video' 
+        const thumb = u.stories[0].mediaType === 'video' 
           ? `<video src="${u.stories[0].mediaUrl}" muted autoplay loop style="width:100%;height:100%;object-fit:cover;"></video>`
           : `<img src="${u.stories[0].mediaUrl}">`;
-        div.innerHTML = `<div class="story-ring">${thumbnail}</div><span>${userData.displayName}</span>`;
+        div.innerHTML = `<div class="story-ring">${thumb}</div><span>${userData.displayName}</span>`;
         div.addEventListener('click', () => viewStory(u.stories));
         container.appendChild(div);
       }
@@ -341,56 +372,35 @@
     }
 
     function viewStory(stories) {
-      if (!stories.length) return;
       let index = 0;
       const modal = document.getElementById('story-modal');
       modal.style.display = 'flex';
       const img = document.getElementById('story-img');
       const video = document.getElementById('story-video');
       const userP = document.getElementById('story-user');
-      img.style.display = 'none';
-      video.style.display = 'none';
-      const showStory = () => {
+      img.style.display = 'none'; video.style.display = 'none';
+      const show = () => {
         const s = stories[index];
         userP.textContent = s.username;
         if (s.mediaType === 'video') {
-          video.src = s.mediaUrl;
-          video.style.display = 'block';
-          video.play();
+          video.src = s.mediaUrl; video.style.display = 'block'; video.play();
           img.style.display = 'none';
         } else {
-          img.src = s.mediaUrl;
-          img.style.display = 'block';
+          img.src = s.mediaUrl; img.style.display = 'block';
           video.style.display = 'none';
         }
       };
-      showStory();
+      show();
       const timer = setInterval(() => {
         index++;
-        if (index >= stories.length) {
-          clearInterval(timer);
-          modal.style.display = 'none';
-          video.pause();
-          video.src = '';
-        } else {
-          showStory();
-        }
-      }, 5000); // 5s mỗi story
-      document.getElementById('btn-close-story').onclick = () => {
-        clearInterval(timer);
-        modal.style.display = 'none';
-        video.pause();
-        video.src = '';
-      };
+        if (index >= stories.length) { clearInterval(timer); modal.style.display = 'none'; video.pause(); }
+        else show();
+      }, 5000);
+      document.getElementById('btn-close-story').onclick = () => { clearInterval(timer); modal.style.display = 'none'; video.pause(); };
     }
 
-    // ========== FEED (phân trang) ==========
-    function loadFeed() {
-      document.getElementById('feed-container').innerHTML = '';
-      lastPostDoc = null;
-      fetchPosts();
-    }
-
+    // ========== FEED ==========
+    function loadFeed() { document.getElementById('feed-container').innerHTML = ''; lastPostDoc = null; fetchPosts(); }
     async function fetchPosts() {
       if (isLoadingPosts) return;
       isLoadingPosts = true;
@@ -400,10 +410,7 @@
         : query(collection(db, "posts"), orderBy("createdAt", "desc"), limit(5));
       const snap = await getDocs(q);
       if (!snap.empty) {
-        snap.forEach(doc => {
-          renderPost(doc.data(), doc.id);
-          lastPostDoc = doc;
-        });
+        snap.forEach(doc => { renderPost(doc.data(), doc.id); lastPostDoc = doc; });
       } else {
         document.getElementById('feed-loader').textContent = 'Không còn bài viết.';
       }
@@ -411,10 +418,9 @@
       document.getElementById('feed-loader').style.display = 'none';
     }
 
-    const scrollContainer = document.querySelector('#app > div:nth-child(2)');
-    scrollContainer.addEventListener('scroll', () => {
-      if (scrollContainer.scrollHeight - scrollContainer.scrollTop - scrollContainer.clientHeight < 100 
-          && document.getElementById('page-home').style.display === 'block') {
+    const scrollArea = document.querySelector('#app > div:nth-child(3)');
+    scrollArea.addEventListener('scroll', () => {
+      if (scrollArea.scrollHeight - scrollArea.scrollTop - scrollArea.clientHeight < 100 && document.getElementById('page-home').style.display === 'block') {
         fetchPosts();
       }
     });
@@ -423,15 +429,12 @@
       const liked = post.likes?.includes(currentUser.uid);
       const div = document.createElement('div');
       div.className = 'post';
-      const mediaHTML = post.mediaType === 'video' 
+      const media = post.mediaType === 'video' 
         ? `<video class="post-media" src="${post.mediaUrl}" controls playsinline></video>`
         : `<img class="post-media" src="${post.mediaUrl}" loading="lazy" onerror="this.src='https://via.placeholder.com/400'">`;
       div.innerHTML = `
-        <div class="post-header" data-uid="${post.uid}">
-          <img src="${post.userAvatar || 'https://via.placeholder.com/32'}">
-          <span class="username">${post.username}</span>
-        </div>
-        ${mediaHTML}
+        <div class="post-header" data-uid="${post.uid}"><img src="${post.userAvatar || 'https://via.placeholder.com/32'}"><span class="username">${post.username}</span></div>
+        ${media}
         <div class="post-actions">
           <i class="${liked ? 'fas fa-heart liked' : 'far fa-heart'}" data-id="${id}"></i>
           <i class="far fa-comment"></i>
@@ -463,67 +466,70 @@
         const input = document.getElementById(`comment-${id}`);
         const text = input.value.trim();
         if (!text) return;
-        await updateDoc(doc(db, "posts", id), { comments: arrayUnion({ uid: currentUser.uid, username: currentUser.displayName, text, createdAt: new Date().toISOString() }) });
+        await updateDoc(doc(db, "posts", id), {
+          comments: arrayUnion({ uid: currentUser.uid, username: currentUser.displayName, text, createdAt: new Date().toISOString() })
+        });
         if (post.uid !== currentUser.uid) addNotification(post.uid, 'comment', `${currentUser.displayName} đã bình luận: "${text}"`);
         input.value = '';
       });
     }
 
-    // ========== POST UPLOAD (hỗ trợ ảnh/video) ==========
+    // ========== POST UPLOAD ==========
     document.getElementById('post-file').addEventListener('change', function() {
       setPreview(this, document.getElementById('post-preview-img'), document.getElementById('post-preview-video'));
     });
-
     document.getElementById('btn-submit-post').addEventListener('click', async () => {
       const file = document.getElementById('post-file').files[0];
       const caption = document.getElementById('post-caption').value.trim();
-      if (!file) return alert("Hãy chọn ảnh hoặc video");
-      const userData = (await getDoc(doc(db, "users", currentUser.uid))).data();
-      const path = `posts/${currentUser.uid}_${Date.now()}_${file.name}`;
-      const mediaUrl = await uploadFile(file, path);
-      await addDoc(collection(db, "posts"), {
-        uid: currentUser.uid,
-        username: userData.displayName,
-        userAvatar: userData.photoURL || currentUser.photoURL,
-        mediaUrl,
-        mediaType: isVideo(file) ? 'video' : 'image',
-        caption,
-        likes: [],
-        comments: [],
-        createdAt: serverTimestamp()
-      });
-      document.getElementById('post-file').value = '';
-      document.getElementById('post-preview-img').style.display = 'none';
-      document.getElementById('post-preview-video').style.display = 'none';
-      document.getElementById('post-caption').value = '';
-      alert("Đã đăng bài!");
-      navigateTo('home');
+      if (!file) return alert("Chọn ảnh/video");
+      try {
+        const userData = (await getDoc(doc(db, "users", currentUser.uid))).data();
+        const path = `posts/${currentUser.uid}_${Date.now()}_${file.name}`;
+        const mediaUrl = await uploadFile(file, path);
+        await addDoc(collection(db, "posts"), {
+          uid: currentUser.uid,
+          username: userData.displayName,
+          userAvatar: userData.photoURL || currentUser.photoURL,
+          mediaUrl,
+          mediaType: isVideo(file) ? 'video' : 'image',
+          caption,
+          likes: [],
+          comments: [],
+          createdAt: serverTimestamp()
+        });
+        document.getElementById('post-file').value = '';
+        document.getElementById('post-preview-img').style.display = 'none';
+        document.getElementById('post-preview-video').style.display = 'none';
+        document.getElementById('post-caption').value = '';
+        alert("Đã đăng bài!");
+        navigateTo('home');
+      } catch (e) { alert("Lỗi đăng bài: " + e.message); }
     });
 
-    // Story upload
     document.getElementById('story-file').addEventListener('change', function() {
       setPreview(this, document.getElementById('story-preview-img'), document.getElementById('story-preview-video'));
     });
-
     document.getElementById('btn-submit-story').addEventListener('click', async () => {
       const file = document.getElementById('story-file').files[0];
-      if (!file) return alert("Chọn ảnh hoặc video cho story");
-      const path = `stories/${currentUser.uid}_${Date.now()}_${file.name}`;
-      const mediaUrl = await uploadFile(file, path);
-      const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000);
-      await addDoc(collection(db, "stories"), {
-        uid: currentUser.uid,
-        username: currentUser.displayName || "Người dùng",
-        mediaUrl,
-        mediaType: isVideo(file) ? 'video' : 'image',
-        createdAt: serverTimestamp(),
-        expiresAt: Timestamp.fromDate(expiresAt)
-      });
-      document.getElementById('story-file').value = '';
-      document.getElementById('story-preview-img').style.display = 'none';
-      document.getElementById('story-preview-video').style.display = 'none';
-      alert("Đã đăng story!");
-      navigateTo('home');
+      if (!file) return alert("Chọn ảnh/video cho story");
+      try {
+        const path = `stories/${currentUser.uid}_${Date.now()}_${file.name}`;
+        const mediaUrl = await uploadFile(file, path);
+        const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000);
+        await addDoc(collection(db, "stories"), {
+          uid: currentUser.uid,
+          username: currentUser.displayName || "Người dùng",
+          mediaUrl,
+          mediaType: isVideo(file) ? 'video' : 'image',
+          createdAt: serverTimestamp(),
+          expiresAt: Timestamp.fromDate(expiresAt)
+        });
+        document.getElementById('story-file').value = '';
+        document.getElementById('story-preview-img').style.display = 'none';
+        document.getElementById('story-preview-video').style.display = 'none';
+        alert("Đã đăng story!");
+        navigateTo('home');
+      } catch (e) { alert("Lỗi đăng story: " + e.message); }
     });
 
     // ========== PROFILE ==========
@@ -553,17 +559,17 @@
         </div>
         <div class="profile-posts" id="profile-posts"></div>
       `;
-      const postsQuery = query(collection(db, "posts"), where("uid", "==", uid), orderBy("createdAt", "desc"), limit(9));
-      const postsSnap = await getDocs(postsQuery);
+      const postsQ = query(collection(db, "posts"), where("uid", "==", uid), orderBy("createdAt", "desc"), limit(12));
+      const postsSnap = await getDocs(postsQ);
       const postsDiv = document.getElementById('profile-posts');
       postsSnap.forEach(doc => {
         const d = doc.data();
-        const thumb = document.createElement(d.mediaType === 'video' ? 'video' : 'img');
-        thumb.src = d.mediaUrl;
-        thumb.className = 'profile-post';
-        thumb.onclick = () => alert(d.caption);
-        if (d.mediaType === 'video') thumb.muted = true;
-        postsDiv.appendChild(thumb);
+        const el = document.createElement(d.mediaType === 'video' ? 'video' : 'img');
+        el.src = d.mediaUrl;
+        el.className = 'profile-post';
+        el.onclick = () => alert(d.caption);
+        if (d.mediaType === 'video') el.muted = true;
+        postsDiv.appendChild(el);
       });
       if (isMe) document.getElementById('edit-profile-btn').addEventListener('click', openEditProfile);
       else document.getElementById('follow-btn').addEventListener('click', () => toggleFollow(uid));
@@ -598,8 +604,10 @@
       if (!name) return alert("Tên không được để trống");
       const updates = { displayName: name, bio };
       if (avatarFile) {
-        const path = `avatars/${currentUser.uid}_${Date.now()}_${avatarFile.name}`;
-        updates.photoURL = await uploadFile(avatarFile, path);
+        try {
+          const path = `avatars/${currentUser.uid}_${Date.now()}_${avatarFile.name}`;
+          updates.photoURL = await uploadFile(avatarFile, path);
+        } catch (e) { alert("Lỗi upload avatar: " + e.message); return; }
       }
       await updateDoc(doc(db, "users", currentUser.uid), updates);
       document.getElementById('edit-profile-modal').style.display = 'none';
@@ -623,29 +631,30 @@
       loadProfile(uid);
     }
 
-    // ========== SEARCH ==========
-    let searchTimeout;
-    document.getElementById('search-input').addEventListener('input', (e) => {
-      clearTimeout(searchTimeout);
-      searchTimeout = setTimeout(async () => {
-        const kw = e.target.value.trim().toLowerCase();
-        const list = document.getElementById('user-list');
-        if (!kw) { list.innerHTML = ''; return; }
-        list.innerHTML = 'Đang tìm...';
+    // ========== SEARCH (tải toàn bộ users, lọc client-side để tránh index) ==========
+    let allUsersCache = null;
+    document.getElementById('search-input').addEventListener('input', async (e) => {
+      const kw = e.target.value.trim().toLowerCase();
+      const list = document.getElementById('user-list');
+      if (!kw) { list.innerHTML = ''; return; }
+      if (!allUsersCache) {
+        list.innerHTML = 'Đang tải danh sách người dùng...';
         const snap = await getDocs(collection(db, "users"));
-        list.innerHTML = '';
+        allUsersCache = [];
         snap.forEach(doc => {
-          if (doc.id === currentUser.uid) return;
-          const d = doc.data();
-          if (d.displayName.toLowerCase().includes(kw)) {
-            const li = document.createElement('li');
-            li.className = 'user-item';
-            li.innerHTML = `<img src="${d.photoURL || 'https://via.placeholder.com/44'}"><span class="name">${d.displayName}</span>`;
-            li.addEventListener('click', () => loadProfile(doc.id));
-            list.appendChild(li);
-          }
+          if (doc.id !== currentUser.uid) allUsersCache.push({ id: doc.id, ...doc.data() });
         });
-      }, 500);
+      }
+      list.innerHTML = '';
+      const filtered = allUsersCache.filter(u => u.displayName.toLowerCase().includes(kw));
+      if (filtered.length === 0) list.innerHTML = 'Không tìm thấy.';
+      else filtered.forEach(u => {
+        const li = document.createElement('li');
+        li.className = 'user-item';
+        li.innerHTML = `<img src="${u.photoURL || 'https://via.placeholder.com/44'}"><span class="name">${u.displayName}</span>`;
+        li.addEventListener('click', () => loadProfile(u.id));
+        list.appendChild(li);
+      });
     });
 
     // ========== NOTIFICATIONS ==========
@@ -682,11 +691,11 @@
     });
 
     async function loadChatList() {
-      document.getElementById('chat-list').style.display = 'block';
-      document.getElementById('chat-window').style.display = 'none';
+      const chatList = document.getElementById('chat-list');
+      const chatWindow = document.getElementById('chat-window');
+      chatList.style.display = 'block'; chatWindow.style.display = 'none';
       const mySnap = await getDoc(doc(db, "users", currentUser.uid));
       const following = mySnap.data()?.following || {};
-      const chatList = document.getElementById('chat-list');
       chatList.innerHTML = '';
       for (const uid in following) {
         if (!following[uid]) continue;
@@ -738,16 +747,21 @@
 
     document.getElementById('btn-back-chat').addEventListener('click', loadChatList);
 
-    // ========== LOGOUT ==========
-    const header = document.querySelector('.header');
-    const logoutBtn = document.createElement('i');
-    logoutBtn.className = 'fas fa-sign-out-alt';
-    logoutBtn.style.cssText = 'margin-left: 10px; cursor: pointer; font-size: 22px; color: #262626;';
-    logoutBtn.title = 'Đăng xuất';
-    logoutBtn.addEventListener('click', () => {
-      if (confirm("Đăng xuất?")) signOut(auth);
+    // ========== REPORT ==========
+    document.getElementById('btn-submit-report').addEventListener('click', async () => {
+      const text = document.getElementById('report-text').value.trim();
+      if (!text) return alert("Nhập nội dung báo cáo");
+      await addDoc(collection(db, "reports"), {
+        uid: currentUser.uid,
+        email: currentUser.email,
+        message: text,
+        createdAt: serverTimestamp()
+      });
+      document.getElementById('report-text').value = '';
+      document.getElementById('report-modal').style.display = 'none';
+      alert("Đã gửi báo cáo!");
     });
-    header.appendChild(logoutBtn);
+    document.getElementById('btn-close-report').addEventListener('click', () => document.getElementById('report-modal').style.display = 'none');
   </script>
 </body>
 </html>

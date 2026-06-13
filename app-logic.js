@@ -1,12 +1,3 @@
-// =============================================
-// FILE: app-logic.js - DUNUKHA.STORE
-// SIÊU GỌN - CHỈ 1 FILE LOGIC DUY NHẤT
-// FULL CODE 100% - KHÔNG VIẾT TẮT
-// =============================================
-
-// =============================================
-// PHẦN 1: VCONSOLE DEBUG TOOL (F12 TRÊN ĐIỆN THOẠI)
-// =============================================
 (function() {
     var script = document.createElement('script');
     script.src = 'https://unpkg.com/vconsole@latest/dist/vconsole.min.js';
@@ -14,7 +5,7 @@
     script.onload = function() {
         if (typeof window.VConsole !== 'undefined') {
             new window.VConsole();
-            console.log('[Dunukha] vConsole đã sẵn sàng - Chạm nút xanh để debug');
+            console.log('[Dunukha] vConsole đã sẵn sàng');
         }
     };
     document.head.appendChild(script);
@@ -44,6 +35,12 @@ const googleProvider = new GoogleAuthProvider();
 const facebookProvider = new FacebookAuthProvider();
 const IMGBB_API_KEY = "d4802501f212046a8d74561bbdaf6dd3";
 
+// =============================================
+// ẢNH MẶC ĐỊNH MỚI (KHÔNG DÙNG via.placeholder.com)
+// =============================================
+const DEFAULT_AVATAR = 'https://www.gstatic.com/images/branding/product/1x/avatar_anonymous_512dp.png';
+const DEFAULT_POST_IMAGE = 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=400&h=400&fit=crop';
+
 let currentUser = null;
 let currentChatUser = null;
 let unsubscribes = {};
@@ -53,7 +50,7 @@ let isLoadingPosts = false;
 let selectedFiles = [];
 
 // =============================================
-// PHẦN 3: TOAST THÔNG BÁO
+// TOAST
 // =============================================
 function showToast(message) {
     var toast = document.getElementById('toast');
@@ -70,7 +67,22 @@ function showToast(message) {
 }
 
 // =============================================
-// PHẦN 4: AUTHENTICATION
+// HÀM TẠO ẢNH AN TOÀN (KÈM onerror)
+// =============================================
+function createSafeImage(src, fallbackSrc, className, extraStyle) {
+    var img = document.createElement('img');
+    img.src = src || fallbackSrc;
+    if (className) img.className = className;
+    if (extraStyle) img.style.cssText = extraStyle;
+    img.onerror = function() {
+        this.src = fallbackSrc;
+        this.onerror = null;
+    };
+    return img;
+}
+
+// =============================================
+// AUTH
 // =============================================
 function setupAuth() {
     document.getElementById('google-login').onclick = function() { signInWithPopup(auth, googleProvider).catch(function(e) { showToast('Lỗi: ' + e.message); }); };
@@ -98,7 +110,7 @@ function setupAuth() {
                     uid: user.uid,
                     displayName: user.displayName || user.email.split('@')[0],
                     email: user.email || '',
-                    photoURL: user.photoURL || 'https://via.placeholder.com/150',
+                    photoURL: user.photoURL || DEFAULT_AVATAR,
                     username: user.email ? user.email.split('@')[0] : 'user' + user.uid.slice(0,6),
                     bio: '',
                     location: '',
@@ -121,7 +133,7 @@ function setupAuth() {
 }
 
 // =============================================
-// PHẦN 5: UPLOAD ẢNH IMGBB
+// UPLOAD IMGBB
 // =============================================
 async function uploadImgBB(file) {
     var fd = new FormData();
@@ -133,7 +145,7 @@ async function uploadImgBB(file) {
 }
 
 // =============================================
-// PHẦN 6: NAVIGATION
+// NAVIGATION
 // =============================================
 function navigateTo(page) {
     document.querySelectorAll('.bottom-nav i').forEach(function(i) { i.classList.remove('active'); });
@@ -153,7 +165,7 @@ document.querySelectorAll('.bottom-nav i').forEach(function(icon) {
 });
 
 // =============================================
-// PHẦN 7: STORIES
+// STORIES
 // =============================================
 async function loadStories() {
     var container = document.getElementById('stories');
@@ -176,7 +188,14 @@ async function loadStories() {
             var u = usnap.data();
             var div = document.createElement('div');
             div.className = 'story-item';
-            div.innerHTML = '<div class="story-ring"><img src="' + (u.photoURL || 'https://via.placeholder.com/66') + '"></div><span>' + u.displayName + '</span>';
+            var avatarImg = createSafeImage(u.photoURL, DEFAULT_AVATAR, '', 'width:100%;height:100%;border-radius:50%;border:2px solid white;object-fit:cover;');
+            var ring = document.createElement('div');
+            ring.className = 'story-ring';
+            ring.appendChild(avatarImg);
+            var span = document.createElement('span');
+            span.textContent = u.displayName;
+            div.appendChild(ring);
+            div.appendChild(span);
             div.onclick = function() { viewStory(map[uid].stories); };
             container.appendChild(div);
         }
@@ -194,6 +213,7 @@ function viewStory(stories) {
     modal.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:black;z-index:9999;';
     var img = document.createElement('img');
     img.style.cssText = 'width:100%;height:100%;object-fit:contain;';
+    img.onerror = function() { this.src = DEFAULT_POST_IMAGE; this.onerror = null; };
     var vid = document.createElement('video');
     vid.style.cssText = 'width:100%;height:100%;object-fit:contain;';
     vid.controls = true; vid.autoplay = true;
@@ -213,7 +233,7 @@ function viewStory(stories) {
 }
 
 // =============================================
-// PHẦN 8: FEED + TƯƠNG TÁC (LIKE, COMMENT, MENU 3 CHẤM)
+// FEED + TƯƠNG TÁC
 // =============================================
 function loadFeed() {
     document.getElementById('feed').innerHTML = '';
@@ -250,10 +270,10 @@ function renderPost(post, id) {
     if (post.mediaUrls && post.mediaUrls.length) {
         post.mediaUrls.forEach(function(url) {
             if (url.match(/\.(mp4|webm|ogg|mov)$/i)) media += '<video class="post-media" src="' + url + '" controls></video>';
-            else media += '<img class="post-media" src="' + url + '" loading="lazy">';
+            else media += '<img class="post-media" src="' + url + '" loading="lazy" onerror="this.src=\'' + DEFAULT_POST_IMAGE + '\'; this.onerror=null;">';
         });
     } else {
-        media = '<img class="post-media" src="' + (post.mediaUrl || post.postUrl || 'https://via.placeholder.com/400') + '">';
+        media = '<img class="post-media" src="' + (post.mediaUrl || post.postUrl || DEFAULT_POST_IMAGE) + '" onerror="this.src=\'' + DEFAULT_POST_IMAGE + '\'; this.onerror=null;">';
     }
     var timeStr = 'Vừa xong';
     if (post.createdAt) {
@@ -267,7 +287,7 @@ function renderPost(post, id) {
     }
     div.innerHTML = `
         <div class="post-header" data-uid="${post.uid || post.ownerId}">
-            <img class="post-avatar" src="${post.userAvatar || 'https://via.placeholder.com/32'}">
+            <img class="post-avatar" src="${post.userAvatar || DEFAULT_AVATAR}" onerror="this.src='${DEFAULT_AVATAR}'; this.onerror=null;">
             <span class="post-username">${post.username || 'Người dùng'}</span>
             <span class="post-time">${timeStr}</span>
             <div style="margin-left:auto;position:relative;">
@@ -355,7 +375,7 @@ function renderPost(post, id) {
             var input = document.getElementById('comment-' + id);
             var text = input.value.trim();
             if (!text) return;
-            await updateDoc(doc(db, "posts", id), { comments: arrayUnion({ uid: currentUser.uid, username: currentUser.displayName, avatar: currentUser.photoURL, text: text, createdAt: new Date().toISOString() }) });
+            await updateDoc(doc(db, "posts", id), { comments: arrayUnion({ uid: currentUser.uid, username: currentUser.displayName, avatar: currentUser.photoURL || DEFAULT_AVATAR, text: text, createdAt: new Date().toISOString() }) });
             input.value = '';
             loadComments(id);
             showToast('Đã bình luận');
@@ -394,13 +414,17 @@ async function loadComments(postId) {
     comments.forEach(function(c) {
         var d = document.createElement('div');
         d.style.cssText = 'padding:5px 0;border-bottom:1px solid #f5f5f5;display:flex;gap:8px;';
-        d.innerHTML = '<img src="' + (c.avatar || 'https://via.placeholder.com/24') + '" style="width:24px;height:24px;border-radius:50%;"><div><strong>' + c.username + '</strong> ' + c.text + '</div>';
+        var avatarImg = createSafeImage(c.avatar, DEFAULT_AVATAR, '', 'width:24px;height:24px;border-radius:50%;margin-top:2px;');
+        d.appendChild(avatarImg);
+        var textDiv = document.createElement('div');
+        textDiv.innerHTML = '<strong>' + c.username + '</strong> ' + c.text;
+        d.appendChild(textDiv);
         container.appendChild(d);
     });
 }
 
 // =============================================
-// PHẦN 9: ĐĂNG BÀI
+// ĐĂNG BÀI
 // =============================================
 function setupPost() {
     var fileInput = document.getElementById('post-files');
@@ -444,7 +468,7 @@ function setupPost() {
             var u = snap.data();
             await addDoc(collection(db, "posts"), {
                 uid: currentUser.uid, ownerId: currentUser.uid,
-                username: u.displayName, userAvatar: u.photoURL,
+                username: u.displayName, userAvatar: u.photoURL || DEFAULT_AVATAR,
                 mediaUrls: urls, mediaUrl: urls[0], postUrl: urls[0],
                 mediaType: selectedFiles[0].type.startsWith('video') ? 'video' : 'image',
                 caption: captionInput.value.trim(), likes: [], comments: [], status: 'pending', createdAt: serverTimestamp()
@@ -462,7 +486,7 @@ function setupPost() {
 }
 
 // =============================================
-// PHẦN 10: PROFILE ĐỘNG (CỐT LÕI)
+// PROFILE ĐỘNG
 // =============================================
 async function renderProfile(targetUid) {
     var container = document.getElementById('profile-content');
@@ -480,7 +504,7 @@ async function renderProfile(targetUid) {
 
     container.innerHTML = `
         <div class="profile-header">
-            <img class="profile-avatar" src="${profile.photoURL || 'https://via.placeholder.com/150'}">
+            <img class="profile-avatar" src="${profile.photoURL || DEFAULT_AVATAR}" onerror="this.src='${DEFAULT_AVATAR}'; this.onerror=null;">
             <div style="flex:1;">
                 <h2>${profile.displayName}</h2>
                 <p style="color:#888;">@${profile.username}</p>
@@ -543,16 +567,14 @@ async function loadProfilePosts(uid) {
     if (snap.empty) { grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:40px;color:#888;">Chưa có bài viết</div>'; return; }
     snap.forEach(function(doc) {
         var d = doc.data();
-        var img = document.createElement('img');
-        img.src = d.mediaUrls ? d.mediaUrls[0] : (d.mediaUrl || '');
-        img.style.cssText = 'width:100%;aspect-ratio:1;object-fit:cover;cursor:pointer;';
+        var img = createSafeImage(d.mediaUrls ? d.mediaUrls[0] : (d.mediaUrl || ''), DEFAULT_POST_IMAGE, '', 'width:100%;aspect-ratio:1;object-fit:cover;cursor:pointer;');
         img.onclick = function() { alert(d.caption || 'Không có caption'); };
         grid.appendChild(img);
     });
 }
 
 // =============================================
-// PHẦN 11: TÌM KIẾM (ĐÃ XỬ LÝ DẤU @)
+// TÌM KIẾM (ĐÃ XỬ LÝ DẤU @)
 // =============================================
 function setupSearch() {
     var input = document.getElementById('search-input');
@@ -580,7 +602,11 @@ function setupSearch() {
         filtered.forEach(function(u) {
             var div = document.createElement('div');
             div.className = 'search-result';
-            div.innerHTML = '<img src="' + (u.data.photoURL || 'https://via.placeholder.com/44') + '" style="width:44px;height:44px;border-radius:50%;"><div><strong>' + u.data.displayName + '</strong><br><span style="color:#888;">@' + u.data.username + '</span></div>';
+            var avatarImg = createSafeImage(u.data.photoURL, DEFAULT_AVATAR, '', 'width:44px;height:44px;border-radius:50%;');
+            var infoDiv = document.createElement('div');
+            infoDiv.innerHTML = '<strong>' + u.data.displayName + '</strong><br><span style="color:#888;">@' + u.data.username + '</span>';
+            div.appendChild(avatarImg);
+            div.appendChild(infoDiv);
             div.onclick = function() {
                 renderProfile(u.id);
                 navigateTo('profile');
@@ -591,7 +617,7 @@ function setupSearch() {
 }
 
 // =============================================
-// PHẦN 12: EXPLORE, REELS, CHAT, NOTIFICATIONS
+// EXPLORE, REELS, CHAT, NOTIFICATIONS
 // =============================================
 async function loadExplore() {
     var grid = document.getElementById('search-results');
@@ -602,9 +628,7 @@ async function loadExplore() {
     var snap = await getDocs(query(collection(db, "posts"), orderBy("createdAt", "desc"), limit(12)));
     snap.forEach(function(doc) {
         var d = doc.data();
-        var img = document.createElement('img');
-        img.src = d.mediaUrls ? d.mediaUrls[0] : (d.mediaUrl || '');
-        img.style.cssText = 'width:100%;aspect-ratio:1;object-fit:cover;cursor:pointer;';
+        var img = createSafeImage(d.mediaUrls ? d.mediaUrls[0] : (d.mediaUrl || ''), DEFAULT_POST_IMAGE, '', 'width:100%;aspect-ratio:1;object-fit:cover;cursor:pointer;');
         img.onclick = function() { renderProfile(d.uid); navigateTo('profile'); };
         grid.appendChild(img);
     });
@@ -666,7 +690,11 @@ async function loadChatList() {
         var d = u.data();
         var div = document.createElement('div');
         div.style.cssText = 'display:flex;align-items:center;gap:10px;padding:10px;cursor:pointer;';
-        div.innerHTML = '<img src="' + (d.photoURL || '') + '" style="width:44px;height:44px;border-radius:50%;"><span>' + d.displayName + '</span>';
+        var avatarImg = createSafeImage(d.photoURL, DEFAULT_AVATAR, '', 'width:44px;height:44px;border-radius:50%;');
+        div.appendChild(avatarImg);
+        var span = document.createElement('span');
+        span.textContent = d.displayName;
+        div.appendChild(span);
         div.onclick = function() { openChat(uid, d.displayName); };
         list.appendChild(div);
     }
@@ -691,7 +719,7 @@ function listenNotifications() {
 }
 
 // =============================================
-// PHẦN 13: SIDEBAR + EDIT PROFILE
+// SIDEBAR + EDIT
 // =============================================
 document.getElementById('menu-btn').onclick = function() {
     document.getElementById('side-menu').classList.add('open');
@@ -736,14 +764,14 @@ document.getElementById('save-edit').onclick = async function() {
 };
 
 // =============================================
-// PHẦN 14: SCROLL FEED
+// SCROLL FEED
 // =============================================
 document.getElementById('page-home').addEventListener('scroll', function() {
     if (this.scrollHeight - this.scrollTop - this.clientHeight < 100 && !isLoadingPosts) fetchPosts();
 });
 
 // =============================================
-// PHẦN 15: KHỞI ĐỘNG
+// KHỞI ĐỘNG
 // =============================================
 setupAuth();
 setupPost();

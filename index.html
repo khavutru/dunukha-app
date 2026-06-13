@@ -68,12 +68,6 @@
     .message-actions { display: none; position: absolute; top: -15px; right: 0; background: white; border-radius: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.2); padding: 5px; }
     .message-bubble:hover .message-actions { display: flex; gap: 5px; }
     .loader { text-align: center; padding: 20px; color: #8e8e8e; }
-    .user-item { display: flex; align-items: center; gap: 12px; padding: 12px 15px; border-bottom: 1px solid #f0f0f0; }
-    .user-item img { width: 44px; height: 44px; border-radius: 50%; object-fit: cover; }
-    .user-item .name { font-weight: 600; flex: 1; }
-    #login-screen { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; background: #fafafa; }
-    #login-screen button { background: #0095f6; color: #fff; border: none; padding: 14px 28px; border-radius: 12px; font-size: 18px; cursor: pointer; margin: 10px; width: 250px; }
-    .preview-media { max-width: 100%; max-height: 200px; object-fit: contain; margin: 10px 0; border-radius: 8px; display: none; }
   </style>
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
 </head>
@@ -86,22 +80,12 @@
 
   <div id="app">
     <div class="header">
-      <i class="fas fa-bars menu-btn" id="menu-btn" style="cursor:pointer; font-size:24px;"></i>
+      <i class="fas fa-bars" id="menu-btn" style="font-size:22px; cursor:pointer;"></i>
       <div class="logo"><span>D</span>unukha</div>
       <div class="header-icons">
-        <i class="far fa-heart badge" id="btn-notif" data-count="0" style="position:relative;"></i>
+        <i class="far fa-heart badge" id="btn-notif" data-count="0"></i>
         <i class="far fa-paper-plane" id="btn-chat"></i>
       </div>
-    </div>
-
-    <div class="overlay" id="menu-overlay"></div>
-    <div class="side-menu" id="side-menu">
-      <i class="fas fa-times" id="close-menu" style="align-self:flex-end; font-size:24px; cursor:pointer;"></i>
-      <div class="menu-item" data-action="profile" style="padding:12px 0; cursor:pointer;">Trang cá nhân</div>
-      <div class="menu-item" data-action="edit-profile" style="padding:12px 0; cursor:pointer;">Chỉnh sửa hồ sơ</div>
-      <div class="menu-item" data-action="saved" style="padding:12px 0; cursor:pointer;">Đã lưu</div>
-      <div class="menu-item" data-action="report" style="padding:12px 0; cursor:pointer;">Báo cáo</div>
-      <div class="menu-item" data-action="logout" style="padding:12px 0; cursor:pointer;">Đăng xuất</div>
     </div>
 
     <div class="page active" id="page-home">
@@ -110,12 +94,8 @@
       <div class="loader" id="feed-loader" style="display:none;">Đang tải...</div>
     </div>
     <div class="page" id="page-explore">
-      <h3 style="padding:15px;">Khám phá</h3>
-      <div style="padding: 10px 15px;">
-        <input type="text" id="search-input" placeholder="Tìm kiếm người dùng..." style="width:100%; padding:10px; border:1px solid #dbdbdb; border-radius:8px;">
-      </div>
-      <div id="user-list"></div>
-      <div id="explore-grid" style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:3px; margin-top:15px;"></div>
+      <div style="padding:15px;"><input type="text" id="search-input" placeholder="Tìm kiếm người dùng..." style="width:100%; padding:10px; border-radius:10px; border:1px solid #dbdbdb; margin-bottom:10px;"></div>
+      <div id="explore-grid" style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:3px; padding:0 5px;"></div>
     </div>
     <div class="page" id="page-reels">
       <div id="reels-container" style="height:100vh; overflow-y:scroll; scroll-snap-type: y mandatory;"></div>
@@ -124,9 +104,9 @@
       <div style="padding:20px;">
         <input type="file" id="post-files" accept="image/*,video/*" multiple>
         <div id="preview-container" style="display:flex; flex-wrap:wrap; gap:5px; margin:10px 0;"></div>
-        <textarea id="post-caption" placeholder="Caption..." style="width:100%; padding:10px; border:1px solid #dbdbdb; border-radius:8px; height:80px;"></textarea>
-        <input type="text" id="post-hashtags" placeholder="#hashtags cách nhau dấu cách" style="width:100%; padding:10px; border:1px solid #dbdbdb; border-radius:8px; margin-top:10px;">
-        <button id="btn-submit-post" style="background:#0095f6; color:white; border:none; padding:12px; border-radius:10px; width:100%; margin-top:10px;">Đăng</button>
+        <textarea id="post-caption" placeholder="Caption..."></textarea>
+        <input type="text" id="post-hashtags" placeholder="#hashtags cách nhau dấu cách">
+        <button id="btn-submit-post">Đăng</button>
       </div>
     </div>
     <div class="page" id="page-profile">
@@ -142,18 +122,27 @@
     </div>
   </div>
 
-  <!-- Modals -->
+  <div class="overlay" id="menu-overlay"></div>
+  <div class="side-menu" id="side-menu">
+    <i class="fas fa-times" id="close-menu" style="align-self:flex-end; font-size:24px;"></i>
+    <div class="menu-item" data-action="profile" style="padding:12px 0; cursor:pointer;">Trang cá nhân</div>
+    <div class="menu-item" data-action="edit-profile" style="padding:12px 0; cursor:pointer;">Chỉnh sửa hồ sơ</div>
+    <div class="menu-item" data-action="saved" style="padding:12px 0; cursor:pointer;">Đã lưu</div>
+    <div class="menu-item" data-action="report" style="padding:12px 0; cursor:pointer;">Báo cáo</div>
+    <div class="menu-item" data-action="logout" style="padding:12px 0; cursor:pointer;">Đăng xuất</div>
+  </div>
+
   <div class="modal" id="story-modal">
-    <div class="modal-content" style="background:black; color:white; text-align:center; width:100%; max-width:500px; height:80%; position:relative;">
+    <div class="modal-content" style="background:black; color:white; text-align:center; width:100%; max-width:500px; height:80%;">
       <img id="story-img" style="width:100%; height:100%; object-fit:contain; display:none;">
       <video id="story-video" style="width:100%; height:100%; object-fit:contain; display:none;" controls autoplay></video>
-      <button id="btn-close-story" style="position:absolute; top:10px; right:10px; background:white; color:black; border:none; border-radius:50%; width:30px; height:30px;">X</button>
+      <button id="btn-close-story" style="position:absolute; top:10px; right:10px; background:white; color:black;">X</button>
     </div>
   </div>
 
   <div class="modal" id="chat-modal">
     <div class="modal-content" style="height:90%; display:flex; flex-direction:column; max-width:500px;">
-      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+      <div style="display:flex; justify-content:space-between; align-items:center;">
         <h3 id="chat-username">Chat</h3>
         <button id="btn-back-chat" style="background:none; border:none; color:#0095f6; font-size:16px;"><i class="fas fa-arrow-left"></i> Quay lại</button>
       </div>
@@ -180,22 +169,13 @@
       <label>Avatar:</label>
       <input type="file" id="edit-avatar-file" accept="image/*">
       <button id="btn-save-edit">Lưu</button>
-      <button id="btn-close-edit" style="background:#ed4956; margin-top:5px;">Hủy</button>
-    </div>
-  </div>
-
-  <div class="modal" id="notif-modal">
-    <div class="modal-content">
-      <h3>Thông báo</h3>
-      <div id="notif-list"></div>
-      <button id="btn-close-notif" style="background:#ed4956; margin-top:10px;">Đóng</button>
     </div>
   </div>
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
     import { getAuth, signInWithPopup, GoogleAuthProvider, FacebookAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-    import { getFirestore, collection, addDoc, query, orderBy, onSnapshot, doc, updateDoc, arrayUnion, arrayRemove, serverTimestamp, where, getDocs, setDoc, getDoc, limit, startAfter } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+    import { getFirestore, collection, addDoc, query, orderBy, onSnapshot, doc, updateDoc, arrayUnion, arrayRemove, serverTimestamp, where, getDocs, setDoc, getDoc, limit, startAfter, deleteDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyBJ3DAWyschGA6fM5VmBndLI0cGSaFF46U",
@@ -216,15 +196,15 @@
     let currentUser = null;
     let currentChatUser = null;
     let unsubscribes = {};
+    let allUsersCache = null;
     let lastPostDoc = null;
     let isLoadingPosts = false;
-    let allUsersCache = null;
 
-    // ===================== AUTH =====================
-    document.getElementById('google-login').addEventListener('click', () => signInWithPopup(auth, googleProvider).catch(alert));
-    document.getElementById('facebook-login').addEventListener('click', () => signInWithPopup(auth, facebookProvider).catch(alert));
+    // ---------- AUTH ----------
+    document.getElementById('google-login').onclick = () => signInWithPopup(auth, googleProvider).catch(e => alert(e.message));
+    document.getElementById('facebook-login').onclick = () => signInWithPopup(auth, facebookProvider).catch(e => alert(e.message));
 
-    onAuthStateChanged(auth, async (user) => {
+    onAuthStateChanged(auth, async user => {
       if (user) {
         currentUser = user;
         document.getElementById('login-screen').style.display = 'none';
@@ -254,23 +234,23 @@
           followers: {},
           following: {},
           saved: [],
-          blocked: [],
+          blocked: {},
           createdAt: serverTimestamp()
         });
       }
     }
 
-    // ===================== UPLOAD IMGBB =====================
-    async function uploadToImgBB(file) {
+    // ---------- IMGBB UPLOAD ----------
+    async function uploadImgBB(file) {
       const fd = new FormData();
       fd.append('image', file);
       const res = await fetch(`https://api.imgbb.com/1/upload?key=${IMGBB_API_KEY}`, { method: 'POST', body: fd });
       const data = await res.json();
-      if (!data.success) throw new Error(data.error?.message || 'Upload failed');
+      if (!data.success) throw new Error(data.error?.message || 'Upload lỗi');
       return data.data.url;
     }
 
-    // ===================== NAVIGATION =====================
+    // ---------- NAVIGATION ----------
     const pages = {
       home: document.getElementById('page-home'),
       explore: document.getElementById('page-explore'),
@@ -278,25 +258,23 @@
       post: document.getElementById('page-post'),
       profile: document.getElementById('page-profile')
     };
-    const navIcons = document.querySelectorAll('.bottom-nav i');
-
-    navIcons.forEach(icon => {
+    document.querySelectorAll('.bottom-nav i').forEach(icon => {
       icon.addEventListener('click', () => navigateTo(icon.dataset.page));
     });
 
     function navigateTo(page) {
-      navIcons.forEach(i => i.classList.remove('active'));
+      document.querySelectorAll('.bottom-nav i').forEach(i => i.classList.remove('active'));
       document.querySelector(`[data-page="${page}"]`).classList.add('active');
       Object.values(pages).forEach(p => p.classList.remove('active'));
       pages[page].classList.add('active');
 
       if (page === 'home') { loadStories(); loadFeed(); }
-      else if (page === 'explore') { loadExplore(); allUsersCache = null; }
+      else if (page === 'explore') loadExplore();
       else if (page === 'reels') loadReels();
       else if (page === 'profile') loadProfile(currentUser.uid);
     }
 
-    // ===================== STORIES =====================
+    // ---------- STORIES ----------
     async function loadStories() {
       const container = document.getElementById('stories-container');
       container.innerHTML = '';
@@ -317,17 +295,17 @@
         const userData = userDoc.data();
         const div = document.createElement('div');
         div.className = 'story-item';
-        const thumb = u.stories[0].mediaType === 'video'
-          ? `<video src="${u.stories[0].mediaUrl}" muted autoplay loop></video>`
-          : `<img src="${u.stories[0].mediaUrl}">`;
+        const thumb = u.stories[0].mediaType === 'video' ?
+          `<video src="${u.stories[0].mediaUrl}" muted autoplay loop></video>` :
+          `<img src="${u.stories[0].mediaUrl}">`;
         div.innerHTML = `<div class="story-ring">${thumb}</div><span>${userData.displayName}</span>`;
-        div.addEventListener('click', () => viewStory(u.stories));
+        div.onclick = () => viewStory(u.stories);
         container.appendChild(div);
       }
       const myDiv = document.createElement('div');
       myDiv.className = 'story-item';
       myDiv.innerHTML = `<div class="story-ring" style="background:#ddd; display:flex; align-items:center; justify-content:center;"><i class="fas fa-plus" style="color:#0095f6;"></i></div><span>Bạn</span>`;
-      myDiv.addEventListener('click', () => navigateTo('post'));
+      myDiv.onclick = () => navigateTo('post');
       container.appendChild(myDiv);
     }
 
@@ -356,7 +334,7 @@
       document.getElementById('btn-close-story').onclick = () => { clearInterval(timer); modal.style.display = 'none'; };
     }
 
-    // ===================== FEED =====================
+    // ---------- FEED ----------
     function loadFeed() {
       document.getElementById('feed-container').innerHTML = '';
       lastPostDoc = null;
@@ -367,9 +345,9 @@
       if (isLoadingPosts) return;
       isLoadingPosts = true;
       document.getElementById('feed-loader').style.display = 'block';
-      const q = lastPostDoc
-        ? query(collection(db, "posts"), orderBy("createdAt", "desc"), startAfter(lastPostDoc), limit(5))
-        : query(collection(db, "posts"), orderBy("createdAt", "desc"), limit(5));
+      const q = lastPostDoc ?
+        query(collection(db, "posts"), orderBy("createdAt", "desc"), startAfter(lastPostDoc), limit(5)) :
+        query(collection(db, "posts"), orderBy("createdAt", "desc"), limit(5));
       const snap = await getDocs(q);
       if (!snap.empty) {
         snap.forEach(doc => { renderPost(doc.data(), doc.id); lastPostDoc = doc; });
@@ -388,38 +366,37 @@
       const liked = post.likes?.includes(currentUser.uid);
       const div = document.createElement('div');
       div.className = 'post';
-      const mediaHTML = post.mediaUrls?.map(url => {
-        const isVideo = url.match(/\.(mp4|webm|ogg)$/i);
-        return isVideo ? `<video class="post-media" src="${url}" controls></video>` : `<img class="post-media" src="${url}" loading="lazy">`;
-      }).join('') || `<img class="post-media" src="${post.mediaUrl}">`;
+      const media = post.mediaUrls?.map(url =>
+        url.match(/\.(mp4|webm|ogg)$/i) ? `<video class="post-media" src="${url}" controls></video>` : `<img class="post-media" src="${url}" loading="lazy">`
+      ).join('') || `<img class="post-media" src="${post.mediaUrl || 'https://via.placeholder.com/400'}">`;
       div.innerHTML = `
         <div class="post-header" data-uid="${post.uid}">
           <img src="${post.userAvatar || 'https://via.placeholder.com/32'}">
           <span class="username">${post.username}</span>
         </div>
-        <div class="post-media-container">${mediaHTML}</div>
+        <div>${media}</div>
         <div class="post-actions">
           <i class="${liked ? 'fas fa-heart liked' : 'far fa-heart'}" data-id="${id}"></i>
           <i class="far fa-comment"></i>
           <i class="far fa-paper-plane share-btn" data-id="${id}"></i>
           <i class="far fa-bookmark save-btn" data-id="${id}"></i>
         </div>
-        <div class="post-likes">${post.likes?.length || 0} lượt thích</div>
-        <div class="post-caption"><span class="username">${post.username}</span> ${post.caption} ${post.hashtags?.map(t=>'#'+t).join(' ')||''}</div>
+        <div class="post-likes">${post.likes?.length || 0} thích</div>
+        <div class="post-caption"><span class="username">${post.username}</span> ${post.caption || ''} ${post.hashtags?.map(t=>'#'+t).join(' ')||''}</div>
         <div class="post-comment-input">
-          <input placeholder="Thêm bình luận..." id="comment-${id}">
+          <input placeholder="Bình luận..." id="comment-${id}">
           <button class="send-comment" data-id="${id}">Đăng</button>
         </div>
       `;
       document.getElementById('feed-container').appendChild(div);
-
+      // Sự kiện
       div.querySelector('.post-header').onclick = () => loadProfile(post.uid);
       div.querySelector('[data-id]').onclick = async (e) => {
         const ref = doc(db, "posts", id);
         if (liked) await updateDoc(ref, { likes: arrayRemove(currentUser.uid) });
         else {
           await updateDoc(ref, { likes: arrayUnion(currentUser.uid) });
-          if (post.uid !== currentUser.uid) addNotification(post.uid, 'like', `${currentUser.displayName} đã thích bài viết của bạn`);
+          if (post.uid !== currentUser.uid) addNotification(post.uid, 'like', `${currentUser.displayName} đã thích bài của bạn`);
         }
       };
       div.querySelector('.send-comment').onclick = async () => {
@@ -427,7 +404,7 @@
         const text = input.value.trim();
         if (!text) return;
         await updateDoc(doc(db, "posts", id), { comments: arrayUnion({ uid: currentUser.uid, username: currentUser.displayName, text, createdAt: new Date().toISOString() }) });
-        if (post.uid !== currentUser.uid) addNotification(post.uid, 'comment', `${currentUser.displayName} đã bình luận: "${text}"`);
+        if (post.uid !== currentUser.uid) addNotification(post.uid, 'comment', `${currentUser.displayName}: ${text}`);
         input.value = '';
       };
       div.querySelector('.save-btn').onclick = async () => {
@@ -444,8 +421,8 @@
       };
     }
 
-    // ===================== POST UPLOAD =====================
-    document.getElementById('post-files').addEventListener('change', function() {
+    // ---------- POST UPLOAD ----------
+    document.getElementById('post-files').onchange = function() {
       const preview = document.getElementById('preview-container');
       preview.innerHTML = '';
       for (const file of this.files) {
@@ -458,67 +435,65 @@
         };
         reader.readAsDataURL(file);
       }
-    });
+    };
 
-    document.getElementById('btn-submit-post').addEventListener('click', async () => {
+    document.getElementById('btn-submit-post').onclick = async () => {
       const files = document.getElementById('post-files').files;
       const caption = document.getElementById('post-caption').value.trim();
       const hashtags = document.getElementById('post-hashtags').value.split(' ').filter(t => t.startsWith('#')).map(t => t.slice(1));
       if (!files.length) return alert("Chọn ảnh/video");
-      const mediaUrls = [];
-      for (const file of files) mediaUrls.push(await uploadToImgBB(file));
+      const urls = [];
+      for (const file of files) urls.push(await uploadImgBB(file));
       const userData = (await getDoc(doc(db, "users", currentUser.uid))).data();
       await addDoc(collection(db, "posts"), {
         uid: currentUser.uid,
         username: userData.displayName,
-        userAvatar: userData.photoURL || currentUser.photoURL,
-        mediaUrls,
+        userAvatar: userData.photoURL,
+        mediaUrls: urls,
         mediaType: files[0].type.startsWith('video') ? 'video' : 'image',
-        caption,
-        hashtags,
-        likes: [],
-        comments: [],
+        caption, hashtags,
+        likes: [], comments: [],
         createdAt: serverTimestamp()
       });
       document.getElementById('post-files').value = '';
       document.getElementById('preview-container').innerHTML = '';
       document.getElementById('post-caption').value = '';
       document.getElementById('post-hashtags').value = '';
-      alert("Đã đăng bài!");
+      alert("Đã đăng!");
       navigateTo('home');
-    });
+    };
 
-    // ===================== REELS =====================
+    // ---------- REELS ----------
     async function loadReels() {
       const container = document.getElementById('reels-container');
       container.innerHTML = '';
-      const q = query(collection(db, "posts"), where("mediaType", "==", "video"), orderBy("createdAt", "desc"), limit(10));
-      const snap = await getDocs(q);
+      const snap = await getDocs(query(collection(db, "posts"), where("mediaType", "==", "video"), orderBy("createdAt", "desc"), limit(10)));
       snap.forEach(doc => {
-        const reel = doc.data();
+        const d = doc.data();
         const div = document.createElement('div');
         div.className = 'reel-item';
-        div.innerHTML = `<video src="${reel.mediaUrls[0]}" loop controls></video><div class="reel-info">${reel.username}: ${reel.caption}</div>`;
+        div.innerHTML = `<video src="${d.mediaUrls[0]}" controls></video><div class="reel-info">${d.username}: ${d.caption}</div>`;
         container.appendChild(div);
       });
     }
 
-    // ===================== EXPLORE =====================
+    // ---------- EXPLORE ----------
     async function loadExplore() {
       const grid = document.getElementById('explore-grid');
       grid.innerHTML = '';
       const snap = await getDocs(query(collection(db, "posts"), orderBy("createdAt", "desc"), limit(12)));
       snap.forEach(doc => {
-        const post = doc.data();
+        const p = doc.data();
         const el = document.createElement('img');
-        el.src = post.mediaUrls?.[0] || post.mediaUrl;
+        el.src = p.mediaUrls?.[0] || p.mediaUrl;
         el.style.width = '100%'; el.style.aspectRatio = '1/1'; el.style.objectFit = 'cover';
-        el.onclick = () => loadProfile(post.uid);
+        el.onclick = () => loadProfile(p.uid);
         grid.appendChild(el);
       });
+      document.getElementById('search-input').value = '';
     }
 
-    // ===================== PROFILE =====================
+    // ---------- PROFILE ----------
     async function loadProfile(uid) {
       const container = document.getElementById('profile-content');
       container.innerHTML = 'Đang tải...';
@@ -541,7 +516,7 @@
             <p>${data.bio || ''}</p>
             <a href="${data.website || '#'}" target="_blank">${data.website || ''}</a>
             <div style="margin-top:10px;">
-              ${isMe ? '<button class="btn" id="edit-profile-btn">Chỉnh sửa</button>' : 
+              ${isMe ? '<button class="btn" id="edit-profile-btn">Chỉnh sửa</button>' :
                 `<button class="btn btn-primary" id="follow-btn">${isFollowing ? 'Bỏ theo dõi' : 'Theo dõi'}</button>
                 <button class="btn" id="block-btn">Chặn</button>
                 <button class="btn" id="report-btn">Báo cáo</button>`}
@@ -580,40 +555,38 @@
       });
     }
 
-    document.getElementById('btn-save-edit').addEventListener('click', async () => {
+    document.getElementById('btn-save-edit').onclick = async () => {
       const updates = {
         username: document.getElementById('edit-username').value.trim(),
         displayName: document.getElementById('edit-displayname').value.trim(),
         bio: document.getElementById('edit-bio').value.trim(),
         website: document.getElementById('edit-website').value.trim()
       };
-      const avatarFile = document.getElementById('edit-avatar-file').files[0];
-      if (avatarFile) updates.photoURL = await uploadToImgBB(avatarFile);
+      const file = document.getElementById('edit-avatar-file').files[0];
+      if (file) updates.photoURL = await uploadImgBB(file);
       await updateDoc(doc(db, "users", currentUser.uid), updates);
       document.getElementById('edit-modal').style.display = 'none';
       loadProfile(currentUser.uid);
-    });
-
-    document.getElementById('btn-close-edit').addEventListener('click', () => document.getElementById('edit-modal').style.display = 'none');
+    };
 
     async function toggleFollow(uid) {
-      const myRef = doc(db, "users", currentUser.uid);
-      const targetRef = doc(db, "users", uid);
-      const targetSnap = await getDoc(targetRef);
-      const isFollow = targetSnap.data().followers?.[currentUser.uid];
+      const me = doc(db, "users", currentUser.uid);
+      const target = doc(db, "users", uid);
+      const snap = await getDoc(target);
+      const isFollow = snap.data().followers?.[currentUser.uid];
       if (isFollow) {
-        await updateDoc(targetRef, { [`followers.${currentUser.uid}`]: false });
-        await updateDoc(myRef, { [`following.${uid}`]: false });
+        await updateDoc(target, { [`followers.${currentUser.uid}`]: false });
+        await updateDoc(me, { [`following.${uid}`]: false });
       } else {
-        await updateDoc(targetRef, { [`followers.${currentUser.uid}`]: true });
-        await updateDoc(myRef, { [`following.${uid}`]: true });
-        addNotification(uid, 'follow', `${currentUser.displayName} đã theo dõi bạn`);
+        await updateDoc(target, { [`followers.${currentUser.uid}`]: true });
+        await updateDoc(me, { [`following.${uid}`]: true });
+        addNotification(uid, 'follow', `${currentUser.displayName} theo dõi bạn`);
       }
       loadProfile(uid);
     }
 
     async function blockUser(uid) {
-      if (!confirm("Chặn người dùng này?")) return;
+      if (!confirm("Chặn người này?")) return;
       await updateDoc(doc(db, "users", currentUser.uid), { [`blocked.${uid}`]: true });
       alert("Đã chặn");
     }
@@ -625,51 +598,50 @@
       alert("Đã gửi báo cáo");
     }
 
-    // ===================== SEARCH =====================
+    // ---------- SEARCH ----------
     document.getElementById('search-input').addEventListener('input', async (e) => {
       const kw = e.target.value.trim().toLowerCase();
-      const list = document.getElementById('user-list');
-      if (!list) return;
-      if (!kw) { list.innerHTML = ''; return; }
-      if (!allUsersCache) {
-        const snap = await getDocs(collection(db, "users"));
-        allUsersCache = [];
-        snap.forEach(doc => { if (doc.id !== currentUser.uid) allUsersCache.push({ id: doc.id, ...doc.data() }); });
+      const grid = document.getElementById('explore-grid');
+      if (kw) {
+        if (!allUsersCache) {
+          const snap = await getDocs(collection(db, "users"));
+          allUsersCache = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+        }
+        const filtered = allUsersCache.filter(u => u.displayName?.toLowerCase().includes(kw) || u.username?.toLowerCase().includes(kw));
+        grid.innerHTML = '';
+        filtered.forEach(u => {
+          const div = document.createElement('div');
+          div.style.display = 'flex'; div.style.alignItems = 'center'; div.style.padding = '10px';
+          div.innerHTML = `<img src="${u.photoURL || 'https://via.placeholder.com/44'}" style="width:44px;height:44px;border-radius:50%; margin-right:10px;"><span>${u.displayName}</span>`;
+          div.onclick = () => loadProfile(u.id);
+          grid.appendChild(div);
+        });
+      } else {
+        loadExplore();
       }
-      list.innerHTML = '';
-      const filtered = allUsersCache.filter(u => u.displayName?.toLowerCase().includes(kw) || u.username?.toLowerCase().includes(kw));
-      filtered.forEach(u => {
-        const li = document.createElement('div');
-        li.className = 'user-item';
-        li.innerHTML = `<img src="${u.photoURL || 'https://via.placeholder.com/44'}"><span class="name">${u.displayName}</span>`;
-        li.onclick = () => loadProfile(u.id);
-        list.appendChild(li);
-      });
     });
 
-    // ===================== CHAT =====================
-    document.getElementById('btn-chat').addEventListener('click', () => {
-      document.getElementById('chat-modal').style.display = 'flex';
-      loadChatList();
-    });
+    // ---------- CHAT ----------
+    document.getElementById('btn-chat').onclick = () => { document.getElementById('chat-modal').style.display = 'flex'; loadChatList(); };
 
     async function loadChatList() {
-      const chatList = document.getElementById('chat-list');
-      const chatWindow = document.getElementById('chat-window');
-      chatList.style.display = 'block'; chatWindow.style.display = 'none';
-      const mySnap = await getDoc(doc(db, "users", currentUser.uid));
-      const following = mySnap.data()?.following || {};
-      chatList.innerHTML = '';
+      document.getElementById('chat-list').style.display = 'block';
+      document.getElementById('chat-window').style.display = 'none';
+      const snap = await getDoc(doc(db, "users", currentUser.uid));
+      const following = snap.data()?.following || {};
+      const list = document.getElementById('chat-list');
+      list.innerHTML = '';
       for (const uid in following) {
         if (!following[uid]) continue;
-        const userSnap = await getDoc(doc(db, "users", uid));
-        if (!userSnap.exists()) continue;
-        const data = userSnap.data();
+        const u = await getDoc(doc(db, "users", uid));
+        if (!u.exists()) continue;
+        const d = u.data();
         const div = document.createElement('div');
         div.className = 'user-item';
-        div.innerHTML = `<img src="${data.photoURL || 'https://via.placeholder.com/44'}"><span class="name">${data.displayName}</span>`;
-        div.onclick = () => openChat(uid, data.displayName);
-        chatList.appendChild(div);
+        div.style.cssText = 'display:flex; align-items:center; gap:10px; padding:10px;';
+        div.innerHTML = `<img src="${d.photoURL || 'https://via.placeholder.com/44'}" style="width:44px;height:44px;border-radius:50%;"><span>${d.displayName}</span>`;
+        div.onclick = () => openChat(uid, d.displayName);
+        list.appendChild(div);
       }
     }
 
@@ -716,35 +688,19 @@
     document.getElementById('chat-file').onchange = async function() {
       const file = this.files[0];
       if (!file || !currentChatUser) return;
-      const url = await uploadToImgBB(file);
+      const url = await uploadImgBB(file);
       const type = file.type.startsWith('video') ? 'video' : 'image';
       const chatId = [currentUser.uid, currentChatUser].sort().join('_');
       await addDoc(collection(db, "messages"), { chatId, from: currentUser.uid, to: currentChatUser, text: url, type, createdAt: serverTimestamp() });
     };
 
-    document.getElementById('btn-back-chat').addEventListener('click', () => {
-      document.getElementById('chat-window').style.display = 'none';
-      document.getElementById('chat-list').style.display = 'block';
-    });
-
-    // ===================== NOTIFICATIONS =====================
+    // ---------- NOTIFICATIONS ----------
     function listenNotifications() {
       const q = query(collection(db, "notifications"), where("to", "==", currentUser.uid), orderBy("createdAt", "desc"), limit(20));
       onSnapshot(q, snap => {
         let count = 0;
-        const notifList = document.getElementById('notif-list');
-        if (notifList) notifList.innerHTML = '';
-        snap.forEach(doc => {
-          const d = doc.data();
-          if (!d.read) count++;
-          if (notifList) {
-            const p = document.createElement('p');
-            p.textContent = d.message + ' (' + new Date(d.createdAt?.toDate()).toLocaleTimeString() + ')';
-            notifList.appendChild(p);
-          }
-        });
-        const badge = document.getElementById('btn-notif');
-        if (badge) badge.dataset.count = count;
+        snap.forEach(doc => { if (!doc.data().read) count++; });
+        document.getElementById('btn-notif').dataset.count = count;
       });
     }
 
@@ -752,39 +708,31 @@
       await addDoc(collection(db, "notifications"), { to, from: currentUser.uid, type, message, read: false, createdAt: serverTimestamp() });
     }
 
-    document.getElementById('btn-notif').addEventListener('click', () => {
-      document.getElementById('notif-modal').style.display = 'flex';
-    });
-    document.getElementById('btn-close-notif').addEventListener('click', () => {
-      document.getElementById('notif-modal').style.display = 'none';
-    });
-
-    // ===================== SIDE MENU =====================
-    document.getElementById('menu-btn').addEventListener('click', () => {
+    // ---------- SIDE MENU ----------
+    document.getElementById('menu-btn').onclick = () => {
       document.getElementById('side-menu').classList.add('open');
       document.getElementById('menu-overlay').classList.add('show');
-    });
-    document.getElementById('close-menu').addEventListener('click', () => {
+    };
+    document.getElementById('close-menu').onclick = () => {
       document.getElementById('side-menu').classList.remove('open');
       document.getElementById('menu-overlay').classList.remove('show');
-    });
-    document.getElementById('menu-overlay').addEventListener('click', () => {
-      document.getElementById('side-menu').classList.remove('open');
-      document.getElementById('menu-overlay').classList.remove('show');
-    });
+    };
     document.querySelectorAll('.menu-item').forEach(item => {
-      item.addEventListener('click', () => {
-        const action = item.dataset.action;
+      item.onclick = () => {
+        const act = item.dataset.action;
+        if (act === 'profile') navigateTo('profile');
+        else if (act === 'edit-profile') openEditProfile();
+        else if (act === 'logout') signOut(auth);
+        else if (act === 'saved') { alert('Tính năng xem bài đã lưu sẽ được bổ sung sau.'); }
         document.getElementById('side-menu').classList.remove('open');
         document.getElementById('menu-overlay').classList.remove('show');
-        if (action === 'profile') navigateTo('profile');
-        else if (action === 'edit-profile') openEditProfile();
-        else if (action === 'logout') signOut(auth);
-      });
+      };
     });
 
-    // Khởi tạo
-    console.log('Dunukha Pro Max đã sẵn sàng!');
+    // Close modals on overlay click
+    window.onclick = (e) => {
+      if (e.target.classList.contains('modal')) e.target.style.display = 'none';
+    };
   </script>
 </body>
 </html>

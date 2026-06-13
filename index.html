@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Dunukha</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; }
+    body { background: #fafafa; display: flex; justify-content: center; }
+    #app { max-width: 500px; width: 100%; background: #fff; min-height: 100vh; display: none; flex-direction: column; position: relative; }
+    .header { display: flex; align-items: center; justify-content: space-between; padding: 10px 15px; border-bottom: 1px solid #dbdbdb; background: #fff; position: sticky; top: 0; z-index: 10; }
+    .logo-text { font-size: 26px; font-weight: 700; color: #262626; letter-spacing: 1px; font-family: 'Segoe UI', cursive; }
+    .logo-text span { color: #0095f6; }
+    .header .icons i { font-size: 22px; margin-left: 18px; cursor: pointer; }
+    .tabs { display: flex; justify-content: space-around; border-bottom: 1px solid #dbdbdb; background: #fff; }
+    .tab { flex: 1; text-align: center; padding: 10px 0; font-weight: 500; font-size: 14px; color: #8e8e8e; cursor: pointer; }
+    .tab.active { color: #0095f6; border-bottom: 2px solid #0095f6; }
+    .tab-content { display: none; flex: 1; flex-direction: column; }
+    .tab-content.active { display: flex; }
+    .feed { flex: 1; display: flex; flex-direction: column; gap: 20px; padding: 0 0 60px; }
+    .post { background: #fff; border: 1px solid #dbdbdb; border-radius: 4px; }
+    .post-header { display: flex; align-items: center; gap: 10px; padding: 12px 15px; cursor: pointer; }
+    .post-header .avatar { width: 32px; height: 32px; border-radius: 50%; object-fit: cover; }
+    .post-header .username { font-weight: 600; font-size: 14px; }
+    .post-image { width: 100%; height: auto; max-height: 500px; object-fit: cover; }
+    .post-actions { padding: 10px 15px; display: flex; gap: 15px; }
+    .post-actions i { font-size: 24px; cursor: pointer; }
+    .post-actions i.liked { color: #ed4956; }
+    .post-likes { padding: 0 15px 5px; font-weight: 600; font-size: 14px; }
+    .post-caption { padding: 0 15px 10px; font-size: 14px; }
+    .post-caption .username { font-weight: 600; margin-right: 5px; }
+    .post-comments { padding: 0 15px; font-size: 14px; color: #8e8e8e; cursor: pointer; margin-bottom: 5px; }
+    .post-comment-input { display: flex; border-top: 1px solid #efefef; padding: 10px 15px; }
+    .post-comment-input input { flex: 1; border: none; outline: none; font-size: 14px; }
+    .post-comment-input button { background: none; border: none; color: #0095f6; font-weight: 600; cursor: pointer; }
+    .profile { padding: 20px; }
+    .profile-header { display: flex; align-items: center; gap: 20px; margin-bottom: 20px; }
+    .profile-avatar { width: 80px; height: 80px; border-radius: 50%; object-fit: cover; }
+    .profile-info { flex: 1; }
+    .profile-info h2 { font-size: 20px; margin-bottom: 5px; }
+    .profile-stats { display: flex; gap: 20px; margin: 10px 0; }
+    .profile-stats div { text-align: center; cursor: pointer; }
+    .profile-stats span { font-weight: 600; }
+    .edit-profile { background: #efefef; border: none; padding: 6px 12px; border-radius: 4px; font-weight: 600; cursor: pointer; }
+    .profile-posts { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 3px; }
+    .profile-post-img { width: 100%; aspect-ratio: 1/1; object-fit: cover; cursor: pointer; }
+    .search-bar { padding: 10px 15px; border-bottom: 1px solid #dbdbdb; }
+    .search-bar input { width: 100%; padding: 8px 12px; background: #efefef; border: none; border-radius: 6px; }
+    .user-list { flex: 1; overflow-y: auto; }
+    .user-item { display: flex; align-items: center; gap: 12px; padding: 10px 15px; border-bottom: 1px solid #f0f0f0; }
+    .user-item img { width: 44px; height: 44px; border-radius: 50%; object-fit: cover; }
+    .user-item .name { font-weight: 600; }
+    .follow-btn { margin-left: auto; background: #0095f6; color: white; border: none; padding: 6px 16px; border-radius: 6px; font-weight: 600; cursor: pointer; }
+    .follow-btn.following { background: #efefef; color: #262626; }
+    .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); justify-content: center; align-items: center; z-index: 20; }
+    .modal-content { background: #fff; padding: 20px; border-radius: 12px; width: 90%; max-width: 400px; }
+    .modal-content input, .modal-content textarea { width: 100%; padding: 10px; margin: 8px 0; border: 1px solid #dbdbdb; border-radius: 4px; }
+    .modal-content button { background: #0095f6; color: #fff; border: none; padding: 10px; border-radius: 8px; width: 100%; font-weight: 600; cursor: pointer; margin-top: 5px; }
+    #login-screen { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; background: #fafafa; }
+    #login-screen button { background: #0095f6; color: #fff; border: none; padding: 12px 24px; border-radius: 8px; font-size: 16px; cursor: pointer; }
+  </style>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+  <div id="login-screen">
+    <div style="font-size:42px;font-weight:700;margin-bottom:20px;"><span style="color:#0095f6;">D</span>unukha</div>
+    <button id="google-login"><i class="fab fa-google"></i> Đăng nhập với Google</button>
+  </div>
+
+  <div id="app">
+    <div class="header">
+      <div class="logo-text"><span>D</span>unukha</div>
+      <div class="icons">
+        <i class="far fa-paper-plane" id="btn-messages" title="Tin nhắn"></i>
+        <i class="far fa-bell" id="btn-notifications" title="Thông báo"></i>
+      </div>
+    </div>
+
+    <div class="tabs" id="tabs">
+      <div class="tab active" data-tab="home">🏠 Home</div>
+      <div class="tab" data-tab="search">🔍 Search</div>
+      <div class="tab" data-tab="add-post">+ Post</div>
+      <div class="tab" data-tab="profile">👤 Profile</div>
+    </div>
+
+    <div class="tab-content active" id="tab-home">
+      <div class="feed" id="feed-container"></div>
+    </div>
+
+    <div class="tab-content" id="tab-search">
+      <div class="search-bar">
+        <input type="text" id="search-input" placeholder="Tìm kiếm người dùng...">
+      </div>
+      <div class="user-list" id="user-list"></div>
+    </div>
+
+    <div class="tab-content" id="tab-add-post">
+      <div class="modal-content" style="margin: 20px auto; width: 90%;">
+        <h3>Tạo bài viết mới</h3>
+        <input type="text" id="post-image-url" placeholder="Link ảnh (dán URL ảnh online)">
+        <textarea id="post-caption" placeholder="Viết caption..."></textarea>
+        <button id="btn-submit-post">Đăng</button>
+      </div>
+    </div>
+
+    <div class="tab-content" id="tab-profile">
+      <div class="profile" id="profile-content"></div>
+    </div>
+  </div>
+
+  <!-- Modal edit profile -->
+  <div class="modal" id="edit-profile-modal">
+    <div class="modal-content">
+      <h3>Chỉnh sửa trang cá nhân</h3>
+      <input type="text" id="edit-name" placeholder="Tên hiển thị">
+      <input type="text" id="edit-bio" placeholder="Bio">
+      <input type="text" id="edit-avatar" placeholder="Link avatar mới">
+      <button id="btn-save-profile">Lưu</button>
+      <button style="background:#ed4956;" id="btn-close-edit-modal">Hủy</button>
+    </div>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+    import { getFirestore, collection, addDoc, query, orderBy, onSnapshot, doc, updateDoc, arrayUnion, arrayRemove, serverTimestamp, where, getDocs, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+    // 🔁 THAY THẾ BẰNG CẤU HÌNH CỦA BẠN
+    const firebaseConfig = {
+      apiKey: "AIzaSyBJ3DAWyschGA6fM5VmBndLI0cGSaFF46U",
+      authDomain: "dunukhasite.firebaseapp.com",
+      projectId: "dunukhasite",
+      storageBucket: "dunukhasite.firebasestorage.app",
+      messagingSenderId: "841226738327",
+      appId: "1:841226738327:web:5e0192799adbe1179067d2"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+    const provider = new GoogleAuthProvider();
+
+    let currentUser = null;
+    let currentTab = 'home';
+
+    // Elements
+    const loginScreen = document.getElementById('login-screen');
+    const appDiv = document.getElementById('app');
+    const feedContainer = document.getElementById('feed-container');
+    const profileContent = document.getElementById('profile-content');
+    const userList = document.getElementById('user-list');
+    const searchInput = document.getElementById('search-input');
+    const editProfileModal = document.getElementById('edit-profile-modal');
+
+    // Auth
+    document.getElementById('google-login').addEventListener('click', async () => {
+      try { await signInWithPopup(auth, provider); } catch (e) { alert("Lỗi đăng nhập: " + e.message); }
+    });
+
+    onAuthStateChanged(auth, user => {
+      if (user) {
+        currentUser = user;
+        loginScreen.style.display = 'none';
+        appDiv.style.display = 'flex';
+        ensureUserDoc(user);
+        loadFeed();
+        switchTab('home');
+      } else {
+        currentUser = null;
+        loginScreen.style.display = 'flex';
+        appDiv.style.display = 'none';
+      }
+    });
+
+    // Tạo user doc nếu chưa có
+    async function ensureUserDoc(user) {
+      const userRef = doc(db, "users", user.uid);
+      const snap = await getDoc(userRef);
+      if (!snap.exists()) {
+        await setDoc(userRef, {
+          displayName: user.displayName || "Người dùng",
+          email: user.email,
+          photoURL: user.photoURL || "https://via.placeholder.com/150",
+          bio: "",
+          followers: {},
+          following: {},
+          createdAt: serverTimestamp()
+        });
+      }
+    }
+
+    // Tab navigation
+    document.querySelectorAll('.tab').forEach(tab => {
+      tab.addEventListener('click', () => {
+        const tabName = tab.dataset.tab;
+        switchTab(tabName);
+      });
+    });
+
+    function switchTab(tabName) {
+      currentTab = tabName;
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      document.querySelector(`.tab[data-tab="${tabName}"]`).classList.add('active');
+      document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+      document.getElementById(`tab-${tabName}`).classList.add('active');
+
+      if (tabName === 'home') loadFeed();
+      else if (tabName === 'search') loadSearch();
+      else if (tabName === 'profile') loadProfile(currentUser.uid);
+    }
+
+    // Feed
+    function loadFeed() {
+      feedContainer.innerHTML = '';
+      const q = query(collection(db, "posts"), orderBy("createdAt", "desc"));
+      onSnapshot(q, snapshot => {
+        feedContainer.innerHTML = '';
+        snapshot.forEach(docSnap => renderPost(docSnap.data(), docSnap.id));
+      });
+    }
+
+    function renderPost(post, postId) {
+      const liked = post.likes?.includes(currentUser.uid);
+      const div = document.createElement('div');
+      div.className = 'post';
+      div.innerHTML = `
+        <div class="post-header" data-uid="${post.uid}">
+          <img class="avatar" src="${post.userAvatar}" onerror="this.src='https://via.placeholder.com/32'">
+          <span class="username">${post.username}</span>
+        </div>
+        <img class="post-image" src="${post.imageUrl}" onerror="this.src='https://via.placeholder.com/400'">
+        <div class="post-actions">
+          <i class="${liked ? 'fas fa-heart liked' : 'far fa-heart'}" data-action="like" data-id="${postId}"></i>
+          <i class="far fa-comment"></i>
+        </div>
+        <div class="post-likes">${post.likes?.length || 0} lượt thích</div>
+        <div class="post-caption"><span class="username">${post.username}</span>${post.caption}</div>
+        <div class="post-comment-input">
+          <input type="text" placeholder="Thêm bình luận..." id="comment-input-${postId}">
+          <button class="btn-send-comment" data-id="${postId}">Đăng</button>
+        </div>
+      `;
+      feedContainer.appendChild(div);
+
+      // Click vào tên để xem profile
+      div.querySelector('.post-header').addEventListener('click', () => loadProfile(post.uid));
+
+      // Like
+      div.querySelector('[data-action="like"]').addEventListener('click', async (e) => {
+        const id = e.target.dataset.id;
+        const ref = doc(db, "posts", id);
+        if (liked) await updateDoc(ref, { likes: arrayRemove(currentUser.uid) });
+        else await updateDoc(ref, { likes: arrayUnion(currentUser.uid) });
+      });
+
+      // Comment
+      div.querySelector('.btn-send-comment').addEventListener('click', async function() {
+        const id = this.dataset.id;
+        const input = document.getElementById(`comment-input-${id}`);
+        const text = input.value.trim();
+        if (!text) return;
+        await updateDoc(doc(db, "posts", id), {
+          comments: arrayUnion({ uid: currentUser.uid, username: currentUser.displayName || "Ẩn danh", text, createdAt: new Date().toISOString() })
+        });
+        input.value = '';
+      });
+    }
+
+    // Post new
+    document.getElementById('btn-submit-post').addEventListener('click', async () => {
+      const imageUrl = document.getElementById('post-image-url').value.trim();
+      const caption = document.getElementById('post-caption').value.trim();
+      if (!imageUrl) return alert("Cần link ảnh");
+      try {
+        await addDoc(collection(db, "posts"), {
+          uid: currentUser.uid,
+          username: currentUser.displayName || "Người dùng",
+          userAvatar: (await getDoc(doc(db, "users", currentUser.uid))).data()?.photoURL || currentUser.photoURL || 'https://via.placeholder.com/32',
+          imageUrl,
+          caption,
+          likes: [],
+          comments: [],
+          createdAt: serverTimestamp()
+        });
+        document.getElementById('post-image-url').value = '';
+        document.getElementById('post-caption').value = '';
+        alert("Đăng bài thành công!");
+        switchTab('home');
+      } catch (e) { alert("Lỗi: " + e.message); }
+    });
+
+    // Profile
+    async function loadProfile(uid) {
+      profileContent.innerHTML = 'Đang tải...';
+      const userRef = doc(db, "users", uid);
+      const userSnap = await getDoc(userRef);
+      if (!userSnap.exists()) { profileContent.innerHTML = 'Người dùng không tồn tại.'; return; }
+      const userData = userSnap.data();
+      const isMe = uid === currentUser.uid;
+      const following = userData.followers?.[currentUser.uid] || false;
+
+      let followBtnHtml = '';
+      if (!isMe) {
+        followBtnHtml = `<button class="follow-btn ${following ? 'following' : ''}" id="follow-btn">${following ? 'Đang theo dõi' : 'Theo dõi'}</button>`;
+      }
+
+      profileContent.innerHTML = `
+        <div class="profile-header">
+          <img class="profile-avatar" src="${userData.photoURL}" onerror="this.src='https://via.placeholder.com/150'">
+          <div class="profile-info">
+            <h2>${userData.displayName}</h2>
+            <p>${userData.bio || ''}</p>
+            <div class="profile-stats">
+              <div><span>${Object.keys(userData.followers || {}).length}</span> followers</div>
+              <div><span>${Object.keys(userData.following || {}).length}</span> following</div>
+            </div>
+            ${isMe ? '<button class="edit-profile" id="btn-edit-profile">Chỉnh sửa</button>' : followBtnHtml}
+          </div>
+        </div>
+        <h3>Bài viết</h3>
+        <div class="profile-posts" id="profile-posts"></div>
+      `;
+
+      // Load posts của user
+      const postsQuery = query(collection(db, "posts"), where("uid", "==", uid), orderBy("createdAt", "desc"));
+      const postsSnap = await getDocs(postsQuery);
+      const postsContainer = document.getElementById('profile-posts');
+      postsSnap.forEach(doc => {
+        const img = document.createElement('img');
+        img.src = doc.data().imageUrl;
+        img.className = 'profile-post-img';
+        img.onclick = () => alert(doc.data().caption || 'Không có caption');
+        postsContainer.appendChild(img);
+      });
+
+      if (isMe) {
+        document.getElementById('btn-edit-profile').addEventListener('click', openEditProfile);
+      } else {
+        document.getElementById('follow-btn').addEventListener('click', () => toggleFollow(uid));
+      }
+    }
+
+    async function openEditProfile() {
+      const userRef = doc(db, "users", currentUser.uid);
+      const snap = await getDoc(userRef);
+      const data = snap.data();
+      document.getElementById('edit-name').value = data.displayName;
+      document.getElementById('edit-bio').value = data.bio || '';
+      document.getElementById('edit-avatar').value = data.photoURL || '';
+      editProfileModal.style.display = 'flex';
+    }
+
+    document.getElementById('btn-save-profile').addEventListener('click', async () => {
+      const name = document.getElementById('edit-name').value.trim();
+      const bio = document.getElementById('edit-bio').value.trim();
+      const avatar = document.getElementById('edit-avatar').value.trim();
+      if (!name) return alert("Tên không được để trống");
+      try {
+        await updateDoc(doc(db, "users", currentUser.uid), { displayName: name, bio, photoURL: avatar || currentUser.photoURL });
+        editProfileModal.style.display = 'none';
+        loadProfile(currentUser.uid);
+      } catch (e) { alert("Lỗi: " + e.message); }
+    });
+
+    document.getElementById('btn-close-edit-modal').addEventListener('click', () => editProfileModal.style.display = 'none');
+
+    async function toggleFollow(uid) {
+      const myRef = doc(db, "users", currentUser.uid);
+      const targetRef = doc(db, "users", uid);
+      const targetSnap = await getDoc(targetRef);
+      const following = targetSnap.data().followers?.[currentUser.uid];
+
+      if (following) {
+        // Unfollow
+        await updateDoc(targetRef, { [`followers.${currentUser.uid}`]: false });
+        await updateDoc(myRef, { [`following.${uid}`]: false });
+      } else {
+        await updateDoc(targetRef, { [`followers.${currentUser.uid}`]: true });
+        await updateDoc(myRef, { [`following.${uid}`]: true });
+      }
+      loadProfile(uid);
+    }
+
+    // Search
+    function loadSearch() {
+      userList.innerHTML = '';
+      searchInput.value = '';
+      searchInput.addEventListener('input', debounce(async (e) => {
+        const keyword = e.target.value.trim();
+        if (keyword.length === 0) { userList.innerHTML = ''; return; }
+        userList.innerHTML = 'Đang tìm...';
+        const q = query(collection(db, "users"), orderBy("displayName"), startAt(keyword), endAt(keyword + '\uf8ff'));
+        const snap = await getDocs(q);
+        userList.innerHTML = '';
+        snap.forEach(doc => {
+          if (doc.id === currentUser.uid) return;
+          const data = doc.data();
+          const div = document.createElement('div');
+          div.className = 'user-item';
+          div.innerHTML = `
+            <img src="${data.photoURL}" onerror="this.src='https://via.placeholder.com/44'">
+            <div class="name">${data.displayName}</div>
+            <button class="follow-btn" data-uid="${doc.id}">Xem</button>
+          `;
+          userList.appendChild(div);
+          div.querySelector('.follow-btn').addEventListener('click', () => loadProfile(doc.id));
+        });
+      }, 300));
+    }
+
+    function debounce(func, delay) {
+      let timer;
+      return (...args) => {
+        clearTimeout(timer);
+        timer = setTimeout(() => func.apply(this, args), delay);
+      };
+    }
+
+    // Logout
+    document.getElementById('btn-profile')?.addEventListener('click', () => {
+      if (confirm("Bạn muốn đăng xuất?")) signOut(auth);
+    });
+  </script>
+</body>
+</html>

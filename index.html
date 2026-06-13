@@ -77,6 +77,10 @@
 
         .search-result { display: flex; align-items: center; gap: 10px; padding: 10px; border-bottom: 1px solid #efefef; cursor: pointer; }
         .search-result:hover { background: #f5f5f5; }
+        
+        .profile-action-btn { padding: 8px 20px; border: 1px solid #dbdbdb; border-radius: 8px; font-weight: 600; cursor: pointer; background: #fafafa; margin-right: 8px; }
+        .profile-action-btn.primary { background: #0095f6; color: white; border: none; }
+        .profile-action-btn.following { background: #fafafa; color: #262626; border: 1px solid #dbdbdb; }
     </style>
 </head>
 <body>
@@ -171,16 +175,18 @@
         </div>
     </div>
 
-    <div class="modal" id="edit-modal">
+    <div class="modal" id="edit-profile-modal">
         <div class="modal-content">
             <h3>Chỉnh sửa hồ sơ</h3>
-            <input type="text" id="edit-displayname" placeholder="Tên hiển thị">
-            <input type="text" id="edit-username" placeholder="Username">
-            <textarea id="edit-bio" placeholder="Bio"></textarea>
-            <input type="text" id="edit-location" placeholder="Địa điểm">
-            <label>Avatar</label>
-            <input type="file" id="edit-avatar">
-            <button id="save-edit">Lưu</button>
+            <label>Tên hiển thị</label>
+            <input type="text" id="edit-display-name" placeholder="Nhập tên hiển thị mới">
+            <label>Tiểu sử</label>
+            <textarea id="edit-bio" placeholder="Viết tiểu sử của bạn..."></textarea>
+            <label>Ảnh đại diện mới</label>
+            <input type="file" id="edit-avatar-input" accept="image/*">
+            <img id="edit-avatar-preview" style="width:100px; height:100px; border-radius:50%; object-fit:cover; margin:10px 0; display:none;">
+            <button id="save-profile-btn">Lưu thay đổi</button>
+            <button id="cancel-edit-btn" style="background:#ed4956; margin-top:5px;">Hủy</button>
         </div>
     </div>
 

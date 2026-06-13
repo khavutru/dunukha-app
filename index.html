@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Dunukha Pro Max</title>
+  <title>Instagram Clone</title>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
     body { background: #000; display: flex; justify-content: center; }
@@ -12,7 +12,7 @@
     .logo { font-size: 22px; font-weight: 700; } .logo span { color: #0095f6; }
     .header-icons { display: flex; gap: 18px; font-size: 22px; color: #262626; }
     .badge { position: relative; }
-    .badge::after { content: attr(data-count); position: absolute; top: -4px; right: -8px; background: #ed4956; color: #fff; border-radius: 50%; padding: 2px 6px; font-size: 11px; display: none; }
+    .badge::after { content: attr(data-count); position: absolute; top: -4px; right: -8px; background: #ed4956; color: #fff; border-radius: 50%; padding: 2px 5px; font-size: 11px; display: none; }
     .badge[data-count]:not([data-count="0"])::after { display: block; }
     
     .bottom-nav { display: flex; justify-content: space-around; padding: 10px 0; border-top: 1px solid #dbdbdb; background: #fff; position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 480px; z-index: 10; }
@@ -20,20 +20,20 @@
     .bottom-nav i.active { color: #0095f6; }
     .bottom-nav i:active { transform: scale(0.9); }
 
-    .page { display: none; flex: 1; overflow-y: auto; padding-bottom: 80px; }
+    .page { display: none; flex: 1; overflow-y: auto; padding-bottom: 80px; background: #fafafa; }
     .page.active { display: block; }
 
     .stories { display: flex; gap: 12px; padding: 12px 15px; border-bottom: 1px solid #dbdbdb; overflow-x: auto; background: #fff; }
     .story-item { display: flex; flex-direction: column; align-items: center; gap: 4px; cursor: pointer; flex-shrink: 0; }
     .story-ring { width: 64px; height: 64px; border-radius: 50%; background: linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888); padding: 2px; }
-    .story-ring img, .story-ring video { width: 100%; height: 100%; border-radius: 50%; border: 2px solid #fff; object-fit: cover; }
+    .story-ring img { width: 100%; height: 100%; border-radius: 50%; border: 2px solid #fff; object-fit: cover; }
     .story-item span { font-size: 11px; color: #262626; max-width: 70px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
     .post { background: #fff; border: 1px solid #dbdbdb; border-radius: 12px; margin-bottom: 20px; overflow: hidden; }
     .post-header { display: flex; align-items: center; gap: 10px; padding: 12px 15px; cursor: pointer; }
     .post-header img { width: 32px; height: 32px; border-radius: 50%; object-fit: cover; }
     .post-header .username { font-weight: 600; font-size: 14px; }
-    .post-media { width: 100%; max-height: 500px; object-fit: contain; background: #000; }
+    .post-media { width: 100%; max-height: 500px; object-fit: cover; background: #000; }
     .post-actions { padding: 10px 15px 5px; display: flex; gap: 15px; }
     .post-actions i { font-size: 26px; cursor: pointer; transition: 0.15s; }
     .post-actions i:active { transform: scale(1.2); }
@@ -63,7 +63,6 @@
     .btn-primary { background: #0095f6; color: white; border: none; }
     .btn-primary:active { opacity: 0.7; }
 
-    /* Modal */
     .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); justify-content: center; align-items: center; z-index: 30; }
     .modal-content { background: #fff; padding: 25px; border-radius: 16px; width: 90%; max-width: 400px; max-height: 80%; overflow-y: auto; }
     .modal-content input, .modal-content textarea { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #dbdbdb; border-radius: 8px; }
@@ -80,48 +79,55 @@
     .sent .message-bubble { background: #0095f6; color: white; }
     .received .message-bubble { background: #efefef; }
 
-    #login-screen { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; gap: 12px; padding: 20px; }
-    #login-screen h1 { font-size: 3rem; }
-    #login-screen button { padding: 12px 30px; border: none; border-radius: 30px; font-weight: 600; color: #fff; cursor: pointer; background: #db4437; width: 80%; max-width: 300px; }
-    #login-screen button:nth-child(2) { background: #1877f2; }
+    #login-screen { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; gap: 12px; padding: 20px; background: #000; color: #fff; }
+    #login-screen h1 { font-size: 3rem; margin-bottom: 30px; }
+    #login-screen h1 span { color: #0095f6; }
+    #login-screen button { padding: 12px 30px; border: none; border-radius: 30px; font-weight: 600; color: #fff; cursor: pointer; background: #0095f6; width: 80%; max-width: 300px; font-size: 16px; }
+    #login-screen button:active { opacity: 0.8; }
+    #login-screen .demo-hint { font-size: 13px; color: #888; margin-top: 15px; }
 
-    /* scrollbar ẩn */
     ::-webkit-scrollbar { width: 0; height: 0; }
   </style>
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
 </head>
 <body>
-  <!-- LOGIN SCREEN (giả, luôn hiện nếu chưa đăng nhập) -->
+  <!-- Màn hình đăng nhập -->
   <div id="login-screen">
-    <h1><span style="color:#0095f6;">D</span>unukha</h1>
-    <button onclick="fakeLogin()"><i class="fab fa-google"></i> Đăng nhập Google (Demo)</button>
-    <button onclick="fakeLogin()" style="background:#1877f2;"><i class="fab fa-facebook"></i> Facebook (Demo)</button>
-    <p style="font-size:13px; color:#888;">(Click để dùng ngay với dữ liệu giả)</p>
+    <h1><span>I</span>nstagram</h1>
+    <button onclick="fakeLogin()"><i class="fab fa-google" style="margin-right:10px;"></i> Đăng nhập Demo</button>
+    <button onclick="fakeLogin()" style="background:#1877f2; margin-top:5px;"><i class="fab fa-facebook"></i> Facebook Demo</button>
+    <p class="demo-hint">(Click vào để dùng ngay với dữ liệu giả)</p>
   </div>
 
-  <!-- ỨNG DỤNG CHÍNH -->
+  <!-- Ứng dụng chính -->
   <div id="app">
     <div class="header">
       <i class="fas fa-bars" id="menu-btn" style="font-size:22px;cursor:pointer;"></i>
-      <div class="logo"><span>D</span>unukha</div>
+      <div class="logo"><span>I</span>nstagram</div>
       <div class="header-icons">
-        <i class="far fa-heart badge" id="btn-notif" data-count="3"></i>
+        <i class="far fa-heart badge" id="btn-notif" data-count="2"></i>
         <i class="far fa-paper-plane" id="btn-chat"></i>
       </div>
     </div>
 
-    <!-- Các trang -->
+    <!-- Trang chủ -->
     <div class="page active" id="page-home">
       <div class="stories" id="stories-container"></div>
       <div id="feed-container"></div>
     </div>
+
+    <!-- Khám phá -->
     <div class="page" id="page-explore">
       <div style="padding:15px;"><input type="text" id="search-input" placeholder="Tìm kiếm người dùng..." style="width:100%;padding:10px;border-radius:10px;border:1px solid #dbdbdb;"></div>
       <div id="explore-grid" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:3px;padding:0 5px;"></div>
     </div>
+
+    <!-- Reels -->
     <div class="page" id="page-reels">
       <div id="reels-container" style="height:100vh;overflow-y:scroll;scroll-snap-type:y mandatory;"></div>
     </div>
+
+    <!-- Đăng bài -->
     <div class="page" id="page-post">
       <div style="padding:20px;">
         <label style="display:block;margin-bottom:5px;">Chọn ảnh/video</label>
@@ -131,10 +137,13 @@
         <button id="btn-submit-post" class="btn btn-primary" style="width:100%;margin-top:10px;">Đăng</button>
       </div>
     </div>
+
+    <!-- Trang cá nhân -->
     <div class="page" id="page-profile">
       <div id="profile-content"></div>
     </div>
 
+    <!-- Thanh điều hướng dưới -->
     <div class="bottom-nav">
       <i class="fas fa-home active" data-page="home"></i>
       <i class="fas fa-search" data-page="explore"></i>
@@ -193,67 +202,60 @@
   </div>
 
   <script>
-    // --- DỮ LIỆU GIẢ (để bạn nhấn vào thấy có tác dụng ngay) ---
+    // ======== DỮ LIỆU GIẢ (SẴN SÀNG DÙNG NGAY) ========
     const DEMO_USERS = {
-      'user1': { displayName: 'Nguyễn Văn A', username: 'nguyenvana', photoURL: 'https://i.pravatar.cc/150?img=1', bio: 'Yêu đời', followers: { 'me': true }, following: {} },
-      'user2': { displayName: 'Trần Thị B', username: 'tranthib', photoURL: 'https://i.pravatar.cc/150?img=2', bio: 'Chụp ảnh', followers: {}, following: {} },
-      'user3': { displayName: 'Lê Văn C', username: 'levanc', photoURL: 'https://i.pravatar.cc/150?img=3', bio: 'Game thủ', followers: {}, following: {} }
+      'user1': { displayName: 'Nguyễn Văn A', username: 'nguyenvana', photoURL: 'https://i.pravatar.cc/150?img=1', bio: 'Yêu đời, sống ảo', followers: { 'me': true }, following: {} },
+      'user2': { displayName: 'Trần Thị B', username: 'tranthib', photoURL: 'https://i.pravatar.cc/150?img=2', bio: 'Chụp ảnh xuyên đêm', followers: {}, following: {} },
+      'user3': { displayName: 'Lê Văn C', username: 'levanc', photoURL: 'https://i.pravatar.cc/150?img=3', bio: 'Game thủ chân chính', followers: {}, following: {} }
     };
-    let DEMO_POSTS = [];
-    for (let i=0; i<5; i++) {
-      DEMO_POSTS.push({
-        id: 'post'+i,
-        uid: 'user'+((i%3)+1),
-        username: DEMO_USERS['user'+((i%3)+1)].displayName,
-        userAvatar: DEMO_USERS['user'+((i%3)+1)].photoURL,
-        caption: 'Bài viết demo thứ ' + (i+1) + ' 🎉',
-        mediaUrls: ['https://picsum.photos/400/400?random='+i],
-        mediaType: 'image',
-        likes: [],
-        comments: [],
-        hashtags: ['demo']
-      });
-    }
+
+    let DEMO_POSTS = [
+      { id: 'p1', uid: 'user1', username: 'Nguyễn Văn A', userAvatar: 'https://i.pravatar.cc/150?img=1', caption: 'Chào buổi sáng mọi người ☀️', mediaUrls: ['https://picsum.photos/400/400?random=1'], likes: ['user2'], comments: ['Đẹp quá!', 'Chúc một ngày tốt lành'] },
+      { id: 'p2', uid: 'user2', username: 'Trần Thị B', userAvatar: 'https://i.pravatar.cc/150?img=2', caption: 'Mới đi du lịch về, đăng ảnh lưu niệm 😍', mediaUrls: ['https://picsum.photos/400/400?random=2'], likes: ['user1', 'me'], comments: ['Chụp đẹp quá!'] },
+      { id: 'p3', uid: 'user3', username: 'Lê Văn C', userAvatar: 'https://i.pravatar.cc/150?img=3', caption: 'Chiến thắng game thôi nào! 🎮', mediaUrls: ['https://picsum.photos/400/400?random=3'], likes: [], comments: ['Add friend nhé'] }
+    ];
 
     let currentUser = null;
     let currentChatUserId = null;
     let allUsers = [];
 
-    // --- Hàm giả lập đăng nhập ---
+    // ======== HÀM ĐĂNG NHẬP GIẢ ========
     window.fakeLogin = function() {
       document.getElementById('login-screen').style.display = 'none';
       document.getElementById('app').style.display = 'flex';
-      currentUser = { uid: 'me', displayName: 'Bạn', photoURL: 'https://i.pravatar.cc/150?img=4', email: 'you@demo.com' };
+      currentUser = { uid: 'me', displayName: 'Bạn', username: 'me_user', photoURL: 'https://i.pravatar.cc/150?img=4', email: 'me@demo.com' };
       allUsers = Object.entries(DEMO_USERS).map(([id, data]) => ({ id, ...data }));
-      // Khởi tạo giao diện
       initApp();
     };
 
-    // --- Khởi tạo ứng dụng ---
+    // ======== KHỞI TẠO ỨNG DỤNG ========
     function initApp() {
       loadStories();
       loadFeed();
       loadExplore();
       loadReels();
       loadProfile('me');
+      setupNavigation();
     }
 
-    // --- Navigation ---
-    document.querySelectorAll('.bottom-nav i').forEach(el => {
-      el.addEventListener('click', function() {
-        document.querySelectorAll('.bottom-nav i').forEach(i => i.classList.remove('active'));
-        this.classList.add('active');
-        const page = this.dataset.page;
-        document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-        document.getElementById('page-' + page).classList.add('active');
-        if (page === 'home') { loadStories(); loadFeed(); }
-        else if (page === 'explore') loadExplore();
-        else if (page === 'reels') loadReels();
-        else if (page === 'profile') loadProfile('me');
+    // ======== CHUYỂN TRANG ========
+    function setupNavigation() {
+      document.querySelectorAll('.bottom-nav i').forEach(el => {
+        el.addEventListener('click', function() {
+          document.querySelectorAll('.bottom-nav i').forEach(i => i.classList.remove('active'));
+          this.classList.add('active');
+          const page = this.dataset.page;
+          document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+          document.getElementById('page-' + page).classList.add('active');
+          if (page === 'home') { loadStories(); loadFeed(); }
+          else if (page === 'explore') loadExplore();
+          else if (page === 'reels') loadReels();
+          else if (page === 'profile') loadProfile('me');
+        });
       });
-    });
+    }
 
-    // --- Stories ---
+    // ======== STORIES ========
     function loadStories() {
       const container = document.getElementById('stories-container');
       container.innerHTML = '';
@@ -263,7 +265,7 @@
         const div = document.createElement('div');
         div.className = 'story-item';
         div.innerHTML = `<div class="story-ring"><img src="${u.photoURL}"></div><span>${u.displayName}</span>`;
-        div.onclick = () => alert('Xem story của ' + u.displayName);
+        div.onclick = () => viewStory([{ mediaUrl: 'https://picsum.photos/400/600?random='+Math.random(), type: 'image' }]);
         container.appendChild(div);
       });
       // Story của bạn
@@ -274,7 +276,23 @@
       container.appendChild(me);
     }
 
-    // --- Feed ---
+    function viewStory(stories) {
+      const modal = document.getElementById('story-modal');
+      modal.style.display = 'flex';
+      const img = document.getElementById('story-img');
+      const video = document.getElementById('story-video');
+      const s = stories[0];
+      if (s.type === 'video') {
+        video.src = s.mediaUrl; video.style.display = 'block'; video.play();
+        img.style.display = 'none';
+      } else {
+        img.src = s.mediaUrl; img.style.display = 'block';
+        video.style.display = 'none';
+      }
+      document.getElementById('btn-close-story').onclick = () => modal.style.display = 'none';
+    }
+
+    // ======== FEED ========
     function loadFeed() {
       const container = document.getElementById('feed-container');
       container.innerHTML = '';
@@ -286,7 +304,7 @@
       div.className = 'post';
       const liked = post.likes.includes('me');
       div.innerHTML = `
-        <div class="post-header">
+        <div class="post-header" onclick="loadProfile('${post.uid}')">
           <img src="${post.userAvatar}">
           <span class="username">${post.username}</span>
         </div>
@@ -337,7 +355,7 @@
 
       // Share
       div.querySelector('.share-btn').onclick = function() {
-        if (navigator.share) navigator.share({ title: 'Dunukha', text: post.caption, url: post.mediaUrls[0] });
+        if (navigator.share) navigator.share({ title: 'Instagram', text: post.caption, url: post.mediaUrls[0] });
         else alert('Chia sẻ link: ' + post.mediaUrls[0]);
       };
 
@@ -349,7 +367,7 @@
       };
     }
 
-    // --- Explore ---
+    // ======== KHÁM PHÁ ========
     function loadExplore() {
       const grid = document.getElementById('explore-grid');
       grid.innerHTML = '';
@@ -357,16 +375,16 @@
         const img = document.createElement('img');
         img.src = p.mediaUrls[0];
         img.style.width = '100%'; img.style.aspectRatio = '1/1'; img.style.objectFit = 'cover';
-        img.onclick = () => alert('Bài viết: ' + p.caption);
+        img.onclick = () => showToast('Bài viết: ' + p.caption);
         grid.appendChild(img);
       });
     }
 
-    // --- Reels ---
+    // ======== REELS ========
     function loadReels() {
       const container = document.getElementById('reels-container');
       container.innerHTML = '';
-      // Dùng video demo từ Pexels
+      // Video demo từ W3Schools
       const videoUrls = [
         'https://www.w3schools.com/html/mov_bbb.mp4',
         'https://www.w3schools.com/html/movie.mp4'
@@ -374,18 +392,22 @@
       videoUrls.forEach((url, i) => {
         const div = document.createElement('div');
         div.className = 'reel-item';
-        div.innerHTML = `<video src="${url}" controls loop autoplay muted></video><div class="reel-info">Video Reel ${i+1} - <b>Dunukha</b></div>`;
+        div.innerHTML = `<video src="${url}" controls loop autoplay muted></video><div class="reel-info">Reel ${i+1} - <b>Instagram Clone</b></div>`;
         container.appendChild(div);
       });
     }
 
-    // --- Profile ---
+    // ======== PROFILE ========
     function loadProfile(uid) {
       const container = document.getElementById('profile-content');
-      const user = uid === 'me' ? { ...DEMO_USERS['user1'], uid: 'me', displayName: 'Bạn', username: 'you', photoURL: 'https://i.pravatar.cc/150?img=4' } : DEMO_USERS[uid];
+      const user = uid === 'me' ? 
+        { ...currentUser, displayName: 'Bạn', username: 'me_user', photoURL: 'https://i.pravatar.cc/150?img=4', followers: { 'user1': true }, following: { 'user2': true, 'user3': true }, bio: 'Chia sẻ cuộc sống' } : 
+        DEMO_USERS[uid];
+      
       if (!user) { container.innerHTML = 'Không tìm thấy'; return; }
       const isMe = uid === 'me';
       const isFollowing = user.followers && user.followers['me'];
+      
       container.innerHTML = `
         <div class="profile-header">
           <img class="profile-avatar" src="${user.photoURL}">
@@ -405,9 +427,10 @@
           </div>
         </div>
         <div class="profile-grid">
-          ${DEMO_POSTS.filter(p => p.uid === uid).map(p => `<img src="${p.mediaUrls[0]}" onclick="alert('${p.caption}')">`).join('')}
+          ${DEMO_POSTS.filter(p => p.uid === uid).map(p => `<img src="${p.mediaUrls[0]}" onclick="showToast('${p.caption}')">`).join('')}
         </div>
       `;
+      
       if (isMe) {
         document.getElementById('edit-profile-btn').onclick = () => {
           document.getElementById('edit-modal').style.display = 'flex';
@@ -428,7 +451,7 @@
       }
     }
 
-    // --- Post upload (demo) ---
+    // ======== ĐĂNG BÀI ========
     document.getElementById('post-files').onchange = function() {
       const preview = document.getElementById('preview-container');
       preview.innerHTML = '';
@@ -448,18 +471,18 @@
       const files = document.getElementById('post-files').files;
       const caption = document.getElementById('post-caption').value.trim();
       if (files.length === 0) { alert('Chọn ảnh/video'); return; }
-      // Thêm bài viết giả vào đầu feed
-      DEMO_POSTS.unshift({
+      // Thêm bài viết mới vào đầu feed
+      const newPost = {
         id: 'newpost_' + Date.now(),
         uid: 'me',
         username: 'Bạn',
         userAvatar: 'https://i.pravatar.cc/150?img=4',
         caption: caption || 'Bài viết mới',
         mediaUrls: [URL.createObjectURL(files[0])],
-        mediaType: files[0].type.startsWith('video') ? 'video' : 'image',
         likes: [],
         comments: []
-      });
+      };
+      DEMO_POSTS.unshift(newPost);
       document.getElementById('post-files').value = '';
       document.getElementById('preview-container').innerHTML = '';
       document.getElementById('post-caption').value = '';
@@ -467,7 +490,7 @@
       showToast('Đã đăng bài!');
     };
 
-    // --- Chat (demo) ---
+    // ======== CHAT ========
     document.getElementById('btn-chat').onclick = () => {
       document.getElementById('chat-modal').style.display = 'flex';
       loadChatList();
@@ -480,7 +503,7 @@
       list.innerHTML = '';
       Object.entries(DEMO_USERS).forEach(([uid, data]) => {
         const div = document.createElement('div');
-        div.style.cssText = 'display:flex;align-items:center;gap:10px;padding:10px;cursor:pointer;';
+        div.style.cssText = 'display:flex;align-items:center;gap:10px;padding:10px;cursor:pointer;border-bottom:1px solid #efefef;';
         div.innerHTML = `<img src="${data.photoURL}" style="width:40px;height:40px;border-radius:50%;"><span>${data.displayName}</span>`;
         div.onclick = () => openChat(uid, data.displayName);
         list.appendChild(div);
@@ -493,11 +516,11 @@
       document.getElementById('chat-window').style.display = 'flex';
       document.getElementById('chat-username').textContent = name;
       document.getElementById('chat-messages').innerHTML = '';
-      // Tin nhắn giả
+      // Tin nhắn giả lập
       const msgs = [
-        { from: uid, text: 'Chào bạn!' },
-        { from: 'me', text: 'Chào, khỏe không?' },
-        { from: uid, text: 'Mình khỏe, cảm ơn!' }
+        { from: uid, text: 'Chào bạn! Hôm nay thế nào?' },
+        { from: 'me', text: 'Mình khỏe, cảm ơn bạn!' },
+        { from: uid, text: 'Có gì mới không?' }
       ];
       msgs.forEach(m => {
         const row = document.createElement('div');
@@ -516,11 +539,11 @@
       row.innerHTML = `<div class="message-bubble">${text}</div>`;
       document.getElementById('chat-messages').appendChild(row);
       input.value = '';
-      // Giả lập reply
+      // Giả lập người kia trả lời sau 1 giây
       setTimeout(() => {
         const reply = document.createElement('div');
         reply.className = 'message-row received';
-        reply.innerHTML = `<div class="message-bubble">Cảm ơn bạn!</div>`;
+        reply.innerHTML = `<div class="message-bubble">OK! Cảm ơn bạn đã nhắn.</div>`;
         document.getElementById('chat-messages').appendChild(reply);
       }, 1000);
     };
@@ -529,13 +552,13 @@
       document.getElementById('chat-modal').style.display = 'none';
     };
 
-    // --- Notifications ---
+    // ======== THÔNG BÁO ========
     document.getElementById('btn-notif').onclick = () => {
       document.getElementById('btn-notif').dataset.count = '0';
-      showToast('Bạn có 3 thông báo mới (demo)');
+      showToast('Bạn có 2 thông báo mới (demo)');
     };
 
-    // --- Side menu ---
+    // ======== SIDEBAR ========
     document.getElementById('menu-btn').onclick = () => {
       document.getElementById('side-menu').classList.add('open');
       document.getElementById('menu-overlay').classList.add('show');
@@ -556,13 +579,14 @@
       };
     });
 
-    // --- Edit profile ---
+    // ======== CHỈNH SỬA PROFILE ========
     document.getElementById('btn-save-edit').onclick = () => {
       document.getElementById('edit-modal').style.display = 'none';
       showToast('Đã lưu thông tin');
+      loadProfile('me');
     };
 
-    // --- Utility ---
+    // ======== TIỆN ÍCH ========
     function showToast(msg) {
       const div = document.createElement('div');
       div.textContent = msg;
@@ -581,10 +605,6 @@
       else if (page === 'reels') loadReels();
       else if (page === 'profile') loadProfile('me');
     }
-
-    // --- Tự động đăng nhập khi mở ứng dụng (cho demo) ---
-    // Bạn có thể bỏ comment dòng dưới để vào thẳng app
-    // fakeLogin();
   </script>
 </body>
 </html>

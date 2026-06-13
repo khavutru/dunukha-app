@@ -59,7 +59,7 @@
 
     /* Post */
     .post { background: #fff; border: 1px solid #dbdbdb; border-radius: 12px; margin-bottom: 20px; overflow: hidden; }
-    .post-header { display: flex; align-items: center; gap: 10px; padding: 12px 15px; cursor: pointer; }
+    .post-header { display: flex; align-items: center; gap: 10px; padding: 12px 15px; cursor: pointer; position: relative; }
     .post-header img { width: 32px; height: 32px; border-radius: 50%; object-fit: cover; }
     .post-header .username { font-weight: 600; font-size: 14px; }
     .post-media { width: 100%; max-height: 500px; object-fit: contain; background: black; }
@@ -555,7 +555,14 @@
         <div class="post-header" data-uid="${post.uid}">
           <img src="${post.userAvatar || 'https://via.placeholder.com/32'}">
           <span class="username">${post.username}</span>
-          ${isOwner ? '<i class="fas fa-trash" style="margin-left:auto; color:#ed4956; cursor:pointer;" data-id="'+id+'"></i>' : ''}
+          <div style="margin-left:auto; position:relative;">
+            <i class="fas fa-ellipsis-v" style="cursor:pointer; padding:0 5px;" data-id="${id}"></i>
+            <div class="post-menu" data-id="${id}" style="display:none; position:absolute; right:0; top:25px; background:white; border:1px solid #dbdbdb; border-radius:8px; box-shadow:0 2px 8px rgba(0,0,0,0.1); z-index:10; min-width:120px;">
+              ${post.uid === currentUser.uid ? '<div class="menu-option" data-action="delete" data-id="'+id+'">🗑️ Xóa bài viết</div>' : ''}
+              <div class="menu-option" data-action="save" data-id="${id}">📌 Lưu / Bỏ lưu</div>
+              <div class="menu-option" data-action="report" data-id="${id}">🚩 Báo cáo</div>
+            </div>
+          </div>
         </div>
         <div>${media}</div>
         <div class="post-actions">
@@ -573,21 +580,59 @@
       `;
       document.getElementById('feed-container').appendChild(div);
 
-      // DELETE POST
-      if (isOwner) {
-        div.querySelector('.fa-trash').onclick = async () => {
-          if (confirm('Bạn có chắc muốn xóa bài viết này?')) {
-            await deleteDoc(doc(db, "posts", id));
-            div.remove();
-            showToast('Đã xóa bài viết');
-          }
-        };
-      }
+      // --- XỬ LÝ SỰ KIỆN ----
+      
+      // 1. Mở menu 3 chấm
+      div.querySelector('.fa-ellipsis-v').onclick = (e) => {
+        e.stopPropagation();
+        document.querySelectorAll('.post-menu').forEach(m => m.style.display = 'none');
+        const menu = div.querySelector('.post-menu');
+        menu.style.display = menu.style.display === 'none' ? 'block' : 'none';
+      };
 
-      // CLICK PROFILE
+      // 2. Xử lý các tùy chọn menu
+      div.querySelectorAll('.menu-option').forEach(opt => {
+        opt.onclick = async (e) => {
+          e.stopPropagation();
+          const action = opt.dataset.action;
+          const postId = opt.dataset.id;
+          if (action === 'delete') {
+            if (confirm('Bạn có chắc muốn xóa bài viết này?')) {
+              await deleteDoc(doc(db, "posts", postId));
+              div.remove();
+              showToast('Đã xóa bài viết');
+            }
+          } else if (action === 'save') {
+            const userRef = doc(db, "users", currentUser.uid);
+            const snap = await getDoc(userRef);
+            const saved = snap.data().saved || [];
+            if (saved.includes(postId)) {
+              await updateDoc(userRef, { saved: arrayRemove(postId) });
+              showToast('Đã bỏ lưu');
+            } else {
+              await updateDoc(userRef, { saved: arrayUnion(postId) });
+              showToast('Đã lưu bài viết');
+            }
+          } else if (action === 'report') {
+            const reason = prompt('Lý do báo cáo:');
+            if (reason) {
+              await addDoc(collection(db, "reports"), { reporter: currentUser.uid, postId: postId, reason, createdAt: serverTimestamp() });
+              showToast('Đã gửi báo cáo');
+            }
+          }
+          document.querySelectorAll('.post-menu').forEach(m => m.style.display = 'none');
+        };
+      });
+
+      // 3. Đóng menu khi click ra ngoài
+      document.addEventListener('click', () => {
+        document.querySelectorAll('.post-menu').forEach(m => m.style.display = 'none');
+      });
+
+      // 4. Click profile
       div.querySelector('.post-header').onclick = () => loadProfile(post.uid);
 
-      // LIKE
+      // 5. Like
       div.querySelector('[data-id]').onclick = async (e) => {
         if (e.target.classList.contains('fa-heart')) {
           const ref = doc(db, "posts", id);
@@ -601,14 +646,13 @@
             e.target.classList.remove('far');
             if (post.uid !== currentUser.uid) addNotification(post.uid, 'like', `${currentUser.displayName} đã thích bài của bạn`);
           }
-          // Cập nhật số lượt thích hiển thị
           const likesSpan = div.querySelector('.post-likes');
           const newCount = (await getDoc(doc(db, "posts", id))).data().likes.length;
           likesSpan.textContent = newCount + ' thích';
         }
       };
 
-      // COMMENT
+      // 6. Comment
       div.querySelector('.send-comment').onclick = async () => {
         const input = document.getElementById(`comment-${id}`);
         const text = input.value.trim();
@@ -619,7 +663,7 @@
         showToast('Đã bình luận');
       };
 
-      // SAVE
+      // 7. Save (nút bookmark)
       div.querySelector('.save-btn').onclick = async () => {
         const userRef = doc(db, "users", currentUser.uid);
         const snap = await getDoc(userRef);
@@ -633,7 +677,7 @@
         }
       };
 
-      // SHARE
+      // 8. Share
       div.querySelector('.share-btn').onclick = () => {
         const url = post.mediaUrls?.[0] || post.mediaUrl;
         if (navigator.share) navigator.share({ title: 'Dunukha', text: post.caption, url });
@@ -908,6 +952,14 @@
       const following = snap.data()?.following || {};
       const list = document.getElementById('chat-list');
       list.innerHTML = '';
+      
+      // Nếu không follow ai, hiển thị thông báo
+      const hasFollowing = Object.values(following).some(v => v === true);
+      if (!hasFollowing) {
+        list.innerHTML = '<div style="text-align:center;padding:20px;color:#8e8e8e;">Bạn chưa theo dõi ai.<br>Hãy vào profile người khác và bấm "Theo dõi" để chat.</div>';
+        return;
+      }
+      
       for (const uid in following) {
         if (!following[uid]) continue;
         const u = await getDoc(doc(db, "users", uid));

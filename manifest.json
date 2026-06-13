@@ -1,0 +1,16 @@
+{
+  "name": "Dunukha",
+  "short_name": "Dunukha",
+  "description": "Mạng xã hội Dunukha",
+  "start_url": "/dunukha.html",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#0095f6",
+  "icons": [
+    {
+      "src": "https://via.placeholder.com/192x192?text=D",
+      "sizes": "192x192",
+      "type": "image/png"
+    }
+  ]
+}

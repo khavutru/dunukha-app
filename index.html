@@ -400,6 +400,14 @@
             border-radius: 20px;
             cursor: pointer;
         }
+        .btn {
+            padding: 6px 16px;
+            border: 1px solid #dbdbdb;
+            border-radius: 8px;
+            background: #fafafa;
+            cursor: pointer;
+            font-weight: 600;
+        }
     </style>
 </head>
 <body>
@@ -518,7 +526,7 @@
     </div>
 
     <script type="module">
-        // 🔴 QUAN TRỌNG: ĐÂY LÀ CẤU HÌNH FIREBASE CỦA BẠN 🔴
+        // 🔴 CẤU HÌNH FIREBASE CỦA BẠN 🔴
         const firebaseConfig = {
             apiKey: "AIzaSyDURjXMqgt_pVaCcpNUSoCM9KPIR7OmW10",
             authDomain: "dunukhacall.firebaseapp.com",
@@ -528,11 +536,10 @@
             messagingSenderId: "907574693616",
             appId: "1:907574693616:web:632e8ebc4937842765bc35"
         };
-        // ----------------------------------------------------------------
 
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getAuth, signInWithPopup, GoogleAuthProvider, FacebookAuthProvider, onAuthStateChanged, signOut, createUserWithEmailAndPassword, signInWithEmailAndPassword, RecaptchaVerifier, signInWithPhoneNumber } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-        import { getFirestore, collection, addDoc, query, orderBy, onSnapshot, doc, updateDoc, arrayUnion, arrayRemove, serverTimestamp, where, getDocs, setDoc, getDoc, limit, startAfter, deleteDoc, increment } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { getAuth, signInWithPopup, GoogleAuthProvider, FacebookAuthProvider, onAuthStateChanged, signOut, createUserWithEmailAndPassword, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { getFirestore, collection, addDoc, query, orderBy, onSnapshot, doc, updateDoc, arrayUnion, arrayRemove, serverTimestamp, where, getDocs, setDoc, getDoc, limit, startAfter, deleteDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
         const IMGBB_API_KEY = "d4802501f212046a8d74561bbdaf6dd3";
         const app = initializeApp(firebaseConfig);
@@ -547,8 +554,8 @@
         let allUsersCache = null;
         let lastPostDoc = null;
         let isLoadingPosts = false;
-        let confirmationResult = null;
 
+        // ===================== TOAST NOTIFICATION =====================
         function showToast(msg) {
             const t = document.getElementById('toast');
             t.textContent = msg;
@@ -557,7 +564,7 @@
             t._timer = setTimeout(() => t.classList.remove('show'), 2000);
         }
 
-        // --- AUTH ---
+        // ===================== AUTH =====================
         document.getElementById('google-login').onclick = () => signInWithPopup(auth, googleProvider).catch(e => showToast('Lỗi: ' + e.message));
         document.getElementById('facebook-login').onclick = () => signInWithPopup(auth, facebookProvider).catch(e => showToast('Lỗi: ' + e.message));
         document.getElementById('email-login-btn').onclick = async () => {
@@ -589,26 +596,32 @@
             }
         });
 
+        // ===================== DATABASE: KHỞI TẠO USER =====================
         async function ensureUserDoc(user) {
             const ref = doc(db, "users", user.uid);
             if (!(await getDoc(ref)).exists()) {
                 await setDoc(ref, {
-                    displayName: user.displayName || user.email?.split('@')[0] || "Người dùng",
+                    uid: user.uid,
+                    displayName: user.displayName || user.email?.split('@')[0] || "Người dùng Dunukha",
                     email: user.email || "",
+                    avatarUrl: user.photoURL || "https://via.placeholder.com/150",
                     photoURL: user.photoURL || "https://via.placeholder.com/150",
                     username: user.email?.split('@')[0] || "user" + user.uid.slice(0, 5),
                     bio: "",
                     location: "",
+                    website: "",
                     followers: {},
                     following: {},
                     saved: [],
                     blocked: {},
                     isPrivate: false,
+                    isVerified: false,
                     createdAt: serverTimestamp()
                 });
             }
         }
 
+        // ===================== IMGBB UPLOAD =====================
         async function uploadImgBB(file) {
             const fd = new FormData();
             fd.append('image', file);
@@ -618,8 +631,15 @@
             return data.data.url;
         }
 
-        // --- NAVIGATION ---
-        const pages = { home: document.getElementById('page-home'), explore: document.getElementById('page-explore'), reels: document.getElementById('page-reels'), post: document.getElementById('page-post'), profile: document.getElementById('page-profile') };
+        // ===================== NAVIGATION =====================
+        const pages = {
+            home: document.getElementById('page-home'),
+            explore: document.getElementById('page-explore'),
+            reels: document.getElementById('page-reels'),
+            post: document.getElementById('page-post'),
+            profile: document.getElementById('page-profile')
+        };
+
         document.querySelectorAll('.bottom-nav i').forEach(icon => {
             icon.addEventListener('click', () => navigateTo(icon.dataset.page));
         });
@@ -629,10 +649,14 @@
             document.querySelector(`[data-page="${page}"]`).classList.add('active');
             Object.values(pages).forEach(p => p.classList.remove('active'));
             pages[page].classList.add('active');
-            if (page === 'home') { loadStories(); loadFeed(); } else if (page === 'explore') loadExplore(); else if (page === 'reels') loadReels(); else if (page === 'profile') loadProfile(currentUser.uid);
+
+            if (page === 'home') { loadStories(); loadFeed(); }
+            else if (page === 'explore') loadExplore();
+            else if (page === 'reels') loadReels();
+            else if (page === 'profile') loadProfile(currentUser.uid);
         }
 
-        // --- STORIES ---
+        // ===================== STORIES =====================
         async function loadStories() {
             const container = document.getElementById('stories');
             container.innerHTML = '';
@@ -679,8 +703,7 @@
             const closeBtn = document.createElement('button');
             closeBtn.textContent = 'X';
             closeBtn.style.cssText = 'position:absolute; top:10px; right:10px; background:white; border:none; border-radius:50%; width:30px; height:30px;';
-            closeBtn.onclick = () => { clearInterval(timer);
-                modal.remove(); };
+            closeBtn.onclick = () => { clearInterval(timer); modal.remove(); };
             modal.appendChild(closeBtn);
             const show = () => {
                 const s = stories[i];
@@ -698,12 +721,11 @@
             document.body.appendChild(modal);
             const timer = setInterval(() => {
                 i++;
-                if (i >= stories.length) { clearInterval(timer);
-                    modal.remove(); } else show();
+                if (i >= stories.length) { clearInterval(timer); modal.remove(); } else show();
             }, 5000);
         }
 
-        // --- FEED ---
+        // ===================== FEED =====================
         function loadFeed() {
             document.getElementById('feed').innerHTML = '';
             lastPostDoc = null;
@@ -715,16 +737,16 @@
             isLoadingPosts = true;
             document.getElementById('feed-loader').style.display = 'block';
             try {
-                const q = lastPostDoc ? query(collection(db, "posts"), orderBy("createdAt", "desc"), startAfter(lastPostDoc), limit(5)) : query(collection(db, "posts"), orderBy("createdAt", "desc"), limit(5));
+                const q = lastPostDoc
+                    ? query(collection(db, "posts"), orderBy("createdAt", "desc"), startAfter(lastPostDoc), limit(5))
+                    : query(collection(db, "posts"), orderBy("createdAt", "desc"), limit(5));
                 const snap = await getDocs(q);
                 if (!snap.empty) {
-                    snap.forEach(doc => { renderPost(doc.data(), doc.id);
-                        lastPostDoc = doc; });
+                    snap.forEach(doc => { renderPost(doc.data(), doc.id); lastPostDoc = doc; });
                 } else {
                     if (!lastPostDoc) document.getElementById('feed').innerHTML = '<div style="text-align:center;padding:20px;color:#888;">Chưa có bài viết nào.</div>';
                 }
-            } catch (e) { console.error('Lỗi feed:', e);
-                showToast('Lỗi tải feed'); }
+            } catch (e) { console.error('Lỗi feed:', e); showToast('Lỗi tải feed'); }
             isLoadingPosts = false;
             document.getElementById('feed-loader').style.display = 'none';
         }
@@ -740,7 +762,9 @@
             div.className = 'post';
             div.dataset.id = id;
             const media = post.mediaUrls?.map(url =>
-                url.match(/\.(mp4|webm|ogg)$/i) ? `<video class="post-media" src="${url}" controls preload="metadata"></video>` : `<img class="post-media" src="${url}" loading="lazy">`
+                url.match(/\.(mp4|webm|ogg)$/i)
+                    ? `<video class="post-media" src="${url}" controls preload="metadata"></video>`
+                    : `<img class="post-media" src="${url}" loading="lazy">`
             ).join('') || `<img class="post-media" src="${post.mediaUrl || 'https://via.placeholder.com/400'}">`;
 
             let timeStr = 'Vừa xong';
@@ -780,7 +804,7 @@
             `;
             document.getElementById('feed').appendChild(div);
 
-            // Click vào header -> mở profile
+            // Click vào header -> mở profile người đăng
             div.querySelector('.post-header').addEventListener('click', (e) => {
                 if (e.target.closest('.fa-ellipsis-v')) return;
                 const uid = div.querySelector('.post-header').dataset.uid;
@@ -788,7 +812,7 @@
             });
 
             // Click vào ảnh -> xem toàn màn hình
-            div.querySelector('.post-media').addEventListener('click', () => {
+            div.querySelector('.post-media')?.addEventListener('click', () => {
                 const src = post.mediaUrls?.[0] || post.mediaUrl;
                 if (src) openImageFullscreen(src);
             });
@@ -859,7 +883,15 @@
                 const input = document.getElementById(`comment-${id}`);
                 const text = input.value.trim();
                 if (!text) return;
-                await updateDoc(doc(db, "posts", id), { comments: arrayUnion({ uid: currentUser.uid, username: currentUser.displayName, avatar: currentUser.photoURL, text, createdAt: serverTimestamp() }) });
+                await updateDoc(doc(db, "posts", id), {
+                    comments: arrayUnion({
+                        uid: currentUser.uid,
+                        username: currentUser.displayName,
+                        avatar: currentUser.photoURL,
+                        text,
+                        createdAt: new Date().toISOString()
+                    })
+                });
                 if (post.uid !== currentUser.uid) addNotification(post.uid, 'comment', `${currentUser.displayName}: ${text}`);
                 input.value = '';
                 loadComments(id);
@@ -928,7 +960,7 @@
             document.body.appendChild(modal);
         }
 
-        // --- POST UPLOAD ---
+        // ===================== POST UPLOAD =====================
         document.getElementById('post-files').onchange = function() {
             const preview = document.getElementById('preview-container');
             preview.innerHTML = '';
@@ -945,6 +977,7 @@
                 reader.readAsDataURL(f);
             }
         };
+
         document.getElementById('submit-post').onclick = async () => {
             const files = document.getElementById('post-files').files;
             const caption = document.getElementById('post-caption').value.trim();
@@ -957,9 +990,12 @@
                 const uData = (await getDoc(doc(db, "users", currentUser.uid))).data();
                 await addDoc(collection(db, "posts"), {
                     uid: currentUser.uid,
+                    ownerId: currentUser.uid,
                     username: uData.displayName,
                     userAvatar: uData.photoURL,
                     mediaUrls: urls,
+                    mediaUrl: urls[0],
+                    postUrl: urls[0],
                     mediaType: files[0].type.startsWith('video') ? 'video' : 'image',
                     caption,
                     likes: [],
@@ -976,7 +1012,7 @@
             document.getElementById('submit-post').textContent = 'Đăng';
         };
 
-        // --- REELS ---
+        // ===================== REELS =====================
         async function loadReels() {
             const container = document.getElementById('reels-container');
             container.innerHTML = '';
@@ -992,7 +1028,7 @@
             } catch (e) { console.error('Lỗi reels:', e); }
         }
 
-        // --- EXPLORE & SEARCH ---
+        // ===================== EXPLORE & SEARCH (LOGIC TÌM KIẾM) =====================
         async function loadExplore() {
             const grid = document.getElementById('search-results');
             grid.innerHTML = '';
@@ -1011,64 +1047,91 @@
             } catch (e) { console.error('Lỗi explore:', e); }
         }
 
+        // 🔍 TÌM KIẾM USER REALTIME (gõ đến đâu tìm đến đó)
         document.getElementById('search-input').addEventListener('input', async (e) => {
-            const kw = e.target.value.trim().toLowerCase();
+            const keyword = e.target.value.trim().toLowerCase();
             const grid = document.getElementById('search-results');
-            if (kw) {
-                if (!allUsersCache) {
-                    const snap = await getDocs(collection(db, "users"));
-                    allUsersCache = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-                }
-                const filtered = allUsersCache.filter(u =>
-                    u.displayName?.toLowerCase().includes(kw) || u.username?.toLowerCase().includes(kw)
-                );
-                grid.innerHTML = '';
-                filtered.forEach(u => {
-                    const div = document.createElement('div');
-                    div.className = 'search-result';
-                    div.dataset.uid = u.id;
-                    div.innerHTML = `
-                        <img src="${u.photoURL || 'https://via.placeholder.com/44'}" style="width:44px;height:44px;border-radius:50%;">
-                        <div>
-                            <div style="font-weight:600;">${u.displayName}</div>
-                            <div style="color:#888; font-size:12px;">@${u.username}</div>
-                        </div>
-                    `;
-                    grid.appendChild(div);
-                });
-                grid.addEventListener('click', function(e) {
-                    const target = e.target.closest('.search-result');
-                    if (target) {
-                        const uid = target.dataset.uid;
-                        if (uid) loadProfile(uid);
-                    }
-                });
-            } else {
+
+            if (keyword === '') {
+                // Nếu ô trống, hiển thị explore grid mặc định
                 loadExplore();
+                return;
             }
+
+            // Cache danh sách người dùng nếu chưa có
+            if (!allUsersCache) {
+                const snap = await getDocs(collection(db, "users"));
+                allUsersCache = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+            }
+
+            // Lọc người dùng theo từ khóa (tìm trong username và displayName)
+            const filtered = allUsersCache.filter(u =>
+                u.id !== currentUser.uid && // Không hiển thị chính mình
+                (u.displayName?.toLowerCase().includes(keyword) ||
+                 u.username?.toLowerCase().includes(keyword))
+            );
+
+            // Render kết quả tìm kiếm
+            grid.innerHTML = '';
+            if (filtered.length === 0) {
+                grid.innerHTML = '<div style="text-align:center; padding:20px; color:#888;">Không tìm thấy người dùng</div>';
+                return;
+            }
+
+            filtered.forEach(u => {
+                const div = document.createElement('div');
+                div.className = 'search-result';
+                div.dataset.uid = u.id;
+                div.innerHTML = `
+                    <img src="${u.photoURL || 'https://via.placeholder.com/44'}" style="width:44px;height:44px;border-radius:50%;">
+                    <div>
+                        <div style="font-weight:600;">${u.displayName}</div>
+                        <div style="color:#888; font-size:12px;">@${u.username}</div>
+                        <div style="font-size:12px; color:#888;">${u.bio || ''}</div>
+                    </div>
+                `;
+                // Click vào user -> điều hướng sang trang cá nhân của họ
+                div.addEventListener('click', () => {
+                    loadProfile(u.id);
+                    navigateTo('profile');
+                });
+                grid.appendChild(div);
+            });
         });
 
-        // --- PROFILE ---
+        // ===================== PROFILE (XEM TRANG CÁ NHÂN + FOLLOW/UNFOLLOW) =====================
         async function loadProfile(uid) {
             const container = document.getElementById('profile-content');
             container.innerHTML = 'Đang tải...';
+
+            // Fetch dữ liệu user từ Firestore
             const ref = doc(db, "users", uid);
             const snap = await getDoc(ref);
-            if (!snap.exists()) { container.innerHTML = 'Người dùng không tồn tại'; return; }
-            const data = snap.data();
-            const isMe = uid === currentUser.uid;
-            const isFollowing = data.followers?.[currentUser.uid];
-            const isPrivate = data.isPrivate === true;
-            if (data.blocked?.[currentUser.uid]) {
-                container.innerHTML = '<div style="text-align:center;padding:40px;color:#888;">Bạn đã bị chặn</div>';
+
+            if (!snap.exists()) {
+                container.innerHTML = '<div style="text-align:center; padding:40px; color:#888;">Người dùng không tồn tại</div>';
                 return;
             }
+
+            const data = snap.data();
+            const isMe = uid === currentUser.uid;
+            const isFollowing = data.followers?.[currentUser.uid] === true;
+            const isPrivate = data.isPrivate === true;
+
+            // Kiểm tra nếu người dùng hiện tại bị chặn
+            if (data.blocked?.[currentUser.uid]) {
+                container.innerHTML = '<div style="text-align:center; padding:40px; color:#888;">Bạn đã bị chặn</div>';
+                return;
+            }
+
+            // Xác định có được xem bài viết hay không
             const canViewPosts = isMe || !isPrivate || isFollowing;
+
             container.innerHTML = `
                 <div class="profile-header">
                     <img class="profile-avatar" src="${data.photoURL || 'https://via.placeholder.com/150'}">
                     <div class="profile-info">
-                        <h2>${data.displayName}</h2>
+                        <h2>${data.displayName} ${data.isVerified ? '✅' : ''}</h2>
                         <p>@${data.username}</p>
                         <div class="profile-stats">
                             <div><span>${Object.keys(data.followers||{}).length}</span> followers</div>
@@ -1078,10 +1141,12 @@
                         <p style="font-size:12px; color:#888;">📍 ${data.location || 'Chưa có địa điểm'}</p>
                         <div style="margin-top:10px; display:flex; flex-wrap:wrap; gap:6px;">
                             ${isMe ? `
-                                <button class="btn" id="edit-profile-btn" style="padding:6px 16px; border:1px solid #dbdbdb; border-radius:8px; background:#fafafa;">Chỉnh sửa</button>
+                                <button class="btn" id="edit-profile-btn">Chỉnh sửa hồ sơ</button>
                             ` : `
-                                <button class="btn" id="follow-btn" style="padding:6px 16px; border:1px solid #dbdbdb; border-radius:8px; background:${isFollowing ? '#fafafa' : '#0095f6'}; color:${isFollowing ? '#262626' : 'white'}; font-weight:600;">${isFollowing ? 'Bỏ theo dõi' : 'Theo dõi'}</button>
-                                <button class="btn" id="msg-btn" style="padding:6px 16px; border:1px solid #dbdbdb; border-radius:8px; background:#0095f6; color:white; font-weight:600;">Nhắn tin</button>
+                                <button class="btn" id="follow-btn" style="background:${isFollowing ? '#fafafa' : '#0095f6'}; color:${isFollowing ? '#262626' : 'white'}; font-weight:600;">
+                                    ${isFollowing ? 'Bỏ theo dõi' : 'Theo dõi'}
+                                </button>
+                                <button class="btn" id="msg-btn" style="background:#0095f6; color:white;">Nhắn tin</button>
                                 <button class="call-btn" id="call-btn">📞 Gọi</button>
                                 <button class="video-call-btn" id="video-call-btn">📹 Video</button>
                             `}
@@ -1091,6 +1156,7 @@
                 <div class="profile-grid" id="profile-grid"></div>
             `;
 
+            // Fetch bài viết của user
             const grid = document.getElementById('profile-grid');
             if (canViewPosts) {
                 try {
@@ -1113,6 +1179,7 @@
                 grid.innerHTML = '<div style="grid-column:1/-1; text-align:center; padding:40px; color:#888;">🔒 Tài khoản riêng tư</div>';
             }
 
+            // Gán sự kiện cho các nút
             if (isMe) {
                 document.getElementById('edit-profile-btn').onclick = () => {
                     document.getElementById('edit-modal').style.display = 'flex';
@@ -1122,27 +1189,40 @@
                     document.getElementById('edit-location').value = data.location || '';
                 };
             } else {
+                // Nút Follow/Unfollow - Cập nhật cả 2 phía trong Firestore
                 document.getElementById('follow-btn').onclick = async () => {
+                    const targetRef = doc(db, "users", uid);
+                    const myRef = doc(db, "users", currentUser.uid);
+
                     if (isFollowing) {
-                        await updateDoc(doc(db, "users", uid), { [`followers.${currentUser.uid}`]: false });
-                        await updateDoc(doc(db, "users", currentUser.uid), { [`following.${uid}`]: false });
+                        // UNFOLLOW
+                        await updateDoc(targetRef, { [`followers.${currentUser.uid}`]: false });
+                        await updateDoc(myRef, { [`following.${uid}`]: false });
                         showToast('Đã bỏ theo dõi');
                     } else {
-                        await updateDoc(doc(db, "users", uid), { [`followers.${currentUser.uid}`]: true });
-                        await updateDoc(doc(db, "users", currentUser.uid), { [`following.${uid}`]: true });
-                        addNotification(uid, 'follow', `${currentUser.displayName} theo dõi bạn`);
+                        // FOLLOW
+                        await updateDoc(targetRef, { [`followers.${currentUser.uid}`]: true });
+                        await updateDoc(myRef, { [`following.${uid}`]: true });
+                        addNotification(uid, 'follow', `${currentUser.displayName} đã theo dõi bạn`);
                         showToast('Đã theo dõi');
                     }
+                    // Tải lại profile để cập nhật UI
                     loadProfile(uid);
                 };
+
+                // Nút Nhắn tin
                 document.getElementById('msg-btn').onclick = () => {
                     document.getElementById('chat-btn').click();
                     setTimeout(() => openChat(uid, data.displayName), 500);
                 };
+
+                // Nút Gọi điện
                 document.getElementById('call-btn').onclick = () => {
                     const roomId = [currentUser.uid, uid].sort().join('_');
                     startCall(roomId, true);
                 };
+
+                // Nút Video call
                 document.getElementById('video-call-btn').onclick = () => {
                     const roomId = [currentUser.uid, uid].sort().join('_');
                     startCall(roomId, false);
@@ -1150,6 +1230,7 @@
             }
         }
 
+        // ===================== EDIT PROFILE =====================
         document.getElementById('save-edit').onclick = async () => {
             const updates = {
                 displayName: document.getElementById('edit-displayname').value.trim(),
@@ -1161,6 +1242,7 @@
             if (file) {
                 try {
                     updates.photoURL = await uploadImgBB(file);
+                    updates.avatarUrl = updates.photoURL;
                 } catch (e) { return showToast('Lỗi upload avatar: ' + e.message); }
             }
             await updateDoc(doc(db, "users", currentUser.uid), updates);
@@ -1169,7 +1251,7 @@
             showToast('Đã cập nhật hồ sơ');
         };
 
-        // --- CHAT ---
+        // ===================== CHAT (NHẮN TIN REALTIME) =====================
         document.getElementById('chat-btn').onclick = () => {
             document.getElementById('chat-modal').style.display = 'flex';
             loadChatList();
@@ -1184,7 +1266,7 @@
             const snap = await getDoc(doc(db, "users", currentUser.uid));
             const following = snap.data()?.following || {};
             const list = document.getElementById('chat-list');
-            list.innerHTML = '';
+            list.innerHTML = '<h4>Danh sách bạn bè</h4>';
             for (const uid in following) {
                 if (!following[uid]) continue;
                 const u = await getDoc(doc(db, "users", uid));
@@ -1219,8 +1301,8 @@
                 snap.forEach(doc => {
                     const d = doc.data();
                     const row = document.createElement('div');
-                    row.className = `message-bubble ${d.from === currentUser.uid ? 'sent' : 'received'}`;
-                    row.textContent = d.text;
+                    row.className = `message-row ${d.from === currentUser.uid ? 'sent' : 'received'}`;
+                    row.innerHTML = `<div class="message-bubble">${d.text}</div>`;
                     container.appendChild(row);
                 });
                 container.scrollTop = container.scrollHeight;
@@ -1232,11 +1314,20 @@
             const text = input.value.trim();
             if (!text || !currentChatUser) return;
             const chatId = [currentUser.uid, currentChatUser].sort().join('_');
-            await addDoc(collection(db, "messages"), { chatId, from: currentUser.uid, to: currentChatUser, text, type: 'text', createdAt: serverTimestamp() });
+            await addDoc(collection(db, "messages"), {
+                chatId,
+                from: currentUser.uid,
+                senderId: currentUser.uid,
+                to: currentChatUser,
+                text,
+                type: 'text',
+                createdAt: serverTimestamp(),
+                timestamp: serverTimestamp()
+            });
             input.value = '';
         };
 
-        // --- CALL (Jitsi) ---
+        // ===================== CALL (GỌI ĐIỆN / VIDEO CALL) =====================
         function startCall(roomName, audioOnly) {
             const modal = document.getElementById('call-modal');
             modal.style.display = 'flex';
@@ -1279,7 +1370,7 @@
             };
         }
 
-        // --- NOTIFICATIONS ---
+        // ===================== NOTIFICATIONS =====================
         function listenNotifications() {
             const q = query(collection(db, "notifications"), where("to", "==", currentUser.uid), orderBy("createdAt", "desc"), limit(20));
             unsubscribes['notifications'] = onSnapshot(q, snap => {
@@ -1290,10 +1381,17 @@
         }
 
         async function addNotification(to, type, message) {
-            await addDoc(collection(db, "notifications"), { to, from: currentUser.uid, type, message, read: false, createdAt: serverTimestamp() });
+            await addDoc(collection(db, "notifications"), {
+                to,
+                from: currentUser.uid,
+                type,
+                message,
+                read: false,
+                createdAt: serverTimestamp()
+            });
         }
 
-        // --- SIDEBAR ---
+        // ===================== SIDEBAR =====================
         document.getElementById('menu-btn').onclick = () => {
             document.getElementById('side-menu').classList.add('open');
             document.getElementById('menu-overlay').classList.add('show');

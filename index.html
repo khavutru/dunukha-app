@@ -3,13 +3,14 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Instagram Clone</title>
+  <title>Dunukha</title>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
     body { background: #000; display: flex; justify-content: center; }
     #app { max-width: 480px; width: 100%; background: #fff; min-height: 100vh; display: none; flex-direction: column; position: relative; }
     .header { display: flex; align-items: center; justify-content: space-between; padding: 12px 15px; border-bottom: 1px solid #dbdbdb; background: #fff; position: sticky; top: 0; z-index: 20; }
-    .logo { font-size: 22px; font-weight: 700; } .logo span { color: #0095f6; }
+    .logo { font-size: 22px; font-weight: 700; }
+    .logo span { color: #0095f6; }
     .header-icons { display: flex; gap: 18px; font-size: 22px; color: #262626; }
     .badge { position: relative; }
     .badge::after { content: attr(data-count); position: absolute; top: -4px; right: -8px; background: #ed4956; color: #fff; border-radius: 50%; padding: 2px 5px; font-size: 11px; display: none; }
@@ -91,19 +92,19 @@
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
 </head>
 <body>
-  <!-- Màn hình đăng nhập -->
+  <!-- Màn hình đăng nhập DUNUKHA -->
   <div id="login-screen">
-    <h1><span>I</span>nstagram</h1>
+    <h1><span>D</span>unukha</h1>
     <button onclick="fakeLogin()"><i class="fab fa-google" style="margin-right:10px;"></i> Đăng nhập Demo</button>
     <button onclick="fakeLogin()" style="background:#1877f2; margin-top:5px;"><i class="fab fa-facebook"></i> Facebook Demo</button>
-    <p class="demo-hint">(Click vào để dùng ngay với dữ liệu giả)</p>
+    <p class="demo-hint">(Click để dùng ngay với dữ liệu giả)</p>
   </div>
 
-  <!-- Ứng dụng chính -->
+  <!-- Ứng dụng chính DUNUKHA -->
   <div id="app">
     <div class="header">
       <i class="fas fa-bars" id="menu-btn" style="font-size:22px;cursor:pointer;"></i>
-      <div class="logo"><span>I</span>nstagram</div>
+      <div class="logo"><span>D</span>unukha</div>
       <div class="header-icons">
         <i class="far fa-heart badge" id="btn-notif" data-count="2"></i>
         <i class="far fa-paper-plane" id="btn-chat"></i>
@@ -355,7 +356,7 @@
 
       // Share
       div.querySelector('.share-btn').onclick = function() {
-        if (navigator.share) navigator.share({ title: 'Instagram', text: post.caption, url: post.mediaUrls[0] });
+        if (navigator.share) navigator.share({ title: 'Dunukha', text: post.caption, url: post.mediaUrls[0] });
         else alert('Chia sẻ link: ' + post.mediaUrls[0]);
       };
 
@@ -392,7 +393,7 @@
       videoUrls.forEach((url, i) => {
         const div = document.createElement('div');
         div.className = 'reel-item';
-        div.innerHTML = `<video src="${url}" controls loop autoplay muted></video><div class="reel-info">Reel ${i+1} - <b>Instagram Clone</b></div>`;
+        div.innerHTML = `<video src="${url}" controls loop autoplay muted></video><div class="reel-info">Reel ${i+1} - <b>Dunukha</b></div>`;
         container.appendChild(div);
       });
     }

@@ -9,75 +9,42 @@
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
         body { background: #fafafa; display: flex; justify-content: center; }
         #app { max-width: 480px; width: 100%; background: #fff; min-height: 100vh; display: none; flex-direction: column; position: relative; }
-
         #login-screen { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; background: linear-gradient(135deg, #f09433, #bc1888); padding: 20px; color: white; }
         .login-box { background: rgba(255,255,255,0.15); backdrop-filter: blur(10px); padding: 30px; border-radius: 20px; width: 100%; max-width: 360px; text-align: center; }
         .login-logo { font-size: 50px; font-weight: 900; background: linear-gradient(45deg, #fff, #ffdd00); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
         .login-btn { width: 100%; padding: 12px; margin: 8px 0; border: none; border-radius: 30px; font-weight: 600; cursor: pointer; color: white; }
-        .login-btn.google { background: #db4437; }
-        .login-btn.facebook { background: #1877f2; }
-        .login-btn.email { background: #333; }
+        .login-btn.google { background: #db4437; } .login-btn.facebook { background: #1877f2; } .login-btn.email { background: #333; }
         .login-input { width: 100%; padding: 12px; margin: 8px 0; border: none; border-radius: 8px; }
-
         .header { display: flex; align-items: center; justify-content: space-between; padding: 12px 15px; border-bottom: 1px solid #dbdbdb; background: #fff; position: sticky; top: 0; z-index: 20; }
         .logo { font-size: 22px; font-weight: 700; background: linear-gradient(45deg, #f09433, #bc1888); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
         .header-icons { display: flex; gap: 18px; font-size: 22px; color: #262626; }
-        .badge { position: relative; }
-        .badge::after { content: attr(data-count); position: absolute; top: -5px; right: -8px; background: #ed4956; color: white; border-radius: 50%; padding: 2px 6px; font-size: 10px; display: none; }
-        .badge[data-count]:not([data-count="0"])::after { display: block; }
-
+        .badge { position: relative; } .badge::after { content: attr(data-count); position: absolute; top: -5px; right: -8px; background: #ed4956; color: white; border-radius: 50%; padding: 2px 6px; font-size: 10px; display: none; } .badge[data-count]:not([data-count="0"])::after { display: block; }
         .bottom-nav { display: flex; justify-content: space-around; padding: 10px 0; border-top: 1px solid #dbdbdb; background: #fff; position: fixed; bottom: 0; width: 100%; max-width: 480px; z-index: 10; }
-        .bottom-nav i { font-size: 24px; color: #262626; cursor: pointer; }
-        .bottom-nav i.active { color: #0095f6; }
-
-        .page { display: none; flex: 1; overflow-y: auto; padding-bottom: 60px; }
-        .page.active { display: block; }
-
+        .bottom-nav i { font-size: 24px; color: #262626; cursor: pointer; } .bottom-nav i.active { color: #0095f6; }
+        .page { display: none; flex: 1; overflow-y: auto; padding-bottom: 60px; } .page.active { display: block; }
         .post { background: #fff; border-bottom: 1px solid #dbdbdb; margin-bottom: 10px; }
         .post-header { display: flex; align-items: center; gap: 10px; padding: 12px 15px; cursor: pointer; }
         .post-avatar { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; }
-        .post-username { font-weight: 600; font-size: 14px; }
-        .post-time { font-size: 12px; color: #888; margin-left: auto; }
+        .post-username { font-weight: 600; font-size: 14px; } .post-time { font-size: 12px; color: #888; margin-left: auto; }
         .post-media { width: 100%; max-height: 500px; object-fit: contain; background: black; cursor: pointer; }
-        .post-actions { padding: 10px 15px 5px; display: flex; gap: 15px; font-size: 24px; }
-        .post-actions i { cursor: pointer; }
-        .post-actions i.liked { color: #ed4956; }
+        .post-actions { padding: 10px 15px 5px; display: flex; gap: 15px; font-size: 24px; } .post-actions i { cursor: pointer; } .post-actions i.liked { color: #ed4956; }
         .post-likes { padding: 0 15px 5px; font-weight: 600; font-size: 14px; }
-        .post-caption { padding: 0 15px 10px; font-size: 14px; }
-        .post-caption .username { font-weight: 600; margin-right: 5px; }
-        .comment-input { display: flex; border-top: 1px solid #efefef; padding: 10px 15px; }
-        .comment-input input { flex: 1; border: none; outline: none; font-size: 14px; }
-        .comment-input button { background: none; border: none; color: #0095f6; font-weight: 600; cursor: pointer; }
-
-        .profile-header { padding: 20px; display: flex; gap: 20px; }
-        .profile-avatar { width: 80px; height: 80px; border-radius: 50%; object-fit: cover; }
-        .profile-stats { display: flex; gap: 15px; margin: 10px 0; font-size: 14px; }
-        .profile-stats span { font-weight: 600; }
-        .profile-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 3px; }
-        .profile-grid img { width: 100%; aspect-ratio: 1; object-fit: cover; }
-
+        .post-caption { padding: 0 15px 10px; font-size: 14px; } .post-caption .username { font-weight: 600; margin-right: 5px; }
+        .comment-input { display: flex; border-top: 1px solid #efefef; padding: 10px 15px; } .comment-input input { flex: 1; border: none; outline: none; font-size: 14px; } .comment-input button { background: none; border: none; color: #0095f6; font-weight: 600; cursor: pointer; }
+        .profile-header { padding: 20px; display: flex; gap: 20px; } .profile-avatar { width: 80px; height: 80px; border-radius: 50%; object-fit: cover; }
+        .profile-stats { display: flex; gap: 15px; margin: 10px 0; font-size: 14px; } .profile-stats span { font-weight: 600; }
+        .profile-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 3px; } .profile-grid img { width: 100%; aspect-ratio: 1; object-fit: cover; }
         .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); justify-content: center; align-items: center; z-index: 30; }
         .modal-content { background: #fff; padding: 20px; border-radius: 12px; width: 90%; max-width: 400px; max-height: 80%; overflow-y: auto; }
         .modal-content input, .modal-content textarea { width: 100%; padding: 10px; margin: 8px 0; border: 1px solid #dbdbdb; border-radius: 8px; }
         .modal-content button { width: 100%; padding: 12px; background: #0095f6; color: white; border: none; border-radius: 8px; font-weight: 600; margin-top: 10px; cursor: pointer; }
-
-        .side-menu { position: fixed; top: 0; left: 0; width: 75%; max-width: 300px; height: 100%; background: #fff; z-index: 40; transform: translateX(-100%); transition: 0.3s; padding: 20px; }
-        .side-menu.open { transform: translateX(0); }
-        .overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); z-index: 35; }
-        .overlay.show { display: block; }
-
-        .message-row { display: flex; margin: 6px 0; }
-        .message-row.sent { justify-content: flex-end; }
+        .side-menu { position: fixed; top: 0; left: 0; width: 75%; max-width: 300px; height: 100%; background: #fff; z-index: 40; transform: translateX(-100%); transition: 0.3s; padding: 20px; } .side-menu.open { transform: translateX(0); }
+        .overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); z-index: 35; } .overlay.show { display: block; }
+        .message-row { display: flex; margin: 6px 0; } .message-row.sent { justify-content: flex-end; }
         .message-bubble { max-width: 70%; padding: 10px 14px; border-radius: 20px; font-size: 15px; word-break: break-word; }
-        .sent .message-bubble { background: #0095f6; color: white; }
-        .received .message-bubble { background: #efefef; }
-
-        .toast { position: fixed; top: 60px; left: 50%; transform: translateX(-50%); background: #333; color: white; padding: 10px 20px; border-radius: 20px; font-size: 14px; opacity: 0; transition: 0.3s; z-index: 999; }
-        .toast.show { opacity: 1; }
-
-        .search-result { display: flex; align-items: center; gap: 10px; padding: 10px; border-bottom: 1px solid #efefef; cursor: pointer; }
-        .search-result:hover { background: #f5f5f5; }
-        
+        .sent .message-bubble { background: #0095f6; color: white; } .received .message-bubble { background: #efefef; }
+        .toast { position: fixed; top: 60px; left: 50%; transform: translateX(-50%); background: #333; color: white; padding: 10px 20px; border-radius: 20px; font-size: 14px; opacity: 0; transition: 0.3s; z-index: 999; } .toast.show { opacity: 1; }
+        .search-result { display: flex; align-items: center; gap: 10px; padding: 10px; border-bottom: 1px solid #efefef; cursor: pointer; } .search-result:hover { background: #f5f5f5; }
         .profile-action-btn { padding: 8px 20px; border: 1px solid #dbdbdb; border-radius: 8px; font-weight: 600; cursor: pointer; background: #fafafa; margin-right: 8px; }
         .profile-action-btn.primary { background: #0095f6; color: white; border: none; }
         .profile-action-btn.following { background: #fafafa; color: #262626; border: 1px solid #dbdbdb; }
@@ -85,7 +52,6 @@
 </head>
 <body>
     <div id="toast" class="toast"></div>
-
     <div id="login-screen">
         <div class="login-box">
             <div class="login-logo">D</div>
@@ -99,7 +65,6 @@
             <button class="login-btn facebook" id="facebook-login"><i class="fab fa-facebook"></i> Facebook</button>
         </div>
     </div>
-
     <div id="app">
         <div class="header">
             <i class="fas fa-bars" id="menu-btn"></i>
@@ -109,24 +74,16 @@
                 <i class="far fa-paper-plane" id="chat-btn"></i>
             </div>
         </div>
-
         <div class="page active" id="page-home">
             <div id="stories"></div>
             <div id="feed"></div>
             <div id="feed-loader" style="text-align:center; padding:10px; color:#888; display:none;">Đang tải...</div>
         </div>
-
         <div class="page" id="page-explore">
-            <div style="padding:15px;">
-                <input type="text" id="search-input" placeholder="Tìm người dùng..." style="width:100%; padding:10px; border-radius:10px; border:1px solid #dbdbdb;">
-            </div>
+            <div style="padding:15px;"><input type="text" id="search-input" placeholder="Tìm người dùng..." style="width:100%; padding:10px; border-radius:10px; border:1px solid #dbdbdb;"></div>
             <div id="search-results"></div>
         </div>
-
-        <div class="page" id="page-reels">
-            <div id="reels-container" style="height:100vh; overflow-y:scroll; scroll-snap-type:y mandatory;"></div>
-        </div>
-
+        <div class="page" id="page-reels"><div id="reels-container" style="height:100vh; overflow-y:scroll; scroll-snap-type:y mandatory;"></div></div>
         <div class="page" id="page-post">
             <div style="padding:20px;">
                 <input type="file" id="post-files" accept="image/*,video/*" multiple>
@@ -135,11 +92,7 @@
                 <button id="submit-post" style="width:100%; padding:12px; background:#0095f6; color:white; border:none; border-radius:8px; font-weight:600;">Đăng</button>
             </div>
         </div>
-
-        <div class="page" id="page-profile">
-            <div id="profile-content"></div>
-        </div>
-
+        <div class="page" id="page-profile"><div id="profile-content"></div></div>
         <div class="bottom-nav">
             <i class="fas fa-home active" data-page="home"></i>
             <i class="fas fa-search" data-page="explore"></i>
@@ -148,7 +101,6 @@
             <i class="far fa-user-circle" data-page="profile"></i>
         </div>
     </div>
-
     <div class="overlay" id="menu-overlay"></div>
     <div class="side-menu" id="side-menu">
         <i class="fas fa-times" id="close-menu" style="align-self:flex-end; font-size:24px; cursor:pointer;"></i>
@@ -157,7 +109,6 @@
         <div class="menu-item" data-action="saved" style="padding:12px 0; cursor:pointer;">Đã lưu</div>
         <div class="menu-item" data-action="logout" style="padding:12px 0; cursor:pointer;">Đăng xuất</div>
     </div>
-
     <div class="modal" id="chat-modal">
         <div class="modal-content" style="height:90%; display:flex; flex-direction:column; padding:0;">
             <div style="display:flex; justify-content:space-between; padding:15px; border-bottom:1px solid #dbdbdb;">
@@ -174,7 +125,6 @@
             </div>
         </div>
     </div>
-
     <div class="modal" id="edit-profile-modal">
         <div class="modal-content">
             <h3>Chỉnh sửa hồ sơ</h3>
@@ -189,7 +139,6 @@
             <button id="cancel-edit-btn" style="background:#ed4956; margin-top:5px;">Hủy</button>
         </div>
     </div>
-
     <script type="module" src="app-logic.js"></script>
 </body>
 </html>

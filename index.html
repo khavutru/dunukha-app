@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Dunukha</title>
+  <title>Dunukha Pro</title>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; }
     body { background: #fafafa; display: flex; justify-content: center; }
@@ -19,7 +19,7 @@
     .stories { display: flex; gap: 12px; padding: 12px 15px; border-bottom: 1px solid #dbdbdb; overflow-x: auto; background: #fff; }
     .story-item { display: flex; flex-direction: column; align-items: center; gap: 4px; cursor: pointer; }
     .story-ring { width: 66px; height: 66px; border-radius: 50%; background: linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888); padding: 2px; }
-    .story-ring img { width: 100%; height: 100%; border-radius: 50%; border: 2px solid white; object-fit: cover; }
+    .story-ring img, .story-ring video { width: 100%; height: 100%; border-radius: 50%; border: 2px solid white; object-fit: cover; }
     .story-item span { font-size: 12px; color: #262626; max-width: 70px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     .story-self .story-ring { background: #ddd; display: flex; align-items: center; justify-content: center; }
     .story-self .story-ring i { color: #0095f6; font-size: 24px; }
@@ -28,7 +28,7 @@
     .post-header { display: flex; align-items: center; gap: 10px; padding: 12px 15px; cursor: pointer; }
     .post-header img { width: 32px; height: 32px; border-radius: 50%; object-fit: cover; }
     .post-header .username { font-weight: 600; font-size: 14px; }
-    .post-image { width: 100%; max-height: 400px; object-fit: cover; }
+    .post-media { width: 100%; max-height: 500px; object-fit: contain; background: black; }
     .post-actions { padding: 10px 15px; display: flex; gap: 15px; }
     .post-actions i { font-size: 24px; cursor: pointer; }
     .post-actions i.liked { color: #ed4956; }
@@ -66,15 +66,14 @@
     .modal-content button { background: #0095f6; color: #fff; border: none; padding: 10px; border-radius: 8px; width: 100%; font-weight: 600; cursor: pointer; margin-top: 5px; }
     #login-screen { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; background: #fafafa; }
     #login-screen button { background: #0095f6; color: #fff; border: none; padding: 12px 24px; border-radius: 8px; font-size: 16px; cursor: pointer; }
-    .preview-img { max-width: 100%; max-height: 200px; object-fit: contain; margin: 10px 0; border-radius: 8px; }
+    .preview-media { max-width: 100%; max-height: 200px; object-fit: contain; margin: 10px 0; border-radius: 8px; display: none; }
+    .loader { text-align: center; padding: 20px; color: #8e8e8e; }
     /* Chat */
     .message-row { display: flex; margin: 6px 0; }
     .message-row.sent { justify-content: flex-end; }
     .message-bubble { max-width: 70%; padding: 8px 12px; border-radius: 18px; font-size: 14px; word-break: break-word; }
     .sent .message-bubble { background: #0095f6; color: white; }
     .received .message-bubble { background: #efefef; }
-    /* Loading indicator */
-    .loader { text-align: center; padding: 20px; color: #8e8e8e; }
   </style>
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
 </head>
@@ -94,42 +93,39 @@
     </div>
 
     <div style="flex:1; overflow-y:auto;">
-      <!-- Home -->
       <div id="page-home" class="page">
         <div class="stories" id="stories-container"></div>
         <div class="feed" id="feed-container"></div>
         <div class="loader" id="feed-loader" style="display:none;">Đang tải thêm...</div>
       </div>
-      <!-- Search -->
       <div id="page-search" class="page" style="display:none;">
         <div class="search-page">
           <input class="search-input" id="search-input" placeholder="Tìm kiếm người dùng...">
           <ul class="user-list" id="user-list"></ul>
         </div>
       </div>
-      <!-- Post (upload) -->
       <div id="page-post" class="page" style="display:none;">
         <div style="padding:20px;">
           <h3>Tạo bài viết mới</h3>
-          <input type="file" id="post-file" accept="image/*" capture="environment">
-          <img id="post-preview" class="preview-img" style="display:none;">
+          <input type="file" id="post-file" accept="image/*,video/*">
+          <img id="post-preview-img" class="preview-media" style="display:none;">
+          <video id="post-preview-video" class="preview-media" controls style="display:none;"></video>
           <textarea id="post-caption" placeholder="Caption..."></textarea>
           <button id="btn-submit-post">Đăng</button>
           <hr style="margin:20px 0;">
           <h3>Thêm Story</h3>
-          <input type="file" id="story-file" accept="image/*" capture="environment">
-          <img id="story-preview" class="preview-img" style="display:none;">
+          <input type="file" id="story-file" accept="image/*,video/*">
+          <img id="story-preview-img" class="preview-media" style="display:none;">
+          <video id="story-preview-video" class="preview-media" controls style="display:none;"></video>
           <button id="btn-submit-story">Đăng story</button>
         </div>
       </div>
-      <!-- Notifications -->
       <div id="page-notif" class="page" style="display:none;">
         <div style="padding:15px;">
           <h3>Thông báo</h3>
           <div id="notif-list"></div>
         </div>
       </div>
-      <!-- Profile -->
       <div id="page-profile" class="page" style="display:none;">
         <div id="profile-content"></div>
       </div>
@@ -144,15 +140,17 @@
     </div>
   </div>
 
-  <!-- Modals -->
+  <!-- Story viewer modal -->
   <div class="modal" id="story-modal">
-    <div class="modal-content" style="text-align:center;">
-      <img id="story-img" style="width:100%; max-height:70vh; object-fit:contain;">
+    <div class="modal-content" style="text-align:center; background:black; color:white;">
+      <img id="story-img" style="width:100%; max-height:70vh; object-fit:contain; display:none;">
+      <video id="story-video" style="width:100%; max-height:70vh; object-fit:contain; display:none;" controls autoplay loop></video>
       <p id="story-user" style="margin:10px 0;"></p>
-      <button id="btn-close-story">Đóng</button>
+      <button id="btn-close-story" style="background:white; color:black;">Đóng</button>
     </div>
   </div>
 
+  <!-- Chat modal -->
   <div class="modal" id="chat-modal">
     <div class="modal-content" style="height:90%; display:flex; flex-direction:column;">
       <div style="display:flex; justify-content:space-between; align-items:center;">
@@ -170,20 +168,20 @@
     </div>
   </div>
 
+  <!-- Edit profile modal -->
   <div class="modal" id="edit-profile-modal">
     <div class="modal-content">
       <h3>Chỉnh sửa hồ sơ</h3>
       <input type="text" id="edit-name" placeholder="Tên">
       <textarea id="edit-bio" placeholder="Tiểu sử"></textarea>
-      <input type="file" id="edit-avatar-file" accept="image/*">
-      <img id="edit-avatar-preview" class="preview-img" style="display:none;">
+      <input type="file" id="edit-avatar-file" accept="image/*,video/*">
+      <img id="edit-avatar-preview" class="preview-media" style="display:none;">
       <button id="btn-save-profile">Lưu</button>
       <button style="background:#ed4956;" id="btn-close-edit">Hủy</button>
     </div>
   </div>
 
   <script type="module">
-    // ========== FIREBASE ==========
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
     import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
     import { getFirestore, collection, addDoc, query, orderBy, onSnapshot, doc, updateDoc, arrayUnion, arrayRemove, serverTimestamp, where, getDocs, setDoc, getDoc, limit, startAfter, Timestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
@@ -228,7 +226,6 @@
         currentUser = null;
         document.getElementById('login-screen').style.display = 'flex';
         document.getElementById('app').style.display = 'none';
-        // Hủy tất cả listener
         Object.values(unsubscribes).forEach(unsub => unsub());
         unsubscribes = {};
       }
@@ -250,7 +247,7 @@
       }
     }
 
-    // ========== NAVIGATION (hủy listener khi chuyển tab để đỡ tốn RAM) ==========
+    // ========== NAVIGATION ==========
     const navIcons = document.querySelectorAll('.bottom-nav i');
     const pages = {
       home: document.getElementById('page-home'),
@@ -260,9 +257,7 @@
       profile: document.getElementById('page-profile')
     };
 
-    navIcons.forEach(icon => {
-      icon.addEventListener('click', () => navigateTo(icon.dataset.page));
-    });
+    navIcons.forEach(icon => icon.addEventListener('click', () => navigateTo(icon.dataset.page)));
 
     function navigateTo(page) {
       navIcons.forEach(i => i.classList.remove('active'));
@@ -270,7 +265,6 @@
       Object.values(pages).forEach(p => p.style.display = 'none');
       pages[page].style.display = 'block';
 
-      // Hủy feed listener khi rời khỏi home
       if (page !== 'home' && unsubscribes['feed']) {
         unsubscribes['feed']();
         delete unsubscribes['feed'];
@@ -281,7 +275,7 @@
       else if (page === 'profile') { loadProfile(currentUser.uid); }
     }
 
-    // ========== UPLOAD HELPER ==========
+    // ========== UPLOAD HELPER (hỗ trợ video) ==========
     async function uploadFile(file, path) {
       const storageRef = ref(storage, path);
       const uploadTask = uploadBytesResumable(storageRef, file);
@@ -293,12 +287,30 @@
       });
     }
 
-    // ========== STORIES (tối ưu: chỉ tải thủ công, không tự động lại mỗi lần chuyển tab) ==========
+    function isVideo(file) {
+      return file.type.startsWith('video/');
+    }
+
+    function setPreview(inputFile, imgEl, videoEl) {
+      const file = inputFile.files[0];
+      if (!file) return;
+      if (isVideo(file)) {
+        videoEl.src = URL.createObjectURL(file);
+        videoEl.style.display = 'block';
+        imgEl.style.display = 'none';
+      } else {
+        imgEl.src = URL.createObjectURL(file);
+        imgEl.style.display = 'block';
+        videoEl.style.display = 'none';
+      }
+    }
+
+    // ========== STORIES ==========
     async function loadStories() {
       const container = document.getElementById('stories-container');
       container.innerHTML = '';
       const now = new Date();
-      const snap = await getDocs(query(collection(db, "stories"), orderBy("expiresAt", "desc"), limit(20))); // Giới hạn 20 story
+      const snap = await getDocs(query(collection(db, "stories"), orderBy("expiresAt", "desc"), limit(20)));
       const users = {};
       snap.forEach(doc => {
         const data = doc.data();
@@ -314,10 +326,10 @@
         const userData = userDoc.data();
         const div = document.createElement('div');
         div.className = 'story-item';
-        div.innerHTML = `
-          <div class="story-ring"><img src="${userData.photoURL || 'https://via.placeholder.com/66'}"></div>
-          <span>${userData.displayName}</span>
-        `;
+        const thumbnail = u.stories[0].mediaType === 'video' 
+          ? `<video src="${u.stories[0].mediaUrl}" muted autoplay loop style="width:100%;height:100%;object-fit:cover;"></video>`
+          : `<img src="${u.stories[0].mediaUrl}">`;
+        div.innerHTML = `<div class="story-ring">${thumbnail}</div><span>${userData.displayName}</span>`;
         div.addEventListener('click', () => viewStory(u.stories));
         container.appendChild(div);
       }
@@ -334,25 +346,47 @@
       const modal = document.getElementById('story-modal');
       modal.style.display = 'flex';
       const img = document.getElementById('story-img');
+      const video = document.getElementById('story-video');
       const userP = document.getElementById('story-user');
-      const update = () => {
+      img.style.display = 'none';
+      video.style.display = 'none';
+      const showStory = () => {
         const s = stories[index];
-        img.src = s.imageUrl;
-        userP.textContent = s.username || "Story";
+        userP.textContent = s.username;
+        if (s.mediaType === 'video') {
+          video.src = s.mediaUrl;
+          video.style.display = 'block';
+          video.play();
+          img.style.display = 'none';
+        } else {
+          img.src = s.mediaUrl;
+          img.style.display = 'block';
+          video.style.display = 'none';
+        }
       };
-      update();
+      showStory();
       const timer = setInterval(() => {
         index++;
-        if (index >= stories.length) { clearInterval(timer); modal.style.display = 'none'; }
-        else update();
-      }, 3000);
-      document.getElementById('btn-close-story').onclick = () => { clearInterval(timer); modal.style.display = 'none'; };
+        if (index >= stories.length) {
+          clearInterval(timer);
+          modal.style.display = 'none';
+          video.pause();
+          video.src = '';
+        } else {
+          showStory();
+        }
+      }, 5000); // 5s mỗi story
+      document.getElementById('btn-close-story').onclick = () => {
+        clearInterval(timer);
+        modal.style.display = 'none';
+        video.pause();
+        video.src = '';
+      };
     }
 
-    // ========== FEED (phân trang 5 bài, tải thêm khi cuộn) ==========
+    // ========== FEED (phân trang) ==========
     function loadFeed() {
-      const container = document.getElementById('feed-container');
-      container.innerHTML = '';
+      document.getElementById('feed-container').innerHTML = '';
       lastPostDoc = null;
       fetchPosts();
     }
@@ -361,29 +395,26 @@
       if (isLoadingPosts) return;
       isLoadingPosts = true;
       document.getElementById('feed-loader').style.display = 'block';
-      let q;
-      if (!lastPostDoc) {
-        q = query(collection(db, "posts"), orderBy("createdAt", "desc"), limit(5));
-      } else {
-        q = query(collection(db, "posts"), orderBy("createdAt", "desc"), startAfter(lastPostDoc), limit(5));
-      }
+      const q = lastPostDoc 
+        ? query(collection(db, "posts"), orderBy("createdAt", "desc"), startAfter(lastPostDoc), limit(5))
+        : query(collection(db, "posts"), orderBy("createdAt", "desc"), limit(5));
       const snap = await getDocs(q);
-      if (snap.empty) {
-        document.getElementById('feed-loader').textContent = 'Không còn bài viết nào.';
-      } else {
+      if (!snap.empty) {
         snap.forEach(doc => {
           renderPost(doc.data(), doc.id);
           lastPostDoc = doc;
         });
+      } else {
+        document.getElementById('feed-loader').textContent = 'Không còn bài viết.';
       }
       isLoadingPosts = false;
       document.getElementById('feed-loader').style.display = 'none';
     }
 
-    // Thêm sự kiện cuộn để tải thêm
-    const scrollContainer = document.querySelector('#app > div:nth-child(2)'); // content area
+    const scrollContainer = document.querySelector('#app > div:nth-child(2)');
     scrollContainer.addEventListener('scroll', () => {
-      if (scrollContainer.scrollHeight - scrollContainer.scrollTop - scrollContainer.clientHeight < 100 && document.getElementById('page-home').style.display === 'block') {
+      if (scrollContainer.scrollHeight - scrollContainer.scrollTop - scrollContainer.clientHeight < 100 
+          && document.getElementById('page-home').style.display === 'block') {
         fetchPosts();
       }
     });
@@ -392,12 +423,15 @@
       const liked = post.likes?.includes(currentUser.uid);
       const div = document.createElement('div');
       div.className = 'post';
+      const mediaHTML = post.mediaType === 'video' 
+        ? `<video class="post-media" src="${post.mediaUrl}" controls playsinline></video>`
+        : `<img class="post-media" src="${post.mediaUrl}" loading="lazy" onerror="this.src='https://via.placeholder.com/400'">`;
       div.innerHTML = `
         <div class="post-header" data-uid="${post.uid}">
           <img src="${post.userAvatar || 'https://via.placeholder.com/32'}">
           <span class="username">${post.username}</span>
         </div>
-        <img class="post-image" src="${post.imageUrl}" loading="lazy" onerror="this.src='https://via.placeholder.com/400'">
+        ${mediaHTML}
         <div class="post-actions">
           <i class="${liked ? 'fas fa-heart liked' : 'far fa-heart'}" data-id="${id}"></i>
           <i class="far fa-comment"></i>
@@ -422,8 +456,8 @@
         }
       });
       div.querySelector(`#share-${id}`).addEventListener('click', () => {
-        if (navigator.share) navigator.share({ title: 'Dunukha', text: post.caption, url: post.imageUrl });
-        else prompt("Copy link ảnh:", post.imageUrl);
+        if (navigator.share) navigator.share({ title: 'Dunukha', text: post.caption, url: post.mediaUrl });
+        else prompt("Copy link:", post.mediaUrl);
       });
       div.querySelector('.send-comment').addEventListener('click', async () => {
         const input = document.getElementById(`comment-${id}`);
@@ -435,76 +469,64 @@
       });
     }
 
-    // ========== POST UPLOAD ==========
-    document.getElementById('post-file').addEventListener('change', (e) => {
-      const file = e.target.files[0];
-      if (file) {
-        const reader = new FileReader();
-        reader.onload = (ev) => {
-          document.getElementById('post-preview').src = ev.target.result;
-          document.getElementById('post-preview').style.display = 'block';
-        };
-        reader.readAsDataURL(file);
-      }
+    // ========== POST UPLOAD (hỗ trợ ảnh/video) ==========
+    document.getElementById('post-file').addEventListener('change', function() {
+      setPreview(this, document.getElementById('post-preview-img'), document.getElementById('post-preview-video'));
     });
 
     document.getElementById('btn-submit-post').addEventListener('click', async () => {
       const file = document.getElementById('post-file').files[0];
       const caption = document.getElementById('post-caption').value.trim();
-      if (!file) return alert("Hãy chọn ảnh");
+      if (!file) return alert("Hãy chọn ảnh hoặc video");
       const userData = (await getDoc(doc(db, "users", currentUser.uid))).data();
       const path = `posts/${currentUser.uid}_${Date.now()}_${file.name}`;
-      const imageUrl = await uploadFile(file, path);
+      const mediaUrl = await uploadFile(file, path);
       await addDoc(collection(db, "posts"), {
         uid: currentUser.uid,
         username: userData.displayName,
         userAvatar: userData.photoURL || currentUser.photoURL,
-        imageUrl,
+        mediaUrl,
+        mediaType: isVideo(file) ? 'video' : 'image',
         caption,
         likes: [],
         comments: [],
         createdAt: serverTimestamp()
       });
       document.getElementById('post-file').value = '';
-      document.getElementById('post-preview').style.display = 'none';
+      document.getElementById('post-preview-img').style.display = 'none';
+      document.getElementById('post-preview-video').style.display = 'none';
       document.getElementById('post-caption').value = '';
       alert("Đã đăng bài!");
       navigateTo('home');
     });
 
     // Story upload
-    document.getElementById('story-file').addEventListener('change', (e) => {
-      const file = e.target.files[0];
-      if (file) {
-        const reader = new FileReader();
-        reader.onload = (ev) => {
-          document.getElementById('story-preview').src = ev.target.result;
-          document.getElementById('story-preview').style.display = 'block';
-        };
-        reader.readAsDataURL(file);
-      }
+    document.getElementById('story-file').addEventListener('change', function() {
+      setPreview(this, document.getElementById('story-preview-img'), document.getElementById('story-preview-video'));
     });
 
     document.getElementById('btn-submit-story').addEventListener('click', async () => {
       const file = document.getElementById('story-file').files[0];
-      if (!file) return alert("Chọn ảnh cho story");
+      if (!file) return alert("Chọn ảnh hoặc video cho story");
       const path = `stories/${currentUser.uid}_${Date.now()}_${file.name}`;
-      const imageUrl = await uploadFile(file, path);
+      const mediaUrl = await uploadFile(file, path);
       const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000);
       await addDoc(collection(db, "stories"), {
         uid: currentUser.uid,
         username: currentUser.displayName || "Người dùng",
-        imageUrl,
+        mediaUrl,
+        mediaType: isVideo(file) ? 'video' : 'image',
         createdAt: serverTimestamp(),
         expiresAt: Timestamp.fromDate(expiresAt)
       });
       document.getElementById('story-file').value = '';
-      document.getElementById('story-preview').style.display = 'none';
+      document.getElementById('story-preview-img').style.display = 'none';
+      document.getElementById('story-preview-video').style.display = 'none';
       alert("Đã đăng story!");
       navigateTo('home');
     });
 
-    // ========== PROFILE (tối ưu) ==========
+    // ========== PROFILE ==========
     async function loadProfile(uid) {
       const container = document.getElementById('profile-content');
       container.innerHTML = 'Đang tải...';
@@ -514,7 +536,6 @@
       const data = snap.data();
       const isMe = uid === currentUser.uid;
       const isFollowing = data.followers?.[currentUser.uid];
-
       container.innerHTML = `
         <div class="profile-header">
           <img class="profile-avatar" src="${data.photoURL || 'https://via.placeholder.com/150'}">
@@ -532,24 +553,20 @@
         </div>
         <div class="profile-posts" id="profile-posts"></div>
       `;
-
       const postsQuery = query(collection(db, "posts"), where("uid", "==", uid), orderBy("createdAt", "desc"), limit(9));
       const postsSnap = await getDocs(postsQuery);
       const postsDiv = document.getElementById('profile-posts');
       postsSnap.forEach(doc => {
-        const img = document.createElement('img');
-        img.src = doc.data().imageUrl;
-        img.className = 'profile-post';
-        img.loading = 'lazy';
-        img.onclick = () => alert(doc.data().caption);
-        postsDiv.appendChild(img);
+        const d = doc.data();
+        const thumb = document.createElement(d.mediaType === 'video' ? 'video' : 'img');
+        thumb.src = d.mediaUrl;
+        thumb.className = 'profile-post';
+        thumb.onclick = () => alert(d.caption);
+        if (d.mediaType === 'video') thumb.muted = true;
+        postsDiv.appendChild(thumb);
       });
-
-      if (isMe) {
-        document.getElementById('edit-profile-btn').addEventListener('click', openEditProfile);
-      } else {
-        document.getElementById('follow-btn').addEventListener('click', () => toggleFollow(uid));
-      }
+      if (isMe) document.getElementById('edit-profile-btn').addEventListener('click', openEditProfile);
+      else document.getElementById('follow-btn').addEventListener('click', () => toggleFollow(uid));
     }
 
     async function openEditProfile() {
@@ -562,12 +579,12 @@
       document.getElementById('edit-profile-modal').style.display = 'flex';
     }
 
-    document.getElementById('edit-avatar-file').addEventListener('change', (e) => {
-      const file = e.target.files[0];
+    document.getElementById('edit-avatar-file').addEventListener('change', function() {
+      const file = this.files[0];
       if (file) {
         const reader = new FileReader();
-        reader.onload = (ev) => {
-          document.getElementById('edit-avatar-preview').src = ev.target.result;
+        reader.onload = (e) => {
+          document.getElementById('edit-avatar-preview').src = e.target.result;
           document.getElementById('edit-avatar-preview').style.display = 'block';
         };
         reader.readAsDataURL(file);
@@ -582,8 +599,7 @@
       const updates = { displayName: name, bio };
       if (avatarFile) {
         const path = `avatars/${currentUser.uid}_${Date.now()}_${avatarFile.name}`;
-        const photoURL = await uploadFile(avatarFile, path);
-        updates.photoURL = photoURL;
+        updates.photoURL = await uploadFile(avatarFile, path);
       }
       await updateDoc(doc(db, "users", currentUser.uid), updates);
       document.getElementById('edit-profile-modal').style.display = 'none';
@@ -607,7 +623,7 @@
       loadProfile(uid);
     }
 
-    // ========== SEARCH (tối ưu: không dùng oninput liên tục, dùng debounce) ==========
+    // ========== SEARCH ==========
     let searchTimeout;
     document.getElementById('search-input').addEventListener('input', (e) => {
       clearTimeout(searchTimeout);
@@ -632,7 +648,7 @@
       }, 500);
     });
 
-    // ========== NOTIFICATIONS (tối ưu) ==========
+    // ========== NOTIFICATIONS ==========
     function listenNotifications() {
       const q = query(collection(db, "notifications"), where("to", "==", currentUser.uid), orderBy("createdAt", "desc"), limit(20));
       onSnapshot(q, snap => {
@@ -656,7 +672,7 @@
       await addDoc(collection(db, "notifications"), { to, from: currentUser.uid, type, message, read: false, createdAt: serverTimestamp() });
     }
 
-    // ========== CHAT (giữ nguyên) ==========
+    // ========== CHAT ==========
     document.getElementById('btn-chat').addEventListener('click', () => {
       document.getElementById('chat-modal').style.display = 'flex';
       loadChatList();
@@ -666,12 +682,11 @@
     });
 
     async function loadChatList() {
-      const chatList = document.getElementById('chat-list');
-      const chatWindow = document.getElementById('chat-window');
-      chatList.style.display = 'block';
-      chatWindow.style.display = 'none';
+      document.getElementById('chat-list').style.display = 'block';
+      document.getElementById('chat-window').style.display = 'none';
       const mySnap = await getDoc(doc(db, "users", currentUser.uid));
       const following = mySnap.data()?.following || {};
+      const chatList = document.getElementById('chat-list');
       chatList.innerHTML = '';
       for (const uid in following) {
         if (!following[uid]) continue;
@@ -689,8 +704,7 @@
     function openChat(uid, name) {
       currentChatUser = uid;
       document.getElementById('chat-list').style.display = 'none';
-      const chatWindow = document.getElementById('chat-window');
-      chatWindow.style.display = 'flex';
+      document.getElementById('chat-window').style.display = 'flex';
       document.getElementById('chat-username').textContent = name;
       loadMessages();
     }
